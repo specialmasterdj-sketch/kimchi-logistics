@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1565C0">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<title>Kimchi Mart Logistics</title>
+<link rel="manifest" href="manifest.json">
+
+<!-- Barcode Scanner -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<!-- Signature Pad -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f5f5f5; color: #333; min-height: 100vh;
+  max-width: 800px; margin: 0 auto; padding-bottom: 70px;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: linear-gradient(135deg, #1565C0, #0D47A1);
+  color: white; padding: 14px 16px; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 10px;
+}
+.header h1 { font-size: 1rem; font-weight: 700; line-height: 1.3; flex: 1; }
+.header .subtitle { font-size: 0.7rem; opacity: 0.85; margin-top: 2px; }
+.back-btn {
+  background: rgba(255,255,255,0.2); border: none; color: white;
+  width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem;
+  cursor: pointer; display: none; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.back-btn.visible { display: flex; }
+.header-right { display: flex; gap: 6px; align-items: center; }
+.notif-btn {
+  background: rgba(255,255,255,0.2); border: none; color: white;
+  width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  position: relative; flex-shrink: 0;
+}
+.notif-btn .badge {
+  position: absolute; top: -2px; right: -2px; background: #F44336; color: white;
+  font-size: 0.55rem; font-weight: 700; min-width: 16px; height: 16px; border-radius: 50%;
+  display: none; align-items: center; justify-content: center; padding: 0 3px;
+}
+.notif-btn .badge.show { display: flex; }
+
+/* ===== LOGIN PAGE ===== */
+.login-page {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 20px;
+  background: linear-gradient(160deg, #ffffff 0%, #e3f2fd 40%, #bbdefb 100%);
+}
+.login-logo-img { width: 220px; margin-bottom: 8px; }
+.login-transfer-icon {
+  display: flex; align-items: center; justify-content: center; gap: 0;
+  margin-bottom: 20px; width: 260px; position: relative; height: 50px;
+}
+.login-transfer-icon .store-icon {
+  font-size: 1.4rem; z-index: 1;
+}
+.login-transfer-icon .store-left { position: absolute; left: 0; }
+.login-transfer-icon .store-right { position: absolute; right: 0; }
+.login-transfer-icon .road-line {
+  width: 100%; height: 2px; background: repeating-linear-gradient(90deg, #90CAF5 0, #90CAF5 8px, transparent 8px, transparent 16px);
+  position: absolute; top: 50%;
+}
+.login-transfer-icon .truck-wrap {
+  position: absolute; animation: driveAcross 3s ease-in-out infinite;
+  display: flex; flex-direction: column; align-items: center;
+}
+.login-transfer-icon .truck-wrap .truck-emoji { font-size: 1.8rem; }
+.login-transfer-icon .truck-wrap .truck-k {
+  font-size: 0.5rem; font-weight: 900; color: #C62828;
+  background: white; border-radius: 3px; padding: 0 3px;
+  position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+  line-height: 1; border: 1px solid #C62828;
+}
+@keyframes driveAcross {
+  0% { left: 20px; }
+  50% { left: calc(100% - 55px); }
+  100% { left: 20px; }
+}
+.login-subtitle { color: #1565C0; font-size: 0.8rem; margin-bottom: 20px; text-align: center; }
+.login-card {
+  background: white; border-radius: 16px; padding: 24px 20px; width: 100%;
+  max-width: 360px; box-shadow: 0 4px 24px rgba(21,101,192,0.15);
+  border: 1px solid #e3f2fd;
+}
+.login-card .form-group { margin-bottom: 16px; }
+.login-card .form-label { display: block; font-size: 0.75rem; font-weight: 600; color: #555; margin-bottom: 6px; }
+.login-card .form-select, .login-card .form-input {
+  width: 100%; padding: 12px 14px; border: 2px solid #e0e0e0; border-radius: 10px;
+  font-size: 0.9rem; background: white; -webkit-appearance: none; appearance: none;
+}
+.login-card .form-select:focus, .login-card .form-input:focus { border-color: #1565C0; outline: none; }
+.login-card .btn-login {
+  width: 100%; padding: 14px; background: #1565C0; color: white; border: none;
+  border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer;
+  margin-top: 8px; transition: transform 0.1s;
+}
+.login-card .btn-login:active { transform: scale(0.97); }
+.login-card .btn-login:disabled { background: #ccc; cursor: default; }
+.login-version { color: #90CAF5; font-size: 0.65rem; margin-top: 20px; }
+
+/* ===== PAGES ===== */
+.page { display: none; padding: 14px; }
+.page.active { display: block; }
+
+/* ===== STAT GRID ===== */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.stat-grid.three { grid-template-columns: repeat(3, 1fr); }
+.stat-card {
+  background: white; border-radius: 10px; padding: 12px; text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.stat-number { font-size: 1.4rem; font-weight: 800; line-height: 1; }
+.stat-label { font-size: 0.6rem; color: #666; margin-top: 3px; text-transform: uppercase; }
+.stat-number.blue { color: #1565C0; }
+.stat-number.green { color: #4CAF50; }
+.stat-number.orange { color: #FF9800; }
+.stat-number.red { color: #F44336; }
+
+/* ===== SECTION ===== */
+.section-title {
+  font-size: 0.8rem; font-weight: 700; color: #333; margin-bottom: 8px;
+  margin-top: 14px; display: flex; align-items: center; justify-content: space-between;
+}
+.section-title .see-all { font-size: 0.7rem; color: #1565C0; font-weight: 600; cursor: pointer; border: none; background: none; }
+
+/* ===== INVOICE LIST ITEM ===== */
+.invoice-item {
+  background: white; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 5px solid #ccc; cursor: pointer;
+  transition: transform 0.1s;
+}
+.invoice-item:active { transform: scale(0.98); }
+.invoice-item.status-issued { border-left-color: #FF9800; }
+.invoice-item.status-confirmed { border-left-color: #4CAF50; }
+.invoice-item.status-pending { border-left-color: #2196F3; }
+.invoice-route { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; }
+.invoice-route .arrow { color: #1565C0; margin: 0 6px; }
+.invoice-summary { font-size: 0.75rem; color: #555; margin-bottom: 4px; }
+.invoice-meta { font-size: 0.65rem; color: #999; display: flex; justify-content: space-between; align-items: center; }
+.status-badge {
+  display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 0.6rem;
+  font-weight: 700; text-transform: uppercase; color: white;
+}
+.badge-issued { background: #FF9800; }
+.badge-confirmed { background: #4CAF50; }
+.badge-pending { background: #2196F3; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 12px 20px; border: none; border-radius: 10px; font-size: 0.9rem;
+  font-weight: 600; cursor: pointer; width: 100%; transition: transform 0.1s;
+  -webkit-tap-highlight-color: transparent; gap: 6px;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: #1565C0; color: white; }
+.btn-primary:disabled { background: #ccc; cursor: default; }
+.btn-success { background: #4CAF50; color: white; }
+.btn-danger { background: #F44336; color: white; }
+.btn-warning { background: #FF9800; color: white; }
+.btn-secondary { background: #e0e0e0; color: #333; }
+.btn-sm { padding: 7px 14px; font-size: 0.75rem; width: auto; border-radius: 8px; }
+.btn-outline {
+  background: white; color: #1565C0; border: 2px solid #1565C0;
+}
+.btn-row { display: flex; gap: 8px; margin-top: 10px; }
+.btn-row .btn { flex: 1; }
+
+/* ===== FORM ELEMENTS ===== */
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 0.75rem; font-weight: 600; color: #555; margin-bottom: 5px; }
+.form-select, .form-input {
+  width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 10px;
+  font-size: 0.85rem; background: white; -webkit-appearance: none; appearance: none;
+}
+.form-select:focus, .form-input:focus { border-color: #1565C0; outline: none; }
+
+/* ===== CARD ===== */
+.card { background: white; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.card-title { font-size: 0.9rem; font-weight: 700; color: #333; margin-bottom: 6px; }
+
+/* ===== SCANNER ===== */
+.scanner-area {
+  background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 12px;
+  position: relative; min-height: 200px;
+}
+.scanner-area video { width: 100%; display: block; }
+.scanner-overlay {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 70%; height: 40%; border: 3px solid rgba(255,255,255,0.7); border-radius: 8px;
+  pointer-events: none;
+}
+.scan-result {
+  background: #E8F5E9; border: 2px solid #4CAF50; border-radius: 10px;
+  padding: 10px 14px; margin-bottom: 10px; display: none;
+}
+.scan-result.show { display: block; }
+.scan-result .barcode-text { font-size: 0.85rem; font-weight: 700; color: #2E7D32; }
+
+/* ===== PRODUCT TABLE ===== */
+.product-table { width: 100%; margin-top: 10px; }
+.product-table-header {
+  display: grid; grid-template-columns: 2fr 0.8fr 1fr 1fr 40px;
+  gap: 4px; padding: 6px 8px; background: #e3f2fd; border-radius: 8px;
+  font-size: 0.6rem; font-weight: 700; color: #1565C0; text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.product-row {
+  display: grid; grid-template-columns: 2fr 0.8fr 1fr 1fr 40px;
+  gap: 4px; padding: 8px; border-bottom: 1px solid #f0f0f0;
+  align-items: center; font-size: 0.8rem;
+}
+.product-row .product-name { font-weight: 600; word-break: break-word; }
+.product-row .product-qty { text-align: center; font-weight: 700; }
+.product-row .product-price { text-align: right; font-size: 0.75rem; }
+.product-row .product-remove {
+  width: 28px; height: 28px; border-radius: 50%; border: none; background: #ffebee;
+  color: #F44336; font-size: 0.8rem; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+}
+.product-total {
+  display: flex; justify-content: space-between; padding: 10px 8px;
+  font-weight: 700; font-size: 0.9rem; border-top: 2px solid #1565C0;
+  margin-top: 4px;
+}
+.product-total .total-amount { color: #1565C0; }
+
+/* ===== INVOICE DETAIL ===== */
+.invoice-header-card {
+  background: linear-gradient(135deg, #1565C0, #0D47A1); color: white;
+  border-radius: 12px; padding: 16px; margin-bottom: 12px;
+}
+.invoice-number { font-size: 0.7rem; opacity: 0.8; }
+.invoice-stores { font-size: 1.1rem; font-weight: 800; margin: 8px 0; }
+.invoice-stores .arrow { margin: 0 8px; opacity: 0.7; }
+.invoice-date { font-size: 0.7rem; opacity: 0.8; }
+.invoice-type-badge {
+  display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 0.65rem;
+  font-weight: 700; margin-top: 6px;
+}
+.type-normal { background: rgba(255,255,255,0.2); }
+.type-urgent { background: #F44336; }
+
+/* ===== SIGNATURE ===== */
+.signature-area {
+  border: 2px dashed #ccc; border-radius: 12px; background: white;
+  margin: 10px 0; position: relative;
+}
+.signature-area canvas { width: 100%; height: 150px; display: block; border-radius: 10px; }
+.signature-label {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  color: #ccc; font-size: 0.85rem; pointer-events: none;
+}
+.signature-actions { display: flex; gap: 8px; margin-top: 6px; }
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 800px; background: white; display: flex;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.nav-item {
+  flex: 1; padding: 8px 4px; text-align: center; cursor: pointer;
+  color: #999; transition: color 0.2s; border: none; background: none;
+}
+.nav-item.active { color: #1565C0; }
+.nav-item .nav-icon { font-size: 1.2rem; display: block; }
+.nav-item .nav-label { font-size: 0.55rem; margin-top: 2px; display: block; font-weight: 500; }
+
+/* ===== EMPTY STATE ===== */
+.empty-state { text-align: center; padding: 40px 20px; color: #999; }
+.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+.empty-state .empty-text { font-size: 0.85rem; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 200; display: none;
+  align-items: flex-end; justify-content: center;
+}
+.modal-overlay.visible { display: flex; }
+.modal {
+  background: white; border-radius: 16px 16px 0 0; width: 100%; max-width: 800px;
+  max-height: 85vh; overflow-y: auto; padding: 20px 16px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0));
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-title { font-size: 1rem; font-weight: 700; margin-bottom: 14px; }
+.modal-close {
+  position: absolute; top: 14px; right: 16px; background: none; border: none;
+  font-size: 1.2rem; color: #999; cursor: pointer;
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: #333; color: white; padding: 10px 20px; border-radius: 10px;
+  font-size: 0.8rem; font-weight: 500; z-index: 300;
+  opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* ===== TABS ===== */
+.tabs { display: flex; gap: 4px; margin-bottom: 14px; background: #e0e0e0; border-radius: 10px; padding: 3px; }
+.tab {
+  flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 0.7rem;
+  font-weight: 600; cursor: pointer; color: #666; border: none; background: transparent;
+}
+.tab.active { background: white; color: #1565C0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+/* ===== FILTER BAR ===== */
+.filter-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+.filter-bar .form-select { font-size: 0.75rem; padding: 8px 10px; }
+
+/* ===== MONTHLY SUMMARY ===== */
+.summary-row {
+  display: flex; justify-content: space-between; padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0; font-size: 0.85rem;
+}
+.summary-row .label { color: #666; }
+.summary-row .value { font-weight: 700; }
+.summary-row .value.income { color: #4CAF50; }
+.summary-row .value.expense { color: #F44336; }
+
+/* ===== NEW PRODUCT FORM (in scanner modal) ===== */
+.new-product-form { background: #FFF8E1; border-radius: 10px; padding: 12px; margin: 10px 0; }
+.new-product-form .form-input { margin-bottom: 8px; }
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  body { padding: 0; max-width: 100%; background: white; }
+  .header, .bottom-nav, .btn, .btn-row, .back-btn, .notif-btn,
+  .toast, .modal-overlay, .login-page,
+  #page-dashboard, #page-new-invoice, #page-history,
+  #signatureSection .btn, .signature-actions { display: none !important; }
+  #page-invoice-detail { display: block !important; padding: 0; }
+  .invoice-header-card {
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    border-radius: 0; margin: 0 0 16px 0;
+  }
+  .card { box-shadow: none; border: 1px solid #ddd; }
+  .product-table-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .product-total { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #signatureDisplay { display: block !important; }
+  #signatureDisplay img { max-height: 100px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div class="login-page" id="loginPage">
+  <img src="logo.png" alt="Kimchi Mart" class="login-logo-img">
+  <div class="login-transfer-icon">
+    <div class="road-line"></div>
+    <span class="store-icon store-left">&#127970;</span>
+    <div class="truck-wrap">
+      <span class="truck-emoji">&#128667;</span>
+      <span class="truck-k">K</span>
+    </div>
+    <span class="store-icon store-right">&#127970;</span>
+  </div>
+  <div class="login-subtitle" style="font-size:1.1rem; font-weight:700; letter-spacing:3px; color:#1565C0">L O G I S T I C S</div>
+  <div class="login-card">
+    <div class="form-group">
+      <label class="form-label">&#51648;&#51216; &#49440;&#53469; / Select Store</label>
+      <select class="form-select" id="loginStore">
+        <option value="">-- &#51648;&#51216; &#49440;&#53469; --</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">&#51060;&#47492; / Name</label>
+      <input class="form-input" id="loginName" type="text" placeholder="&#51060;&#47492;&#51012; &#51077;&#47141;&#54616;&#49464;&#50836;">
+    </div>
+    <button class="btn-login" id="loginBtn" onclick="doLogin()" disabled>&#49884;&#51089; / Start</button>
+  </div>
+  <div class="login-version">v1.0 &middot; Kimchi Mart Internal</div>
+</div>
+
+<!-- ===== HEADER (shown after login) ===== -->
+<div class="header" id="mainHeader" style="display:none">
+  <button class="back-btn" id="backBtn" onclick="goBack()">&#8592;</button>
+  <img src="logo.png" alt="KM" onclick="showPage('stock')" style="height:26px; cursor:pointer; filter:brightness(0) invert(1); margin-right:6px">
+  <div style="flex:1">
+    <h1 id="headerTitle">Dashboard</h1>
+    <div class="subtitle" id="headerSub"></div>
+  </div>
+  <button onclick="logout()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:4px 12px; border-radius:8px; font-size:0.65rem; font-weight:600; cursor:pointer">
+    &#47196;&#44536;&#50500;&#50883;
+  </button>
+</div>
+
+<!-- ===== PAGE: DASHBOARD ===== -->
+<div class="page" id="page-dashboard">
+  <!-- Hero / Logo Area -->
+  <div style="text-align:center; padding:16px 0 10px">
+    <img src="logo.png" alt="Kimchi Mart" style="width:180px; margin-bottom:4px">
+    <div style="font-size:0.85rem; font-weight:700; color:#1565C0; letter-spacing:3px">L O G I S T I C S</div>
+    <div style="font-size:0.65rem; color:#999; margin-top:4px" id="dashStoreName"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-grid three">
+    <div class="stat-card">
+      <div class="stat-number blue" id="statIssued">0</div>
+      <div class="stat-label">&#48156;&#54665; / Issued</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number orange" id="statPending">0</div>
+      <div class="stat-label">&#45824;&#44592; / Pending</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number green" id="statConfirmed">0</div>
+      <div class="stat-label">&#50756;&#47308; / Done</div>
+    </div>
+  </div>
+
+  <!-- Main Actions -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px">
+    <div class="card" onclick="showPage('new-invoice')" style="cursor:pointer; text-align:center; padding:20px 12px; border:2px solid #1565C0; transition:transform 0.1s">
+      <div style="font-size:2rem; margin-bottom:6px">&#128196;</div>
+      <div style="font-size:0.85rem; font-weight:700; color:#1565C0">&#49352; &#51064;&#48372;&#51060;&#49828;</div>
+      <div style="font-size:0.65rem; color:#999">New Invoice</div>
+    </div>
+    <div class="card" onclick="showPage('history')" style="cursor:pointer; text-align:center; padding:20px 12px; transition:transform 0.1s">
+      <div style="font-size:2rem; margin-bottom:6px">&#128203;</div>
+      <div style="font-size:0.85rem; font-weight:700; color:#333">&#51060;&#47141; / &#51221;&#49328;</div>
+      <div style="font-size:0.65rem; color:#999">History</div>
+    </div>
+  </div>
+
+  <!-- Pending -->
+  <div class="section-title">
+    &#54869;&#51064; &#45824;&#44592; / Pending
+    <button class="see-all" onclick="showPage('history')">&#51204;&#52404;&#48372;&#44592;</button>
+  </div>
+  <div id="pendingList"></div>
+
+  <!-- Recent -->
+  <div class="section-title" style="margin-top:14px">
+    &#52572;&#44540; &#51064;&#48372;&#51060;&#49828; / Recent
+    <button class="see-all" onclick="showPage('history')">&#51204;&#52404;&#48372;&#44592;</button>
+  </div>
+  <div id="recentList"></div>
+
+  <!-- Logout -->
+  <button class="btn btn-secondary" onclick="logout()" style="margin-top:20px; font-size:0.75rem">
+    &#47196;&#44536;&#50500;&#50883; / Logout
+  </button>
+</div>
+
+<!-- ===== PAGE: NEW INVOICE ===== -->
+<div class="page" id="page-new-invoice">
+  <div class="card">
+    <div class="card-title">&#51064;&#48372;&#51060;&#49828; &#51221;&#48372; / Invoice Info</div>
+    <div class="form-group" style="margin-top:10px">
+      <label class="form-label">&#48155;&#45716; &#51648;&#51216; / To Store</label>
+      <select class="form-select" id="invoiceToStore">
+        <option value="">-- &#48155;&#45716; &#51648;&#51216; &#49440;&#53469; --</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">&#50976;&#54805; / Type</label>
+      <div class="tabs" style="margin-bottom:0">
+        <button class="tab active" onclick="setInvoiceType('normal', this)">&#51068;&#48152; (5%)</button>
+        <button class="tab" onclick="setInvoiceType('urgent', this)">&#44596;&#44553;-&#49472;&#48652; (10%)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">&#51228;&#54408; &#52628;&#44032; / Add Products</div>
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn btn-primary" onclick="startScanner()">&#128247; &#48148;&#53076;&#46300; &#49828;&#52884;</button>
+      <button class="btn btn-outline" onclick="showManualAdd()">&#9998; &#51649;&#51217; &#51077;&#47141;</button>
+    </div>
+
+    <div id="scannerContainer" style="display:none; margin-top:12px">
+      <div id="scannerView" class="scanner-area"></div>
+      <button class="btn btn-secondary btn-sm" onclick="stopScanner()" style="margin-top:6px">&#49828;&#52884; &#51473;&#51648;</button>
+    </div>
+
+    <div class="scan-result" id="scanResult">
+      <div class="barcode-text" id="scannedBarcode"></div>
+    </div>
+
+    <!-- New product form (shown when unknown barcode) -->
+    <div id="newProductForm" class="new-product-form" style="display:none">
+      <div class="form-label" style="margin-bottom:8px; color:#E65100">&#49352; &#51228;&#54408; &#46321;&#47197; / New Product</div>
+      <input class="form-input" id="npBarcode" placeholder="&#48148;&#53076;&#46300;" readonly>
+      <input class="form-input" id="npName" placeholder="&#51228;&#54408;&#47749; (&#54620;&#44544;)">
+      <input class="form-input" id="npNameEn" placeholder="Product Name (English)">
+      <input class="form-input" id="npCost" type="number" step="0.01" placeholder="&#50896;&#44032; (Cost Price) $">
+      <div class="btn-row">
+        <button class="btn btn-success btn-sm" onclick="registerAndAddProduct()">&#46321;&#47197; &amp; &#52628;&#44032;</button>
+        <button class="btn btn-secondary btn-sm" onclick="cancelNewProduct()">&#52712;&#49548;</button>
+      </div>
+    </div>
+
+    <!-- Manual add form -->
+    <div id="manualAddForm" style="display:none; margin-top:10px">
+      <input class="form-input" id="manualName" placeholder="&#51228;&#54408;&#47749;" style="margin-bottom:8px">
+      <div style="display:flex; gap:8px">
+        <input class="form-input" id="manualQty" type="number" min="1" value="1" placeholder="&#49688;&#47049;(&#48149;&#49828;)" style="flex:0.5">
+        <input class="form-input" id="manualCost" type="number" step="0.01" placeholder="&#50896;&#44032; $" style="flex:1">
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-success btn-sm" onclick="addManualProduct()">&#52628;&#44032;</button>
+        <button class="btn btn-secondary btn-sm" onclick="hideManualAdd()">&#52712;&#49548;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product List -->
+  <div class="card" id="productListCard" style="display:none">
+    <div class="card-title">&#51228;&#54408; &#47785;&#47197; / Product List (<span id="productCount">0</span>)</div>
+    <div class="product-table">
+      <div class="product-table-header">
+        <div>&#51228;&#54408;&#47749;</div>
+        <div style="text-align:center">&#49688;&#47049;</div>
+        <div style="text-align:right">&#50896;&#44032;</div>
+        <div style="text-align:right">&#54032;&#47588;&#44032;</div>
+        <div></div>
+      </div>
+      <div id="productRows"></div>
+      <div class="product-total">
+        <div>&#54633;&#44228; / Total</div>
+        <div class="total-amount" id="invoiceTotal">$0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-success" id="issueInvoiceBtn" onclick="issueInvoice()" style="display:none; margin-top:10px">
+    &#10004; &#51064;&#48372;&#51060;&#49828; &#48156;&#54665; / Issue Invoice
+  </button>
+</div>
+
+<!-- ===== PAGE: INVOICE DETAIL ===== -->
+<div class="page" id="page-invoice-detail">
+  <div class="invoice-header-card" id="invoiceDetailHeader">
+    <!-- filled by JS -->
+  </div>
+
+  <div class="card">
+    <div class="card-title">&#51228;&#54408; &#47785;&#47197; / Items</div>
+    <div class="product-table">
+      <div class="product-table-header" style="grid-template-columns: 2fr 0.8fr 1fr 1fr">
+        <div>&#51228;&#54408;&#47749;</div>
+        <div style="text-align:center">&#49688;&#47049;</div>
+        <div style="text-align:right">&#50896;&#44032;</div>
+        <div style="text-align:right">&#54032;&#47588;&#44032;</div>
+      </div>
+      <div id="detailProductRows"></div>
+      <div class="product-total" id="detailTotal"></div>
+    </div>
+  </div>
+
+  <!-- Step 1: Handover person (sending store confirms who prepared/handed over) -->
+  <div class="card" id="handoverSection" style="display:none">
+    <div class="card-title">&#9312; &#48372;&#45236;&#45716; &#49324;&#46988;</div>
+    <p style="font-size:0.75rem; color:#666; margin-bottom:8px">&#47932;&#44148; &#51456;&#48708;&#54620; &#49324;&#46988; &#51060;&#47492;</p>
+    <input class="form-input" id="handoverName" placeholder="&#51060;&#47492;">
+    <div class="signature-area" style="margin-top:10px">
+      <canvas id="handoverCanvas"></canvas>
+      <div class="signature-label" id="handoverLabel">&#50668;&#44592;&#50640; &#49436;&#47749;</div>
+    </div>
+    <div class="signature-actions">
+      <button class="btn btn-secondary btn-sm" onclick="clearHandoverSig()">&#51648;&#50864;&#44592;</button>
+    </div>
+    <button class="btn btn-warning" onclick="confirmHandover()" style="margin-top:10px">
+      &#10004; &#54869;&#51064;
+    </button>
+  </div>
+
+  <!-- Step 1 completed display -->
+  <div class="card" id="handoverDisplay" style="display:none">
+    <div class="card-title">&#9312; &#48372;&#45236;&#45716; &#49324;&#46988;</div>
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px">
+      <div style="width:36px;height:36px;border-radius:50%;background:#FFF3E0;display:flex;align-items:center;justify-content:center;font-size:1.1rem">&#128100;</div>
+      <div>
+        <div style="font-weight:700;font-size:0.9rem" id="handoverNameDisplay"></div>
+        <div style="font-size:0.65rem;color:#999" id="handoverTimeDisplay"></div>
+      </div>
+    </div>
+    <img id="handoverSigImg" style="width:120px;height:40px;border:1px solid #eee;border-radius:4px;object-fit:contain">
+  </div>
+
+  <!-- Step 2: Pickup person signature (person picking up signs) -->
+  <div class="card" id="pickupSection" style="display:none">
+    <div class="card-title">&#9313; &#44032;&#51256;&#44032;&#45716; &#49324;&#46988;</div>
+    <p style="font-size:0.75rem; color:#666; margin-bottom:8px">&#47932;&#44148; &#44032;&#51256;&#44032;&#45716; &#49324;&#46988; &#51060;&#47492;&#44284; &#49436;&#47749;</p>
+    <input class="form-input" id="pickupName" placeholder="&#51060;&#47492;">
+    <div class="signature-area" style="margin-top:10px">
+      <canvas id="pickupCanvas"></canvas>
+      <div class="signature-label" id="pickupLabel">&#50668;&#44592;&#50640; &#49436;&#47749;</div>
+    </div>
+    <div class="signature-actions">
+      <button class="btn btn-secondary btn-sm" onclick="clearPickupSig()">&#51648;&#50864;&#44592;</button>
+    </div>
+    <button class="btn btn-success" onclick="confirmPickup()" style="margin-top:10px">
+      &#10004; &#54869;&#51064;
+    </button>
+  </div>
+
+  <!-- Step 2 completed display -->
+  <div class="card" id="pickupDisplay" style="display:none">
+    <div class="card-title">&#9313; &#44032;&#51256;&#44036; &#49324;&#46988;</div>
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px">
+      <div style="width:36px;height:36px;border-radius:50%;background:#E8F5E9;display:flex;align-items:center;justify-content:center;font-size:1.1rem">&#128100;</div>
+      <div>
+        <div style="font-weight:700;font-size:0.9rem" id="pickupNameDisplay"></div>
+        <div style="font-size:0.65rem;color:#999" id="pickupTimeDisplay"></div>
+      </div>
+    </div>
+    <img id="pickupSigImg" style="width:120px;height:40px;border:1px solid #eee;border-radius:4px;object-fit:contain">
+  </div>
+
+  <!-- 10-minute countdown timer -->
+  <div class="card" id="countdownCard" style="display:none; background:#FFF3E0; border:2px solid #FF9800; text-align:center">
+    <div style="font-size:0.75rem; font-weight:700; color:#E65100; margin-bottom:6px">&#9888; 10&#48516; &#51060;&#45236; &#51648;&#51216;&#51012; &#46496;&#45208;&#50556; &#54633;&#45768;&#45796;!</div>
+    <div id="countdownTimer" style="font-size:2.5rem; font-weight:900; color:#F44336; font-family:monospace">10:00</div>
+    <div style="font-size:0.65rem; color:#999; margin-top:4px">&#54589;&#50629; &#54980; &#51648;&#51216; &#52636;&#48156; &#51228;&#54620; &#49884;&#44036;</div>
+  </div>
+
+  <!-- Expired warning -->
+  <div class="card" id="expiredCard" style="display:none; background:#FFEBEE; border:2px solid #F44336; text-align:center">
+    <div style="font-size:1.2rem; font-weight:900; color:#F44336">&#9888; &#49884;&#44036; &#52488;&#44284;!</div>
+    <div style="font-size:0.8rem; color:#C62828; margin-top:4px">10&#48516;&#51060; &#52488;&#44284;&#46104;&#50632;&#49845;&#45768;&#45796;. &#51593;&#49884; &#52636;&#48156;&#54616;&#49464;&#50836;.</div>
+  </div>
+
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn btn-outline btn-sm" onclick="printInvoice()">&#128424; &#51064;&#49604;</button>
+    <button class="btn btn-primary btn-sm" onclick="emailInvoice()">&#9993; &#51060;&#47700;&#51068;</button>
+  </div>
+</div>
+
+<!-- ===== PAGE: HISTORY ===== -->
+<div class="page" id="page-history">
+  <div class="filter-bar">
+    <select class="form-select" id="filterMonth" onchange="loadHistory()" style="flex:1">
+      <!-- filled by JS -->
+    </select>
+    <select class="form-select" id="filterStore" onchange="loadHistory()" style="flex:1">
+      <option value="">&#51204;&#52404; &#51648;&#51216;</option>
+    </select>
+  </div>
+
+  <div class="tabs" style="margin-bottom:12px">
+    <button class="tab active" onclick="setHistoryTab('all', this)">&#51204;&#52404;</button>
+    <button class="tab" onclick="setHistoryTab('sent', this)">&#48372;&#45240;&#44163;</button>
+    <button class="tab" onclick="setHistoryTab('received', this)">&#48155;&#51008;&#44163;</button>
+  </div>
+
+  <div id="historyList"></div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">&#50900;&#44036; &#51221;&#49328; &#50836;&#50557; / Monthly Summary</div>
+    <div id="monthlySummary"></div>
+  </div>
+</div>
+
+<!-- ===== PAGE: WORK ORDER ===== -->
+<div class="page" id="page-work-order">
+  <div class="card" style="border:2px solid #1565C0; background:#e3f2fd">
+    <div style="text-align:center; margin-bottom:10px">
+      <div style="font-size:1.4rem; font-weight:900; color:#1565C0">&#128203; &#51089;&#50629; &#50836;&#52397;&#49436;</div>
+      <div style="font-size:0.7rem; color:#666">Pickup Work Order</div>
+    </div>
+    <div style="background:white; border-radius:10px; padding:12px; margin-bottom:10px">
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">&#45572;&#44396;&#50640;&#44172;? (&#45812;&#45817;&#51088; &#51060;&#47492;)</label>
+        <input class="form-input" id="woAssignee" placeholder="&#50696;: &#44608;&#52384;&#49688;" style="font-size:1rem; padding:12px">
+      </div>
+      <div style="font-size:0.7rem; color:#999; margin-top:4px">&#54408;&#47785;&#47560;&#45796; &#45796;&#47480; &#51648;&#51216;&#50640;&#49436; &#44032;&#51256;&#50732; &#49688; &#51080;&#49845;&#45768;&#45796;</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">&#44032;&#51256;&#50732; &#47932;&#54408; &#47785;&#47197;</div>
+    <div id="woItemsList"></div>
+    <div style="background:#f0f7ff; border-radius:10px; padding:10px; margin-top:8px">
+      <div style="display:flex; gap:6px; margin-bottom:6px">
+        <input class="form-input" id="woItemName" placeholder="&#54408;&#47785;&#47749;" onkeydown="if(event.key==='Enter')addWoItem()" style="flex:2; font-size:0.95rem; padding:10px">
+        <input class="form-input" id="woItemQty" type="number" min="1" value="1" style="flex:0.5; font-size:0.95rem; padding:10px; text-align:center">
+      </div>
+      <div style="display:flex; gap:6px">
+        <select class="form-select" id="woItemStore" style="flex:2; font-size:0.85rem; padding:8px">
+          <option value="">&#50612;&#46356;&#49436;?</option>
+        </select>
+        <button class="btn btn-success" onclick="addWoItem()" style="flex:1; padding:10px; font-size:0.9rem; font-weight:700">&#52628;&#44032;</button>
+      </div>
+      <label style="display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; background:#FFF3E0; padding:12px; border-radius:10px; font-size:0.9rem; font-weight:700; color:#E65100; margin-top:8px; border:2px dashed #FF9800">
+        &#128247; &#49324;&#51652; &#52237;&#50612;&#49436; &#52628;&#44032;
+        <input type="file" accept="image/*" capture="environment" id="woPhoto" onchange="addWoPhoto(event)" style="display:none">
+      </label>
+    </div>
+  </div>
+
+  <div class="card" id="woMemoCard">
+    <div class="card-title">&#47700;&#47784; / &#53945;&#51060;&#49324;&#54637;</div>
+    <textarea class="form-input" id="woMemo" placeholder="&#50696;: &#50976;&#53685;&#44592;&#54620; &#54869;&#51064; &#54596;&#49688;, &#45257;&#46041;&#52264;&#47049; &#54596;&#50836;" style="min-height:60px; font-size:0.9rem; resize:vertical"></textarea>
+  </div>
+
+  <button class="btn btn-primary" onclick="generateWorkOrder()" style="margin-top:10px; padding:14px; font-size:1rem">
+    &#50836;&#52397;&#49436; &#49373;&#49457;
+  </button>
+</div>
+
+<!-- ===== PAGE: WORK ORDER VIEW ===== -->
+<div class="page" id="page-work-order-view">
+  <div id="woViewContent"></div>
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn btn-outline btn-sm" onclick="window.print()">&#128424; &#51064;&#49604;</button>
+    <button class="btn btn-primary btn-sm" onclick="shareWorkOrder()">&#128172; &#44277;&#50976;</button>
+  </div>
+</div>
+
+<!-- ===== PAGE: STOCK BOARD ===== -->
+<div class="page" id="page-stock">
+  <!-- Hero -->
+  <div style="text-align:center; padding:12px 0 8px">
+    <img src="logo.png" alt="Kimchi Mart" style="width:140px; margin-bottom:4px">
+    <div style="font-size:0.75rem; font-weight:700; color:#1565C0; letter-spacing:2px">L O G I S T I C S</div>
+    <div style="font-size:0.6rem; color:#999; margin-top:2px" id="stockStoreName"></div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px">
+    <button class="btn btn-primary" onclick="showPage('new-invoice')" style="font-size:0.8rem; padding:10px">
+      &#10010; &#49352; &#51064;&#48372;&#51060;&#49828;
+    </button>
+    <button class="btn btn-outline" onclick="showPage('dashboard')" style="font-size:0.8rem; padding:10px">
+      &#128202; &#45824;&#49884;&#48372;&#46300;
+    </button>
+  </div>
+  <button class="btn btn-warning" onclick="showPage('work-order')" style="font-size:0.85rem; padding:10px; margin-bottom:12px">
+    &#128203; &#51089;&#50629; &#50836;&#52397;&#49436; &#47564;&#46308;&#44592;
+  </button>
+
+  <!-- My Store Stock -->
+  <div class="card" id="myStockCard">
+    <div class="card-title">&#128230; &#50864;&#47532; &#51648;&#51216; &#51116;&#44256; / My Stock</div>
+    <div id="myStockList"></div>
+    <div style="background:#f0f7ff; border-radius:10px; padding:14px; margin-top:8px">
+      <input class="form-input" id="stockItemName" placeholder="&#54408;&#47785;&#47749; &#51077;&#47141; &#54980; Enter" onkeydown="if(event.key==='Enter')addStockItem()" style="font-size:1.1rem; padding:14px; border:2px solid #1565C0;">
+      <input type="hidden" id="stockItemQty" value="1">
+      <button class="btn btn-success" onclick="addStockItem()" style="padding:16px; font-size:1.1rem; margin-top:8px; font-weight:800; letter-spacing:2px">&#52628; &#44032;</button>
+    </div>
+  </div>
+
+  <!-- All Stores Stock View -->
+  <div class="section-title" style="margin-top:10px">
+    &#127970; &#51204;&#52404; &#51648;&#51216; &#51116;&#44256; &#54788;&#54889; / All Stores
+  </div>
+  <div id="allStoresStock"></div>
+</div>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="bottom-nav" id="bottomNav" style="display:none">
+  <button class="nav-item" onclick="showPage('stock')">
+    <span class="nav-icon">&#128230;</span>
+    <span class="nav-label">&#51116;&#44256;&#54788;&#54889;</span>
+  </button>
+  <button class="nav-item" onclick="showPage('new-invoice')">
+    <span class="nav-icon">&#128196;</span>
+    <span class="nav-label">&#51064;&#48372;&#51060;&#49828;</span>
+  </button>
+  <button class="nav-item" onclick="showPage('history')">
+    <span class="nav-icon">&#128200;</span>
+    <span class="nav-label">&#50900;&#44036;&#51221;&#49328;</span>
+  </button>
+  <button class="nav-item" onclick="showPage('dashboard')">
+    <span class="nav-icon">&#128202;</span>
+    <span class="nav-label">&#45824;&#49884;&#48372;&#46300;</span>
+  </button>
+</nav>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   KIMCHI MART LOGISTICS - Inter-Store Invoice App
+   ============================================================ */
+
+// ===== STORE DATA =====
+const STORES = [
+  { id: 'miami',        name: 'Miami',            nameKr: '마이애미 (Palmetto Bay)',  code: 'MIA' },
+  { id: 'pembroke',     name: 'Pembroke Pines',   nameKr: '펨브로크 파인즈',           code: 'PBP' },
+  { id: 'hollywood',    name: 'Hollywood',        nameKr: '할리우드',                  code: 'HLW' },
+  { id: 'coral',        name: 'Coral Springs',    nameKr: '코럴 스프링즈',             code: 'CRS' },
+  { id: 'fortlauder',   name: 'Fort Lauderdale',  nameKr: '포트 로더데일 (Las Olas)',  code: 'FTL' },
+  { id: 'westpalm',     name: 'West Palm Beach',  nameKr: '웨스트 팜비치',             code: 'WPB' }
+];
+
+// ===== APP STATE =====
+let currentUser = null; // { storeId, storeName, name }
+let currentPage = 'dashboard';
+let pageHistory = [];
+let invoiceItems = [];
+let invoiceType = 'normal'; // 'normal' (10%) or 'urgent' (15%)
+let currentInvoice = null;
+let scanner = null;
+let signaturePad = null;
+let historyTab = 'all';
+
+// ===== LOCAL DB (localStorage, will be replaced with Firebase) =====
+function getDB() {
+  const data = localStorage.getItem('km-logistics-db');
+  return data ? JSON.parse(data) : { products: {}, invoices: [], nextInvoiceNum: 1 };
+}
+function saveDB(db) { localStorage.setItem('km-logistics-db', JSON.stringify(db)); }
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  initStoreDropdowns();
+  checkLogin();
+});
+
+function initStoreDropdowns() {
+  const loginSelect = document.getElementById('loginStore');
+  STORES.forEach(s => {
+    loginSelect.innerHTML += `<option value="${s.id}">${s.nameKr} (${s.code})</option>`;
+  });
+
+  // Enable login button when both fields filled
+  loginSelect.addEventListener('change', checkLoginReady);
+  document.getElementById('loginName').addEventListener('input', checkLoginReady);
+}
+
+function checkLoginReady() {
+  const store = document.getElementById('loginStore').value;
+  const name = document.getElementById('loginName').value.trim();
+  document.getElementById('loginBtn').disabled = !(store && name);
+}
+
+function checkLogin() {
+  const saved = localStorage.getItem('km-logistics-user');
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    showApp();
+  }
+}
+
+function doLogin() {
+  const storeId = document.getElementById('loginStore').value;
+  const name = document.getElementById('loginName').value.trim();
+  if (!storeId || !name) return;
+
+  const store = STORES.find(s => s.id === storeId);
+  currentUser = { storeId, storeName: store.name, storeNameKr: store.nameKr, storeCode: store.code, name };
+  localStorage.setItem('km-logistics-user', JSON.stringify(currentUser));
+  showApp();
+}
+
+function showApp() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('mainHeader').style.display = 'flex';
+  document.getElementById('bottomNav').style.display = 'flex';
+  document.getElementById('headerSub').textContent = `${currentUser.storeNameKr} · ${currentUser.name}`;
+  document.getElementById('dashStoreName').textContent = `${currentUser.storeNameKr} · ${currentUser.name}`;
+
+  // Populate "to store" dropdown (exclude current store)
+  const toSelect = document.getElementById('invoiceToStore');
+  toSelect.innerHTML = '<option value="">-- 받는 지점 선택 --</option>';
+  STORES.filter(s => s.id !== currentUser.storeId).forEach(s => {
+    toSelect.innerHTML += `<option value="${s.id}">${s.nameKr} (${s.code})</option>`;
+  });
+
+  // Populate filter dropdowns
+  const filterStore = document.getElementById('filterStore');
+  filterStore.innerHTML = '<option value="">전체 지점</option>';
+  STORES.forEach(s => {
+    filterStore.innerHTML += `<option value="${s.id}">${s.nameKr}</option>`;
+  });
+  populateMonthFilter();
+
+  document.getElementById('stockStoreName').textContent = `${currentUser.storeNameKr} · ${currentUser.name}`;
+  showPage('stock');
+}
+
+// ===== NAVIGATION =====
+function showPage(page, data) {
+  if (currentPage !== page && currentPage !== 'login') {
+    pageHistory.push(currentPage);
+  }
+  currentPage = page;
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pageEl = document.getElementById(`page-${page}`);
+  if (pageEl) pageEl.classList.add('active');
+
+  // Update header
+  const titles = {
+    'stock': '재고 현황 / Stock Board',
+    'work-order': '작업 요청서',
+    'work-order-view': '작업 요청서',
+    'dashboard': 'Dashboard',
+    'new-invoice': '새 인보이스 / New Invoice',
+    'invoice-detail': '인보이스 상세 / Invoice Detail',
+    'history': '이력 조회 / History'
+  };
+  document.getElementById('headerTitle').textContent = titles[page] || 'Dashboard';
+
+  // Back button
+  document.getElementById('backBtn').classList.toggle('visible', pageHistory.length > 0 && page !== 'stock' && page !== 'dashboard');
+
+  // Bottom nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (page === 'stock') document.querySelectorAll('.nav-item')[0].classList.add('active');
+  else if (page === 'new-invoice' || page === 'dashboard') document.querySelectorAll('.nav-item')[1].classList.add('active');
+  else if (page === 'history') document.querySelectorAll('.nav-item')[2].classList.add('active');
+
+  // Page-specific actions
+  if (page === 'stock') loadStockBoard();
+  if (page === 'work-order') initWorkOrder();
+  if (page === 'dashboard') loadDashboard();
+  if (page === 'new-invoice') resetNewInvoice();
+  if (page === 'invoice-detail' && data) loadInvoiceDetail(data);
+  if (page === 'history') loadHistory();
+}
+
+function goBack() {
+  if (pageHistory.length > 0) {
+    const prev = pageHistory.pop();
+    currentPage = prev;
+    showPage(prev);
+    pageHistory.pop(); // Remove double entry
+  } else {
+    showPage('dashboard');
+  }
+}
+
+// ===== DASHBOARD =====
+function loadDashboard() {
+  const db = getDB();
+  const myStore = currentUser.storeId;
+  const thisMonth = new Date().toISOString().slice(0, 7); // "2026-04"
+
+  const monthInvoices = db.invoices.filter(inv =>
+    inv.createdAt.slice(0, 7) === thisMonth &&
+    (inv.fromStore === myStore || inv.toStore === myStore)
+  );
+
+  const issued = monthInvoices.filter(i => i.fromStore === myStore).length;
+  const pending = monthInvoices.filter(i => i.status === 'issued' && i.toStore === myStore).length;
+  const confirmed = monthInvoices.filter(i => i.status === 'confirmed').length;
+
+  document.getElementById('statIssued').textContent = issued;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statConfirmed').textContent = confirmed;
+
+  // Update notification badge
+  const badge = document.getElementById('notifBadge');
+  if (pending > 0) {
+    badge.textContent = pending;
+    badge.classList.add('show');
+  } else {
+    badge.classList.remove('show');
+  }
+
+  // Pending confirmations
+  const pendingInvs = db.invoices
+    .filter(i => i.status === 'issued' && i.toStore === myStore)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  const pendingList = document.getElementById('pendingList');
+  if (pendingInvs.length === 0) {
+    pendingList.innerHTML = '<div class="empty-state"><div class="empty-icon">&#10004;</div><div class="empty-text">대기 중인 인보이스 없음</div></div>';
+  } else {
+    pendingList.innerHTML = pendingInvs.slice(0, 5).map(inv => renderInvoiceItem(inv)).join('');
+  }
+
+  // Recent invoices
+  const recent = db.invoices
+    .filter(i => i.fromStore === myStore || i.toStore === myStore)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 10);
+
+  const recentList = document.getElementById('recentList');
+  if (recent.length === 0) {
+    recentList.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128203;</div><div class="empty-text">인보이스 이력이 없습니다</div></div>';
+  } else {
+    recentList.innerHTML = recent.map(inv => renderInvoiceItem(inv)).join('');
+  }
+}
+
+function renderInvoiceItem(inv) {
+  const fromStore = STORES.find(s => s.id === inv.fromStore);
+  const toStore = STORES.find(s => s.id === inv.toStore);
+  const statusMap = {
+    'issued': { cls: 'status-issued', badge: 'badge-issued', text: '대기' },
+    'handed-over': { cls: 'status-pending', badge: 'badge-pending', text: '인도완료' },
+    'confirmed': { cls: 'status-confirmed', badge: 'badge-confirmed', text: '완료' }
+  };
+  const st = statusMap[inv.status] || statusMap['issued'];
+  const statusClass = st.cls;
+  const badgeClass = st.badge;
+  const statusText = st.text;
+  const dateStr = new Date(inv.createdAt).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const typeLabel = inv.type === 'urgent' ? ' [긴급]' : '';
+
+  return `
+    <div class="invoice-item ${statusClass}" onclick="showPage('invoice-detail', '${inv.id}')">
+      <div class="invoice-route">${fromStore ? fromStore.code : '?'} <span class="arrow">&#10132;</span> ${toStore ? toStore.code : '?'}${typeLabel}</div>
+      <div class="invoice-summary">${inv.items.length}개 품목 · $${inv.totalSale.toFixed(2)}</div>
+      <div class="invoice-meta">
+        <span>${inv.invoiceNo} · ${dateStr}</span>
+        <span class="status-badge ${badgeClass}">${statusText}</span>
+      </div>
+    </div>
+  `;
+}
+
+// ===== NEW INVOICE =====
+function resetNewInvoice() {
+  invoiceItems = [];
+  invoiceType = 'normal';
+  document.getElementById('invoiceToStore').value = '';
+  document.getElementById('productListCard').style.display = 'none';
+  document.getElementById('issueInvoiceBtn').style.display = 'none';
+  document.getElementById('scannerContainer').style.display = 'none';
+  document.getElementById('scanResult').classList.remove('show');
+  document.getElementById('newProductForm').style.display = 'none';
+  document.getElementById('manualAddForm').style.display = 'none';
+  stopScanner();
+  updateProductList();
+}
+
+function setInvoiceType(type, el) {
+  invoiceType = type;
+  el.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  updateProductList(); // recalculate prices
+}
+
+function getMarkup() { return invoiceType === 'urgent' ? 10 : 5; }
+
+// ===== BARCODE SCANNER =====
+function startScanner() {
+  const container = document.getElementById('scannerContainer');
+  container.style.display = 'block';
+  document.getElementById('scanResult').classList.remove('show');
+
+  if (scanner) { scanner.clear(); }
+
+  scanner = new Html5Qrcode('scannerView');
+  scanner.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: { width: 250, height: 100 }, formatsToSupport: [
+      Html5QrcodeSupportedFormats.UPC_A,
+      Html5QrcodeSupportedFormats.UPC_E,
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_39,
+      Html5QrcodeSupportedFormats.QR_CODE
+    ]},
+    onScanSuccess,
+    () => {}
+  ).catch(err => {
+    showToast('카메라 접근 실패. 권한을 확인하세요.');
+    container.style.display = 'none';
+  });
+}
+
+function stopScanner() {
+  if (scanner) {
+    scanner.stop().catch(() => {});
+    scanner.clear();
+    scanner = null;
+  }
+  document.getElementById('scannerContainer').style.display = 'none';
+}
+
+function onScanSuccess(barcode) {
+  stopScanner();
+  document.getElementById('scannedBarcode').textContent = `바코드: ${barcode}`;
+  document.getElementById('scanResult').classList.add('show');
+
+  // Check if product exists in DB
+  const db = getDB();
+  const product = db.products[barcode];
+
+  if (product) {
+    // Known product - add directly
+    addItemToInvoice({
+      barcode,
+      name: product.name,
+      nameEn: product.nameEn || '',
+      qty: 1,
+      costPrice: product.costPrice
+    });
+    showToast(`${product.name} 추가됨`);
+  } else {
+    // Unknown product - show registration form
+    document.getElementById('newProductForm').style.display = 'block';
+    document.getElementById('npBarcode').value = barcode;
+    document.getElementById('npName').value = '';
+    document.getElementById('npNameEn').value = '';
+    document.getElementById('npCost').value = '';
+    document.getElementById('npName').focus();
+  }
+}
+
+function registerAndAddProduct() {
+  const barcode = document.getElementById('npBarcode').value;
+  const name = document.getElementById('npName').value.trim();
+  const nameEn = document.getElementById('npNameEn').value.trim();
+  const costPrice = parseFloat(document.getElementById('npCost').value);
+
+  if (!name || isNaN(costPrice) || costPrice <= 0) {
+    showToast('제품명과 원가를 입력하세요');
+    return;
+  }
+
+  // Save to product DB
+  const db = getDB();
+  db.products[barcode] = { name, nameEn, costPrice, createdAt: new Date().toISOString() };
+  saveDB(db);
+
+  // Add to invoice
+  addItemToInvoice({ barcode, name, nameEn, qty: 1, costPrice });
+  document.getElementById('newProductForm').style.display = 'none';
+  showToast(`${name} 등록 & 추가됨`);
+}
+
+function cancelNewProduct() {
+  document.getElementById('newProductForm').style.display = 'none';
+}
+
+// ===== MANUAL ADD =====
+function showManualAdd() {
+  document.getElementById('manualAddForm').style.display = 'block';
+  document.getElementById('manualName').focus();
+}
+function hideManualAdd() {
+  document.getElementById('manualAddForm').style.display = 'none';
+}
+function addManualProduct() {
+  const name = document.getElementById('manualName').value.trim();
+  const qty = parseInt(document.getElementById('manualQty').value) || 1;
+  const costPrice = parseFloat(document.getElementById('manualCost').value);
+
+  if (!name || isNaN(costPrice) || costPrice <= 0) {
+    showToast('제품명과 원가를 입력하세요');
+    return;
+  }
+
+  addItemToInvoice({ barcode: '', name, nameEn: '', qty, costPrice });
+  document.getElementById('manualName').value = '';
+  document.getElementById('manualQty').value = '1';
+  document.getElementById('manualCost').value = '';
+  hideManualAdd();
+  showToast(`${name} 추가됨`);
+}
+
+// ===== INVOICE ITEMS =====
+function addItemToInvoice(item) {
+  // Check if already in list (same barcode)
+  const existing = item.barcode ? invoiceItems.find(i => i.barcode === item.barcode) : null;
+  if (existing) {
+    existing.qty += item.qty;
+  } else {
+    const markup = getMarkup();
+    item.salePrice = +(item.costPrice * (1 + markup / 100)).toFixed(2);
+    invoiceItems.push(item);
+  }
+  updateProductList();
+}
+
+function removeItem(index) {
+  invoiceItems.splice(index, 1);
+  updateProductList();
+}
+
+function updateItemQty(index, delta) {
+  invoiceItems[index].qty = Math.max(1, invoiceItems[index].qty + delta);
+  updateProductList();
+}
+
+function updateProductList() {
+  const card = document.getElementById('productListCard');
+  const rows = document.getElementById('productRows');
+  const countEl = document.getElementById('productCount');
+  const totalEl = document.getElementById('invoiceTotal');
+  const issueBtn = document.getElementById('issueInvoiceBtn');
+
+  if (invoiceItems.length === 0) {
+    card.style.display = 'none';
+    issueBtn.style.display = 'none';
+    return;
+  }
+
+  card.style.display = 'block';
+  issueBtn.style.display = 'block';
+  countEl.textContent = invoiceItems.length;
+
+  // Recalculate sale prices with current markup
+  const markup = getMarkup();
+  invoiceItems.forEach(item => {
+    item.salePrice = +(item.costPrice * (1 + markup / 100)).toFixed(2);
+  });
+
+  rows.innerHTML = invoiceItems.map((item, i) => `
+    <div class="product-row">
+      <div class="product-name">${item.name}</div>
+      <div class="product-qty">
+        <span style="cursor:pointer;padding:0 4px" onclick="updateItemQty(${i},-1)">-</span>
+        ${item.qty}
+        <span style="cursor:pointer;padding:0 4px" onclick="updateItemQty(${i},1)">+</span>
+      </div>
+      <div class="product-price">$${item.costPrice.toFixed(2)}</div>
+      <div class="product-price" style="color:#1565C0;font-weight:600">$${(item.salePrice * item.qty).toFixed(2)}</div>
+      <button class="product-remove" onclick="removeItem(${i})">&#10005;</button>
+    </div>
+  `).join('');
+
+  const total = invoiceItems.reduce((sum, item) => sum + item.salePrice * item.qty, 0);
+  totalEl.textContent = `$${total.toFixed(2)}`;
+}
+
+// ===== ISSUE INVOICE =====
+function issueInvoice() {
+  const toStoreId = document.getElementById('invoiceToStore').value;
+  if (!toStoreId) { showToast('받는 지점을 선택하세요'); return; }
+  if (invoiceItems.length === 0) { showToast('제품을 추가하세요'); return; }
+
+  const db = getDB();
+  const num = db.nextInvoiceNum++;
+  const now = new Date();
+  const invoiceNo = `INV-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(num).padStart(4,'0')}`;
+
+  const totalCost = invoiceItems.reduce((s, i) => s + i.costPrice * i.qty, 0);
+  const totalSale = invoiceItems.reduce((s, i) => s + i.salePrice * i.qty, 0);
+
+  const invoice = {
+    id: `inv_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
+    invoiceNo,
+    fromStore: currentUser.storeId,
+    toStore: toStoreId,
+    type: invoiceType,
+    markup: getMarkup(),
+    items: JSON.parse(JSON.stringify(invoiceItems)),
+    totalCost: +totalCost.toFixed(2),
+    totalSale: +totalSale.toFixed(2),
+    status: 'issued',
+    createdBy: currentUser.name,
+    createdByStore: currentUser.storeName,
+    createdAt: now.toISOString(),
+    confirmedBy: null,
+    confirmedAt: null,
+    signature: null,
+    emailSent: false
+  };
+
+  db.invoices.push(invoice);
+  saveDB(db);
+
+  showToast(`인보이스 ${invoiceNo} 발행 완료!`);
+  showPage('invoice-detail', invoice.id);
+}
+
+// ===== INVOICE DETAIL =====
+let handoverPad = null;
+let pickupPad = null;
+
+function loadInvoiceDetail(invoiceId) {
+  const db = getDB();
+  currentInvoice = db.invoices.find(i => i.id === invoiceId);
+  if (!currentInvoice) { showToast('인보이스를 찾을 수 없습니다'); return; }
+
+  const inv = currentInvoice;
+  const fromStore = STORES.find(s => s.id === inv.fromStore);
+  const toStore = STORES.find(s => s.id === inv.toStore);
+  const dateStr = new Date(inv.createdAt).toLocaleDateString('ko-KR', {
+    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+  const typeLabel = inv.type === 'urgent' ? '긴급/쉘브 (10%)' : '일반 (5%)';
+  const typeClass = inv.type === 'urgent' ? 'type-urgent' : 'type-normal';
+
+  // Status text
+  let statusHtml = '';
+  if (inv.status === 'issued') statusHtml = '<span class="status-badge badge-issued" style="margin-left:8px">대기</span>';
+  else if (inv.status === 'handed-over') statusHtml = '<span class="status-badge" style="background:#FF9800;margin-left:8px">인도완료</span>';
+  else if (inv.status === 'confirmed') statusHtml = '<span class="status-badge badge-confirmed" style="margin-left:8px">완료</span>';
+
+  document.getElementById('invoiceDetailHeader').innerHTML = `
+    <div class="invoice-number">${inv.invoiceNo} ${statusHtml}</div>
+    <div class="invoice-stores">
+      ${fromStore ? fromStore.code : '?'} <span class="arrow">&#10132;</span> ${toStore ? toStore.code : '?'}
+    </div>
+    <div class="invoice-date">${dateStr} · ${inv.createdBy}</div>
+    <span class="invoice-type-badge ${typeClass}">${typeLabel}</span>
+  `;
+
+  // Product rows
+  document.getElementById('detailProductRows').innerHTML = inv.items.map(item => `
+    <div class="product-row" style="grid-template-columns: 2fr 0.8fr 1fr 1fr">
+      <div class="product-name">${item.name}</div>
+      <div class="product-qty">${item.qty}</div>
+      <div class="product-price">$${item.costPrice.toFixed(2)}</div>
+      <div class="product-price" style="color:#1565C0;font-weight:600">$${(item.salePrice * item.qty).toFixed(2)}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('detailTotal').innerHTML = `
+    <div>합계 (원가: $${inv.totalCost.toFixed(2)})</div>
+    <div class="total-amount">$${inv.totalSale.toFixed(2)}</div>
+  `;
+
+  // Hide all sections first
+  document.getElementById('handoverSection').style.display = 'none';
+  document.getElementById('handoverDisplay').style.display = 'none';
+  document.getElementById('pickupSection').style.display = 'none';
+  document.getElementById('pickupDisplay').style.display = 'none';
+
+  // === Step 1: Handover (sending store) ===
+  if (!inv.handoverBy) {
+    // Not yet handed over - show form for sending store
+    if (inv.fromStore === currentUser.storeId) {
+      document.getElementById('handoverSection').style.display = 'block';
+      document.getElementById('handoverName').value = currentUser.name;
+      setTimeout(() => initHandoverPad(), 100);
+    }
+  } else {
+    // Already handed over - show completed display
+    document.getElementById('handoverDisplay').style.display = 'block';
+    document.getElementById('handoverNameDisplay').textContent = inv.handoverBy;
+    document.getElementById('handoverTimeDisplay').textContent = new Date(inv.handoverAt).toLocaleString('ko-KR');
+    if (inv.handoverSig) {
+      document.getElementById('handoverSigImg').src = inv.handoverSig;
+      document.getElementById('handoverSigImg').style.display = 'block';
+    }
+
+    // === Step 2: Pickup (anyone picks up) ===
+    if (!inv.pickupBy) {
+      // Not yet picked up - show pickup form
+      document.getElementById('pickupSection').style.display = 'block';
+      setTimeout(() => initPickupPad(), 100);
+    } else {
+      // Already picked up - show completed display
+      document.getElementById('pickupDisplay').style.display = 'block';
+      document.getElementById('pickupNameDisplay').textContent = inv.pickupBy;
+      document.getElementById('pickupTimeDisplay').textContent = new Date(inv.pickupAt).toLocaleString('ko-KR');
+      if (inv.pickupSig) {
+        document.getElementById('pickupSigImg').src = inv.pickupSig;
+        document.getElementById('pickupSigImg').style.display = 'block';
+      }
+      // Show countdown if within 10 minutes of pickup
+      const elapsed = Math.floor((Date.now() - new Date(inv.pickupAt).getTime()) / 1000);
+      if (elapsed < 600) {
+        startCountdown(inv.id);
+      } else {
+        document.getElementById('countdownCard').style.display = 'none';
+        document.getElementById('expiredCard').style.display = 'none';
+      }
+    }
+  }
+}
+
+// ===== STEP 1: HANDOVER SIGNATURE =====
+function initHandoverPad() {
+  const canvas = document.getElementById('handoverCanvas');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = 150;
+  handoverPad = new SignaturePad(canvas, {
+    penColor: '#000',
+    backgroundColor: 'rgba(255,255,255,0)',
+    onBegin: () => { document.getElementById('handoverLabel').style.display = 'none'; }
+  });
+}
+
+function clearHandoverSig() {
+  if (handoverPad) {
+    handoverPad.clear();
+    document.getElementById('handoverLabel').style.display = 'block';
+  }
+}
+
+function confirmHandover() {
+  const name = document.getElementById('handoverName').value.trim();
+  if (!name) { showToast('인도자 이름을 입력하세요'); return; }
+  if (!handoverPad || handoverPad.isEmpty()) { showToast('인도자 서명을 해주세요'); return; }
+
+  const db = getDB();
+  const inv = db.invoices.find(i => i.id === currentInvoice.id);
+  if (!inv) return;
+
+  inv.status = 'handed-over';
+  inv.handoverBy = name;
+  inv.handoverAt = new Date().toISOString();
+  inv.handoverSig = handoverPad.toDataURL('image/png');
+  saveDB(db);
+
+  showToast('인도 확인 완료! 픽업자 서명을 받으세요.');
+  loadInvoiceDetail(inv.id);
+}
+
+// ===== STEP 2: PICKUP SIGNATURE =====
+function initPickupPad() {
+  const canvas = document.getElementById('pickupCanvas');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = 150;
+  pickupPad = new SignaturePad(canvas, {
+    penColor: '#000',
+    backgroundColor: 'rgba(255,255,255,0)',
+    onBegin: () => { document.getElementById('pickupLabel').style.display = 'none'; }
+  });
+}
+
+function clearPickupSig() {
+  if (pickupPad) {
+    pickupPad.clear();
+    document.getElementById('pickupLabel').style.display = 'block';
+  }
+}
+
+function confirmPickup() {
+  const name = document.getElementById('pickupName').value.trim();
+  if (!name) { showToast('픽업자 이름을 입력하세요'); return; }
+  if (!pickupPad || pickupPad.isEmpty()) { showToast('픽업자 서명을 해주세요'); return; }
+
+  const db = getDB();
+  const inv = db.invoices.find(i => i.id === currentInvoice.id);
+  if (!inv) return;
+
+  inv.status = 'confirmed';
+  inv.pickupBy = name;
+  inv.pickupAt = new Date().toISOString();
+  inv.pickupSig = pickupPad.toDataURL('image/png');
+  inv.confirmedBy = name;
+  inv.confirmedAt = new Date().toISOString();
+  saveDB(db);
+
+  showToast('픽업 확인 완료! 10분 내 출발하세요.');
+  loadInvoiceDetail(inv.id);
+  startCountdown(inv.id);
+}
+
+// ===== 10-MINUTE COUNTDOWN =====
+let countdownInterval = null;
+function startCountdown(invoiceId) {
+  if (countdownInterval) clearInterval(countdownInterval);
+
+  const card = document.getElementById('countdownCard');
+  const timerEl = document.getElementById('countdownTimer');
+  const expiredCard = document.getElementById('expiredCard');
+  card.style.display = 'block';
+  expiredCard.style.display = 'none';
+
+  let remaining = 600; // 10 minutes in seconds
+
+  // Check if pickup was already done and calculate remaining time
+  const db = getDB();
+  const inv = db.invoices.find(i => i.id === invoiceId);
+  if (inv && inv.pickupAt) {
+    const elapsed = Math.floor((Date.now() - new Date(inv.pickupAt).getTime()) / 1000);
+    remaining = Math.max(0, 600 - elapsed);
+  }
+
+  function updateTimer() {
+    if (remaining <= 0) {
+      clearInterval(countdownInterval);
+      card.style.display = 'none';
+      expiredCard.style.display = 'block';
+      // Play alert sound
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        for (let i = 0; i < 3; i++) {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = 880;
+          osc.type = 'square';
+          gain.gain.value = 0.3;
+          osc.start(ctx.currentTime + i * 0.4);
+          osc.stop(ctx.currentTime + i * 0.4 + 0.2);
+        }
+      } catch(e) {}
+      return;
+    }
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    timerEl.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    // Color changes
+    if (remaining <= 60) {
+      timerEl.style.color = '#F44336';
+      card.style.background = '#FFEBEE';
+      card.style.borderColor = '#F44336';
+      // Flash effect
+      if (remaining <= 30 && remaining % 2 === 0) {
+        timerEl.style.opacity = '0.3';
+      } else {
+        timerEl.style.opacity = '1';
+      }
+    } else if (remaining <= 180) {
+      timerEl.style.color = '#FF9800';
+    }
+    remaining--;
+  }
+
+  updateTimer();
+  countdownInterval = setInterval(updateTimer, 1000);
+}
+
+// ===== WORK ORDER =====
+let woItems = [];
+
+function initWorkOrder() {
+  woItems = [];
+  renderWoItems();
+  document.getElementById('woAssignee').value = '';
+  document.getElementById('woMemo').value = '';
+  // Populate store dropdown for items
+  const sel = document.getElementById('woItemStore');
+  sel.innerHTML = '<option value="">어디서?</option>';
+  STORES.filter(s => s.id !== currentUser.storeId).forEach(s => {
+    sel.innerHTML += `<option value="${s.id}">${s.nameKr} (${s.code})</option>`;
+  });
+}
+
+function addWoItem() {
+  const name = document.getElementById('woItemName').value.trim();
+  const qty = parseInt(document.getElementById('woItemQty').value) || 1;
+  const storeId = document.getElementById('woItemStore').value;
+  if (!name) { showToast('품목명을 입력하세요'); return; }
+  if (!storeId) { showToast('어디서 가져올지 선택하세요'); return; }
+  const store = STORES.find(s => s.id === storeId);
+  woItems.push({ name, qty, storeId, storeCode: store.code, storeNameKr: store.nameKr, photo: null });
+  document.getElementById('woItemName').value = '';
+  document.getElementById('woItemQty').value = '1';
+  document.getElementById('woItemName').focus();
+  renderWoItems();
+}
+
+function addWoPhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    // Resize image to save space
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const maxW = 400;
+      const scale = Math.min(1, maxW / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const photo = canvas.toDataURL('image/jpeg', 0.7);
+
+      const storeId = document.getElementById('woItemStore').value;
+      const store = storeId ? STORES.find(s => s.id === storeId) : null;
+      woItems.push({
+        name: '사진 품목 (이름 수정 가능)',
+        qty: 1,
+        storeId: storeId || '',
+        storeCode: store ? store.code : '?',
+        storeNameKr: store ? store.nameKr : '',
+        photo: photo
+      });
+      renderWoItems();
+      showToast('사진 추가됨! 품목명을 눌러 수정하세요');
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function removeWoItem(i) {
+  woItems.splice(i, 1);
+  renderWoItems();
+}
+
+function renderWoItems() {
+  const el = document.getElementById('woItemsList');
+  if (woItems.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:12px;color:#ccc;font-size:0.8rem">아래에서 품목을 추가하세요</div>';
+    return;
+  }
+  el.innerHTML = woItems.map((item, i) => `
+    <div style="padding:8px 0; border-bottom:1px solid #f0f0f0">
+      <div style="display:flex; align-items:center; gap:8px">
+        <div style="font-size:1.1rem; width:24px; text-align:center; color:#999; font-weight:700">${i+1}</div>
+        <div style="flex:1">
+          <input value="${item.name}" onchange="woItems[${i}].name=this.value" style="font-weight:600;font-size:0.9rem;border:none;background:transparent;width:100%;padding:2px 0;border-bottom:1px dashed #ccc">
+          <div style="font-size:0.65rem; color:#1565C0; font-weight:600">${item.storeCode ? item.storeCode + ' (' + item.storeNameKr + ')' : ''}</div>
+        </div>
+        <div style="font-weight:800; font-size:1rem; color:#1565C0">${item.qty}</div>
+        <button onclick="removeWoItem(${i})" style="width:24px;height:24px;border-radius:50%;border:none;background:#ffebee;color:#F44336;font-size:0.7rem;cursor:pointer">&#10005;</button>
+      </div>
+      ${item.photo ? '<img src="'+item.photo+'" style="width:60px;height:60px;object-fit:cover;border-radius:6px;margin:4px 0 0 32px">' : ''}
+    </div>
+  `).join('');
+}
+
+function generateWorkOrder() {
+  const assignee = document.getElementById('woAssignee').value.trim();
+  if (!assignee) { showToast('담당자 이름을 입력하세요'); return; }
+  if (woItems.length === 0) { showToast('품목을 추가하세요'); return; }
+
+  const myStore = STORES.find(s => s.id === currentUser.storeId);
+  // Group items by store
+  const storeGroups = {};
+  woItems.forEach(item => {
+    const key = item.storeId || 'unknown';
+    if (!storeGroups[key]) storeGroups[key] = [];
+    storeGroups[key].push(item);
+  });
+  const memo = document.getElementById('woMemo').value.trim();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+
+  let checklistHtml = '';
+  Object.keys(storeGroups).forEach(storeId => {
+    const store = STORES.find(s => s.id === storeId);
+    const storeName = store ? `${store.code} (${store.nameKr})` : '미정';
+    checklistHtml += `<div style="background:#e3f2fd; border-radius:8px; padding:8px 12px; margin:10px 0 6px; font-weight:700; font-size:0.8rem; color:#1565C0">&#127970; ${storeName}&#50640;&#49436; &#44032;&#51256;&#50732; &#44163;</div>`;
+    storeGroups[storeId].forEach(item => {
+      checklistHtml += `
+        <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid #f0f0f0; font-size:0.95rem">
+          <div style="width:24px; height:24px; border:2px solid #1565C0; border-radius:4px; flex-shrink:0"></div>
+          <div style="flex:1; font-weight:600">${item.name}</div>
+          <div style="font-weight:800; font-size:1rem; color:#1565C0">${item.qty}&#44060;</div>
+        </div>`;
+    });
+  });
+
+  const content = `
+    <div style="border:3px solid #1565C0; border-radius:12px; overflow:hidden">
+      <div style="background:#1565C0; color:white; padding:16px; text-align:center">
+        <div style="font-size:1.3rem; font-weight:900">&#128203; &#51089;&#50629; &#50836;&#52397;&#49436;</div>
+        <div style="font-size:0.7rem; opacity:0.8; margin-top:4px">PICKUP WORK ORDER</div>
+      </div>
+      <div style="padding:16px">
+        <div style="background:#FFF3E0; border-radius:10px; padding:14px; margin-bottom:14px">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
+            <div>
+              <div style="font-size:0.65rem; color:#999">&#45812;&#45817;&#51088;</div>
+              <div style="font-size:1.1rem; font-weight:800">${assignee}</div>
+            </div>
+            <div>
+              <div style="font-size:0.65rem; color:#999">&#45216;&#51676;</div>
+              <div style="font-size:0.8rem; font-weight:600">${dateStr}</div>
+            </div>
+          </div>
+        </div>
+        <div style="background:#e3f2fd; border-radius:10px; padding:10px; margin-bottom:14px; text-align:center">
+          <div style="font-size:0.65rem; color:#999; margin-bottom:2px">&#44032;&#51256;&#50732; &#44275;</div>
+          <div style="font-size:1.1rem; font-weight:800; color:#1565C0">${myStore.code} (${myStore.nameKr})</div>
+        </div>
+        <div style="font-weight:800; font-size:0.85rem; margin-bottom:4px; color:#333">&#9745; &#54589;&#50629; &#47785;&#47197; (${woItems.length}&#44060;)</div>
+        ${checklistHtml}
+        ${memo ? '<div style="background:#FFF8E1; border-radius:8px; padding:12px; margin-top:12px; font-size:0.85rem"><b>&#9888; &#53945;&#51060;&#49324;&#54637;:</b> ' + memo + '</div>' : ''}
+        <div style="background:#FFEBEE; border-radius:8px; padding:12px; margin-top:12px; text-align:center">
+          <div style="font-weight:800; color:#C62828; font-size:0.85rem">&#9888; &#54589;&#50629; &#54980; 10&#48516; &#51060;&#45236; &#52636;&#48156;&#54616;&#49464;&#50836;</div>
+        </div>
+        <div style="margin-top:16px; padding-top:12px; border-top:2px dashed #ccc">
+          <div style="font-size:0.7rem; color:#999; margin-bottom:4px">&#50836;&#52397;&#51088;</div>
+          <div style="font-weight:700">${currentUser.name} (${myStore.code})</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('woViewContent').innerHTML = content;
+
+  // Save work order
+  const db = getDB();
+  if (!db.workOrders) db.workOrders = [];
+  db.workOrders.push({
+    id: 'wo_' + Date.now(),
+    assignee, toStore: currentUser.storeId,
+    items: JSON.parse(JSON.stringify(woItems)),
+    memo, createdBy: currentUser.name, createdAt: now.toISOString()
+  });
+  saveDB(db);
+
+  woItems = [];
+  showPage('work-order-view');
+}
+
+function shareWorkOrder() {
+  const content = document.getElementById('woViewContent').innerText;
+  if (navigator.share) {
+    navigator.share({ title: '작업 요청서', text: content }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(content).then(() => showToast('클립보드에 복사됨'));
+  }
+}
+
+// ===== STOCK BOARD =====
+function getStockDB() {
+  const data = localStorage.getItem('km-stock-db');
+  return data ? JSON.parse(data) : {};
+}
+function saveStockDB(db) { localStorage.setItem('km-stock-db', JSON.stringify(db)); }
+
+function loadStockBoard() {
+  // Auto-delete stock data older than 30 days
+  const stockDB = getStockDB();
+  let cleaned = false;
+  Object.keys(stockDB).forEach(storeId => {
+    if (stockDB[storeId].updatedAt) {
+      const age = Date.now() - new Date(stockDB[storeId].updatedAt).getTime();
+      if (age > 30 * 24 * 60 * 60 * 1000) {
+        stockDB[storeId].items = [];
+        stockDB[storeId].updatedAt = null;
+        cleaned = true;
+      }
+    }
+  });
+  if (cleaned) saveStockDB(stockDB);
+
+  const myStore = currentUser.storeId;
+
+  // My store stock list
+  const myStock = stockDB[myStore] || { items: [], updatedAt: null, updatedBy: null };
+  const myList = document.getElementById('myStockList');
+
+  if (myStock.items.length === 0) {
+    myList.innerHTML = '<div style="text-align:center;padding:16px;color:#999;font-size:0.8rem">등록된 재고 없음<br><span style="font-size:0.65rem">아래에서 품목을 추가하세요</span></div>';
+  } else {
+    let html = '<div style="margin-top:8px">';
+    html += '<div style="display:grid; grid-template-columns:2fr 1fr 30px; gap:4px; padding:4px 8px; font-size:0.6rem; font-weight:700; color:#1565C0; text-transform:uppercase"><div>품목</div><div style="text-align:center">수량</div><div></div></div>';
+    myStock.items.forEach((item, i) => {
+      const qtyColor = item.qty <= 2 ? '#F44336' : item.qty <= 5 ? '#FF9800' : '#333';
+      html += `<div style="display:grid; grid-template-columns:2fr auto 30px; gap:4px; padding:6px 8px; border-bottom:1px solid #f0f0f0; align-items:center; font-size:0.85rem">
+        <div style="font-weight:500">${item.name}</div>
+        <div style="display:flex; align-items:center; gap:6px">
+          <button onclick="changeStockQty(${i},-1)" style="width:28px;height:28px;border-radius:50%;border:2px solid #1565C0;background:white;color:#1565C0;font-size:1rem;font-weight:700;cursor:pointer">-</button>
+          <span style="font-weight:800; font-size:1rem; min-width:24px; text-align:center; color:${qtyColor}">${item.qty}</span>
+          <button onclick="changeStockQty(${i},1)" style="width:28px;height:28px;border-radius:50%;border:2px solid #1565C0;background:#1565C0;color:white;font-size:1rem;font-weight:700;cursor:pointer">+</button>
+        </div>
+        <button onclick="removeStockItem(${i})" style="width:24px;height:24px;border-radius:50%;border:none;background:#ffebee;color:#F44336;font-size:0.7rem;cursor:pointer">&#10005;</button>
+      </div>`;
+    });
+    if (myStock.updatedAt) {
+      const daysLeft = Math.max(0, 30 - Math.floor((Date.now() - new Date(myStock.updatedAt).getTime()) / (24*60*60*1000)));
+      const daysColor = daysLeft <= 7 ? '#F44336' : daysLeft <= 14 ? '#FF9800' : '#999';
+      html += `<div style="font-size:0.6rem; color:#999; padding:6px 8px; text-align:right">업데이트: ${new Date(myStock.updatedAt).toLocaleString('ko-KR')} · ${myStock.updatedBy || ''}</div>`;
+      html += `<div style="font-size:0.6rem; color:${daysColor}; padding:2px 8px; text-align:right; font-weight:600">&#9888; ${daysLeft}일 후 자동 삭제</div>`;
+    }
+    html += '</div>';
+    myList.innerHTML = html;
+  }
+
+  // All stores view
+  const allDiv = document.getElementById('allStoresStock');
+  let allHtml = '';
+  STORES.forEach(store => {
+    const isMe = store.id === myStore;
+    const stock = stockDB[store.id] || { items: [], updatedAt: null };
+    const borderColor = stock.items.length > 0 ? '#4CAF50' : '#e0e0e0';
+    const meBg = isMe ? 'background:#e3f2fd;' : '';
+    const meLabel = isMe ? ' <span style="background:#1565C0;color:white;font-size:0.55rem;padding:1px 6px;border-radius:4px;font-weight:700">MY</span>' : '';
+    allHtml += `<div class="card" style="border-left:4px solid ${borderColor}; padding:10px 12px; margin-bottom:8px; ${meBg}">`;
+    allHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px">`;
+    allHtml += `<span style="font-weight:700; font-size:0.85rem">${store.nameKr} <span style="color:#999; font-size:0.7rem">(${store.code})</span>${meLabel}</span>`;
+    if (stock.updatedAt) {
+      allHtml += `<span style="font-size:0.55rem; color:#999">${timeAgo(stock.updatedAt)}</span>`;
+    }
+    allHtml += '</div>';
+    if (stock.items.length === 0) {
+      allHtml += '<div style="font-size:0.75rem; color:#ccc; padding:4px 0">등록된 재고 없음</div>';
+    } else {
+      allHtml += '<div style="display:flex; flex-wrap:wrap; gap:4px">';
+      stock.items.forEach(item => {
+        const bg = item.qty <= 2 ? '#ffebee' : item.qty <= 5 ? '#FFF8E1' : '#E8F5E9';
+        const color = item.qty <= 2 ? '#C62828' : item.qty <= 5 ? '#E65100' : '#2E7D32';
+        allHtml += `<span style="background:${bg}; color:${color}; padding:3px 8px; border-radius:6px; font-size:0.65rem; font-weight:600">${item.name} <b>${item.qty}</b></span>`;
+      });
+      allHtml += '</div>';
+    }
+    allHtml += '</div>';
+  });
+  allDiv.innerHTML = allHtml;
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return '방금';
+  if (mins < 60) return `${mins}분 전`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}시간 전`;
+  return `${Math.floor(hrs / 24)}일 전`;
+}
+
+
+function addStockItem() {
+  const name = document.getElementById('stockItemName').value.trim();
+  const qty = parseInt(document.getElementById('stockItemQty').value) || 0;
+  if (!name) { showToast('품목명을 입력하세요'); return; }
+
+  const stockDB = getStockDB();
+  const myStore = currentUser.storeId;
+  if (!stockDB[myStore]) stockDB[myStore] = { items: [], updatedAt: null, updatedBy: null };
+
+  if (stockDB[myStore].items.length >= 20) { showToast('최대 20개까지 등록 가능합니다'); return; }
+
+  // Check duplicate
+  const existing = stockDB[myStore].items.find(i => i.name === name);
+  if (existing) {
+    existing.qty = qty;
+  } else {
+    stockDB[myStore].items.push({ name, qty });
+  }
+  stockDB[myStore].updatedAt = new Date().toISOString();
+  stockDB[myStore].updatedBy = currentUser.name;
+  saveStockDB(stockDB);
+
+  document.getElementById('stockItemName').value = '';
+  document.getElementById('stockItemQty').value = '';
+  document.getElementById('stockItemName').focus();
+  showToast(`${name} 추가됨`);
+  loadStockBoard();
+}
+
+function changeStockQty(index, delta) {
+  const stockDB = getStockDB();
+  const myStore = currentUser.storeId;
+  if (stockDB[myStore] && stockDB[myStore].items[index]) {
+    stockDB[myStore].items[index].qty = Math.max(0, stockDB[myStore].items[index].qty + delta);
+    stockDB[myStore].updatedAt = new Date().toISOString();
+    stockDB[myStore].updatedBy = currentUser.name;
+    saveStockDB(stockDB);
+    loadStockBoard();
+  }
+}
+
+function removeStockItem(index) {
+  const stockDB = getStockDB();
+  const myStore = currentUser.storeId;
+  if (stockDB[myStore]) {
+    stockDB[myStore].items.splice(index, 1);
+    stockDB[myStore].updatedAt = new Date().toISOString();
+    stockDB[myStore].updatedBy = currentUser.name;
+    saveStockDB(stockDB);
+    loadStockBoard();
+  }
+}
+
+// ===== HISTORY =====
+function populateMonthFilter() {
+  const select = document.getElementById('filterMonth');
+  const now = new Date();
+  select.innerHTML = '';
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label = d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' });
+    select.innerHTML += `<option value="${val}">${label}</option>`;
+  }
+}
+
+function setHistoryTab(tab, el) {
+  historyTab = tab;
+  el.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadHistory();
+}
+
+function loadHistory() {
+  const db = getDB();
+  const month = document.getElementById('filterMonth').value;
+  const storeFilter = document.getElementById('filterStore').value;
+  const myStore = currentUser.storeId;
+
+  let invoices = db.invoices.filter(inv => {
+    if (inv.createdAt.slice(0, 7) !== month) return false;
+    if (historyTab === 'sent' && inv.fromStore !== myStore) return false;
+    if (historyTab === 'received' && inv.toStore !== myStore) return false;
+    if (historyTab === 'all' && inv.fromStore !== myStore && inv.toStore !== myStore) return false;
+    if (storeFilter && inv.fromStore !== storeFilter && inv.toStore !== storeFilter) return false;
+    return true;
+  }).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  const list = document.getElementById('historyList');
+  if (invoices.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128203;</div><div class="empty-text">해당 기간 인보이스 없음</div></div>';
+  } else {
+    list.innerHTML = invoices.map(inv => renderInvoiceItem(inv)).join('');
+  }
+
+  // Monthly summary
+  const sentInvs = db.invoices.filter(i => i.createdAt.slice(0,7) === month && i.fromStore === myStore);
+  const recvInvs = db.invoices.filter(i => i.createdAt.slice(0,7) === month && i.toStore === myStore);
+  const totalSent = sentInvs.reduce((s, i) => s + i.totalSale, 0);
+  const totalRecv = recvInvs.reduce((s, i) => s + i.totalSale, 0);
+
+  document.getElementById('monthlySummary').innerHTML = `
+    <div class="summary-row">
+      <span class="label">보낸 인보이스</span>
+      <span class="value">${sentInvs.length}건</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">보낸 금액 (판매가)</span>
+      <span class="value income">$${totalSent.toFixed(2)}</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">받은 인보이스</span>
+      <span class="value">${recvInvs.length}건</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">받은 금액 (판매가)</span>
+      <span class="value expense">$${totalRecv.toFixed(2)}</span>
+    </div>
+    <div class="summary-row" style="border-top:2px solid #1565C0; margin-top:4px; padding-top:10px">
+      <span class="label" style="font-weight:700">순 정산액</span>
+      <span class="value" style="color:${(totalSent - totalRecv) >= 0 ? '#4CAF50' : '#F44336'}">
+        ${(totalSent - totalRecv) >= 0 ? '+' : ''}$${(totalSent - totalRecv).toFixed(2)}
+      </span>
+    </div>
+  `;
+}
+
+// ===== EMAIL (placeholder - will use EmailJS) =====
+function emailInvoice() {
+  if (!currentInvoice) return;
+  const inv = currentInvoice;
+  const fromStore = STORES.find(s => s.id === inv.fromStore);
+  const toStore = STORES.find(s => s.id === inv.toStore);
+  const dateStr = new Date(inv.createdAt).toLocaleString('ko-KR');
+  const typeLabel = inv.type === 'urgent' ? '긴급/쉘브 (+10%)' : '일반 (+5%)';
+
+  let itemsHtml = inv.items.map(item => `
+    <tr>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:14px">${item.name}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;font-weight:700">${item.qty}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right">$${item.costPrice.toFixed(2)}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;color:#1565C0;font-weight:700">$${(item.salePrice * item.qty).toFixed(2)}</td>
+    </tr>`).join('');
+
+  let sigHtml = '';
+  if (inv.handoverBy) {
+    sigHtml += `
+      <div style="margin-top:20px;padding:12px;background:#FFF8E1;border-radius:8px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:6px">보내는 사람: ${inv.handoverBy}</div>
+        <div style="font-size:12px;color:#999">${new Date(inv.handoverAt).toLocaleString('ko-KR')}</div>
+        ${inv.handoverSig ? '<img src="'+inv.handoverSig+'" style="max-width:300px;max-height:80px;margin-top:8px;border:1px solid #ddd;border-radius:4px">' : ''}
+      </div>`;
+  }
+  if (inv.pickupBy) {
+    sigHtml += `
+      <div style="margin-top:10px;padding:12px;background:#E8F5E9;border-radius:8px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:6px">가져간 사람: ${inv.pickupBy}</div>
+        <div style="font-size:12px;color:#999">${new Date(inv.pickupAt).toLocaleString('ko-KR')}</div>
+        ${inv.pickupSig ? '<img src="'+inv.pickupSig+'" style="max-width:300px;max-height:80px;margin-top:8px;border:1px solid #ddd;border-radius:4px">' : ''}
+      </div>`;
+  }
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${inv.invoiceNo}</title></head>
+  <body style="font-family:-apple-system,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f5f5f5">
+    <div style="background:linear-gradient(135deg,#1565C0,#0D47A1);color:white;padding:20px;border-radius:12px;text-align:center">
+      <div style="font-size:24px;font-weight:800;letter-spacing:2px">KIMCHI MART</div>
+      <div style="font-size:12px;opacity:0.8;margin-top:4px">L O G I S T I C S</div>
+    </div>
+    <div style="background:white;border-radius:12px;padding:20px;margin-top:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div>
+          <div style="font-size:12px;color:#999">Invoice No.</div>
+          <div style="font-size:18px;font-weight:800">${inv.invoiceNo}</div>
+        </div>
+        <div style="background:${inv.type==='urgent'?'#F44336':'#1565C0'};color:white;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700">${typeLabel}</div>
+      </div>
+      <div style="background:#e3f2fd;border-radius:8px;padding:14px;text-align:center;margin-bottom:16px">
+        <span style="font-size:20px;font-weight:800">${fromStore.code}</span>
+        <span style="margin:0 12px;font-size:20px;color:#1565C0">&#10132;</span>
+        <span style="font-size:20px;font-weight:800">${toStore.code}</span>
+        <div style="font-size:11px;color:#666;margin-top:4px">${fromStore.name} &#8594; ${toStore.name}</div>
+      </div>
+      <div style="font-size:12px;color:#666;margin-bottom:16px">
+        <div>날짜: ${dateStr}</div>
+        <div>작성자: ${inv.createdBy}</div>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <tr style="background:#e3f2fd">
+          <th style="padding:8px 12px;text-align:left;font-size:11px;color:#1565C0">품목</th>
+          <th style="padding:8px 12px;text-align:center;font-size:11px;color:#1565C0">수량</th>
+          <th style="padding:8px 12px;text-align:right;font-size:11px;color:#1565C0">원가</th>
+          <th style="padding:8px 12px;text-align:right;font-size:11px;color:#1565C0">판매가</th>
+        </tr>
+        ${itemsHtml}
+      </table>
+      <div style="display:flex;justify-content:space-between;padding:12px;border-top:3px solid #1565C0;margin-top:4px;font-weight:800;font-size:16px">
+        <span>합계 (원가: $${inv.totalCost.toFixed(2)})</span>
+        <span style="color:#1565C0">$${inv.totalSale.toFixed(2)}</span>
+      </div>
+      ${sigHtml}
+    </div>
+    <div style="text-align:center;font-size:11px;color:#999;margin-top:16px">
+      Kimchi Mart Logistics &middot; info@miamikimchi.com
+    </div>
+  </body></html>`;
+
+  // Open formatted invoice in new window for sharing
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+
+  showToast('인보이스가 새 창에 열렸습니다. 이메일로 보내세요.');
+
+  // Mark as email sent
+  const db = getDB();
+  const dbInv = db.invoices.find(i => i.id === inv.id);
+  if (dbInv) { dbInv.emailSent = true; saveDB(db); }
+}
+
+// ===== PRINT =====
+function printInvoice() {
+  window.print();
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ===== LOGOUT =====
+function logout() {
+  localStorage.removeItem('km-logistics-user');
+  currentUser = null;
+  location.reload();
+}
+
+// ===== PWA REGISTRATION =====
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
