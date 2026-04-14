@@ -403,6 +403,10 @@ body {
       <label class="form-label">&#51060;&#47492; / Name</label>
       <input class="form-input" id="loginName" type="text" placeholder="&#51060;&#47492;&#51012; &#51077;&#47141;&#54616;&#49464;&#50836;">
     </div>
+    <div class="form-group">
+      <label class="form-label">&#51204;&#54868;&#48264;&#54840; / Phone</label>
+      <input class="form-input" id="loginPhone" type="tel" placeholder="&#50696;: 786-555-1234">
+    </div>
     <button class="btn-login" id="loginBtn" onclick="doLogin()" disabled>&#49884;&#51089; / Start</button>
   </div>
   <div class="login-version">v1.0 &middot; Kimchi Mart Internal</div>
@@ -771,6 +775,24 @@ body {
   </div>
 </div>
 
+<!-- ===== PAGE: LIVE TRACKING (Manager) ===== -->
+<div class="page" id="page-tracking">
+  <div style="text-align:center; padding:10px 0">
+    <div style="font-size:1.2rem; font-weight:900; color:#1565C0">&#128205; &#49892;&#49884;&#44036; &#54788;&#54889;</div>
+    <div style="font-size:0.7rem; color:#999">Live Tracking</div>
+  </div>
+  <div id="trackingList"></div>
+  <div class="empty-state" id="trackingEmpty" style="display:none">
+    <div class="empty-icon">&#128667;</div>
+    <div class="empty-text">&#54788;&#51116; &#51060;&#46041; &#51473;&#51064; &#51089;&#50629;&#51088; &#50630;&#51020;</div>
+  </div>
+</div>
+
+<!-- ===== PAGE: WORKER TASK (Big buttons for worker) ===== -->
+<div class="page" id="page-worker-task">
+  <div id="workerTaskContent"></div>
+</div>
+
 <!-- ===== PAGE: STOCK BOARD ===== -->
 <div class="page" id="page-stock">
   <!-- Hero -->
@@ -789,8 +811,16 @@ body {
       &#128202; &#45824;&#49884;&#48372;&#46300;
     </button>
   </div>
-  <button class="btn btn-warning" onclick="showPage('work-order')" style="font-size:0.85rem; padding:10px; margin-bottom:12px">
-    &#128203; &#51089;&#50629; &#50836;&#52397;&#49436; &#47564;&#46308;&#44592;
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px">
+    <button class="btn btn-warning" onclick="showPage('work-order')" style="font-size:0.8rem; padding:10px">
+      &#128203; &#50836;&#52397;&#49436;
+    </button>
+    <button class="btn btn-secondary" onclick="showPage('tracking')" style="font-size:0.8rem; padding:10px; background:#E8F5E9; color:#2E7D32; border:1px solid #4CAF50">
+      &#128205; &#49892;&#49884;&#44036; &#54788;&#54889;
+    </button>
+  </div>
+  <button class="btn btn-outline" onclick="showPage('worker-task')" style="font-size:0.8rem; padding:10px; margin-bottom:12px; border-color:#FF9800; color:#E65100">
+    &#128170; &#45236; &#50629;&#47924; &#54869;&#51064;
   </button>
 
   <!-- My Store Stock -->
@@ -951,11 +981,16 @@ function checkLogin() {
 function doLogin() {
   const storeId = document.getElementById('loginStore').value;
   const name = document.getElementById('loginName').value.trim();
+  const phone = document.getElementById('loginPhone').value.trim();
   if (!storeId || !name) return;
 
   const store = STORES.find(s => s.id === storeId);
-  currentUser = { storeId, storeName: store.name, storeNameKr: store.nameKr, storeCode: store.code, name };
+  currentUser = { storeId, storeName: store.name, storeNameKr: store.nameKr, storeCode: store.code, name, phone };
   localStorage.setItem('km-logistics-user', JSON.stringify(currentUser));
+  // Save user to Firebase for contact directory
+  fbDB.ref('users/' + storeId + '/' + name.replace(/[.#$/[\]]/g, '_')).set({
+    name, phone, storeId, storeCode: store.code, lastLogin: new Date().toISOString()
+  });
   showApp();
 }
 
@@ -1002,6 +1037,8 @@ function showPage(page, data) {
     'stock': '재고 현황 / Stock Board',
     'work-order': '작업 요청서',
     'work-order-view': '작업 요청서',
+    'tracking': '실시간 현황',
+    'worker-task': '업무 현황',
     'dashboard': 'Dashboard',
     'new-invoice': '새 인보이스 / New Invoice',
     'invoice-detail': '인보이스 상세 / Invoice Detail',
@@ -1021,6 +1058,8 @@ function showPage(page, data) {
   // Page-specific actions
   if (page === 'stock') loadStockBoard();
   if (page === 'work-order') initWorkOrder();
+  if (page === 'tracking') loadTracking();
+  if (page === 'worker-task') loadWorkerTasks();
   if (page === 'dashboard') loadDashboard();
   if (page === 'new-invoice') resetNewInvoice();
   if (page === 'invoice-detail' && data) loadInvoiceDetail(data);
@@ -2123,6 +2162,230 @@ function loadMessages(invoiceId) {
       </div>`;
     }).join('');
     list.scrollTop = list.scrollHeight;
+  });
+}
+
+// ===== WORKER TASK PAGE =====
+function loadWorkerTasks() {
+  const content = document.getElementById('workerTaskContent');
+  const db = getDB();
+  const myStore = currentUser.storeId;
+
+  // Find active work orders assigned to me or my store
+  const activeWOs = (db.workOrders || []).filter(wo =>
+    wo.toStore === myStore && wo.status !== 'completed'
+  ).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  // Find active invoices I need to pickup
+  const activeInvs = (db.invoices || []).filter(inv =>
+    inv.toStore === myStore && inv.status !== 'confirmed'
+  ).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  if (activeWOs.length === 0 && activeInvs.length === 0) {
+    content.innerHTML = '<div class="empty-state"><div class="empty-icon">&#10004;</div><div class="empty-text">현재 배정된 업무 없음</div></div>';
+    return;
+  }
+
+  let html = '';
+
+  // Show work orders with big action buttons
+  activeWOs.forEach(wo => {
+    const fromStore = STORES.find(s => s.id === wo.fromStore) || { code: '?', nameKr: '?' };
+    const status = wo.status || 'pending';
+    const statusColors = {
+      'pending': { bg: '#FFF3E0', border: '#FF9800', text: '대기 중', icon: '&#128276;' },
+      'accepted': { bg: '#E3F2FD', border: '#1565C0', text: '수락됨', icon: '&#10004;' },
+      'departed': { bg: '#E8F5E9', border: '#4CAF50', text: '이동 중', icon: '&#128667;' },
+      'arrived': { bg: '#F3E5F5', border: '#9C27B0', text: '도착', icon: '&#128205;' }
+    };
+    const st = statusColors[status] || statusColors['pending'];
+
+    html += `<div class="card" style="border:2px solid ${st.border}; margin-bottom:12px">`;
+    html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+      <div style="font-weight:800; font-size:1rem">${st.icon} ${fromStore.code}에서 픽업</div>
+      <span style="background:${st.border};color:white;padding:3px 10px;border-radius:10px;font-size:0.65rem;font-weight:700">${st.text}</span>
+    </div>`;
+    html += `<div style="font-size:0.75rem; color:#666; margin-bottom:6px">담당: ${wo.assignee} · ${new Date(wo.createdAt).toLocaleString('ko-KR')}</div>`;
+    html += `<div style="font-size:0.75rem; color:#666; margin-bottom:10px">요청: ${wo.createdBy}</div>`;
+
+    // Items list
+    html += '<div style="background:#f5f5f5; border-radius:8px; padding:8px; margin-bottom:10px">';
+    (wo.items || []).forEach(item => {
+      html += `<div style="display:flex; justify-content:space-between; padding:4px 0; font-size:0.8rem">
+        <span>${item.name}</span><span style="font-weight:700; color:#1565C0">${item.qty}개</span>
+      </div>`;
+    });
+    html += '</div>';
+
+    // Big action buttons based on status
+    if (status === 'pending') {
+      html += `<button class="btn btn-primary" onclick="updateWoStatus('${wo.id}','accepted')" style="padding:16px; font-size:1.1rem; font-weight:800">
+        &#10004; &#49688;&#46973; (&#50629;&#47924; &#54869;&#51064;)
+      </button>`;
+    } else if (status === 'accepted') {
+      html += `<button class="btn btn-success" onclick="updateWoStatus('${wo.id}','departed')" style="padding:16px; font-size:1.1rem; font-weight:800">
+        &#128667; &#52636;&#48156; (GPS &#44592;&#47197;)
+      </button>`;
+    } else if (status === 'departed') {
+      html += `<div id="woTimer_${wo.id}" style="text-align:center; font-size:0.8rem; color:#666; margin-bottom:8px"></div>`;
+      html += `<button class="btn btn-warning" onclick="updateWoStatus('${wo.id}','arrived')" style="padding:16px; font-size:1.1rem; font-weight:800">
+        &#128205; &#46020;&#52265; (GPS &#44592;&#47197;)
+      </button>`;
+      // Show elapsed time
+      if (wo.departedAt) {
+        const mins = Math.floor((Date.now() - new Date(wo.departedAt).getTime()) / 60000);
+        document.addEventListener('DOMContentLoaded', () => {
+          const el = document.getElementById('woTimer_' + wo.id);
+          if (el) el.textContent = `이동 중: ${mins}분 경과`;
+        });
+        setTimeout(() => {
+          const el = document.getElementById('woTimer_' + wo.id);
+          if (el) el.textContent = `이동 중: ${mins}분 경과`;
+        }, 100);
+      }
+    } else if (status === 'arrived') {
+      html += `<div style="text-align:center; padding:12px; background:#E8F5E9; border-radius:8px; color:#2E7D32; font-weight:700">&#10004; 도착 완료</div>`;
+    }
+
+    // Messages
+    html += `<div style="margin-top:10px; border-top:1px solid #eee; padding-top:8px">
+      <div id="woMsg_${wo.id}" style="max-height:120px; overflow-y:auto; margin-bottom:6px"></div>
+      <div style="display:flex; gap:6px">
+        <input class="form-input" id="woMsgInput_${wo.id}" placeholder="메시지..." onkeydown="if(event.key==='Enter')sendWoMessage('${wo.id}')" style="flex:1; font-size:0.8rem; padding:8px">
+        <button class="btn btn-primary btn-sm" onclick="sendWoMessage('${wo.id}')" style="padding:8px 14px">보내기</button>
+      </div>
+    </div>`;
+
+    html += '</div>';
+  });
+
+  content.innerHTML = html;
+
+  // Load messages for each WO
+  activeWOs.forEach(wo => loadWoMessages(wo.id));
+}
+
+function updateWoStatus(woId, newStatus) {
+  const db = getDB();
+  const wo = (db.workOrders || []).find(w => w.id === woId);
+  if (!wo) return;
+
+  wo.status = newStatus;
+  const now = new Date().toISOString();
+
+  if (newStatus === 'accepted') {
+    wo.acceptedAt = now;
+    wo.acceptedBy = currentUser.name;
+    showToast('업무 수락 완료!');
+  } else if (newStatus === 'departed') {
+    wo.departedAt = now;
+    // GPS
+    navigator.geolocation.getCurrentPosition(pos => {
+      wo.departureGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude, time: now };
+      saveDB(db);
+      fbDB.ref('liveTracking/' + woId).set({
+        type: 'workOrder', driver: currentUser.name, phone: currentUser.phone || '',
+        fromStore: wo.items?.[0]?.storeId || '', toStore: wo.toStore,
+        status: 'in-transit', departedAt: now,
+        lastLocation: { lat: pos.coords.latitude, lng: pos.coords.longitude },
+        lastUpdate: now
+      });
+      // Start continuous updates
+      startLocationUpdates(woId);
+    }, () => {});
+    showToast('출발! GPS 기록 중...');
+  } else if (newStatus === 'arrived') {
+    wo.arrivedAt = now;
+    navigator.geolocation.getCurrentPosition(pos => {
+      wo.arrivalGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude, time: now };
+      saveDB(db);
+      fbDB.ref('liveTracking/' + woId + '/status').set('arrived');
+      fbDB.ref('liveTracking/' + woId + '/arrivedAt').set(now);
+    }, () => {});
+    if (locationWatchId) { navigator.geolocation.clearWatch(locationWatchId); locationWatchId = null; }
+    showToast('도착 완료!');
+  }
+
+  saveDB(db);
+  // Also sync to Firebase
+  fbDB.ref('workOrders/' + woId).update({ status: newStatus, [`${newStatus}At`]: now, [`${newStatus}By`]: currentUser.name });
+  loadWorkerTasks();
+}
+
+function sendWoMessage(woId) {
+  const input = document.getElementById('woMsgInput_' + woId);
+  const text = input.value.trim();
+  if (!text) return;
+  fbDB.ref('woMessages/' + woId).push({
+    from: currentUser.storeId, fromName: currentUser.name,
+    text, time: new Date().toISOString()
+  });
+  input.value = '';
+  loadWoMessages(woId);
+}
+
+function loadWoMessages(woId) {
+  const el = document.getElementById('woMsg_' + woId);
+  if (!el) return;
+  fbDB.ref('woMessages/' + woId).orderByChild('time').limitToLast(20).on('value', snap => {
+    const msgs = [];
+    snap.forEach(child => msgs.push(child.val()));
+    if (msgs.length === 0) { el.innerHTML = ''; return; }
+    el.innerHTML = msgs.map(m => {
+      const isMe = m.from === currentUser.storeId;
+      return `<div style="text-align:${isMe?'right':'left'};margin-bottom:3px">
+        <span style="display:inline-block;background:${isMe?'#1565C0':'#e0e0e0'};color:${isMe?'white':'#333'};padding:4px 10px;border-radius:10px;font-size:0.75rem;max-width:80%">
+          ${m.text} <span style="font-size:0.55rem;opacity:0.7">${m.fromName}</span>
+        </span>
+      </div>`;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+  });
+}
+
+// ===== MANAGER TRACKING PAGE =====
+function loadTracking() {
+  const list = document.getElementById('trackingList');
+  const empty = document.getElementById('trackingEmpty');
+
+  fbDB.ref('liveTracking').on('value', snap => {
+    const data = snap.val();
+    if (!data || Object.keys(data).length === 0) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    let html = '';
+    Object.keys(data).forEach(key => {
+      const t = data[key];
+      const statusMap = {
+        'in-transit': { text: '이동 중', color: '#FF9800', icon: '&#128667;' },
+        'arrived': { text: '도착', color: '#4CAF50', icon: '&#128205;' }
+      };
+      const st = statusMap[t.status] || statusMap['in-transit'];
+      const fromStore = STORES.find(s => s.id === t.fromStore);
+      const toStore = STORES.find(s => s.id === t.toStore);
+      const lastUpdate = t.lastUpdate ? timeAgo(t.lastUpdate) : '';
+      const depTime = t.departedAt ? new Date(t.departedAt).toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' }) : '';
+      const elapsed = t.departedAt ? Math.floor((Date.now() - new Date(t.departedAt).getTime()) / 60000) + '분' : '';
+
+      html += `<div class="card" style="border-left:4px solid ${st.color}; margin-bottom:8px">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <div>
+            <div style="font-weight:800; font-size:0.9rem">${st.icon} ${t.driver || '?'}</div>
+            <div style="font-size:0.7rem; color:#666">${fromStore?.code || '?'} &#10132; ${toStore?.code || '?'}</div>
+          </div>
+          <div style="text-align:right">
+            <span style="background:${st.color};color:white;padding:2px 8px;border-radius:8px;font-size:0.6rem;font-weight:700">${st.text}</span>
+            <div style="font-size:0.6rem; color:#999; margin-top:2px">${elapsed} · ${lastUpdate}</div>
+          </div>
+        </div>
+        <div style="font-size:0.65rem; color:#999; margin-top:4px">출발: ${depTime} ${t.phone ? '· &#128222; ' + t.phone : ''}</div>
+      </div>`;
+    });
+    list.innerHTML = html;
   });
 }
 
