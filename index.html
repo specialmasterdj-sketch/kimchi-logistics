@@ -11,6 +11,21 @@
 <title>Kimchi Mart Logistics</title>
 <link rel="manifest" href="manifest.json">
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyDfVP9JAIvRl6ldT5YzhlEmX27zbOrPnOw",
+    authDomain: "kimchi-logistics.firebaseapp.com",
+    databaseURL: "https://kimchi-logistics-default-rtdb.firebaseio.com",
+    projectId: "kimchi-logistics",
+    storageBucket: "kimchi-logistics.firebasestorage.app",
+    messagingSenderId: "461319742719",
+    appId: "1:461319742719:web:e855fec0f831b490ff18ca"
+  });
+  const fbDB = firebase.database();
+</script>
 <!-- Barcode Scanner -->
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <!-- Signature Pad -->
@@ -631,6 +646,21 @@ body {
     <img id="pickupSigImg" style="width:120px;height:40px;border:1px solid #eee;border-radius:4px;object-fit:contain">
   </div>
 
+  <!-- GPS & Departure -->
+  <div class="card" id="gpsSection" style="display:none; border:2px solid #4CAF50">
+    <div class="card-title">&#128205; &#52636;&#48156; &#44592;&#47197;</div>
+    <button class="btn btn-success" onclick="recordDeparture()" id="departBtn" style="font-size:1rem; padding:14px">
+      &#128667; &#52636;&#48156; (GPS &#44592;&#47197;)
+    </button>
+    <div id="gpsInfo" style="display:none; margin-top:8px; font-size:0.75rem; color:#666; text-align:center"></div>
+  </div>
+
+  <!-- GPS Completed -->
+  <div class="card" id="gpsDisplay" style="display:none">
+    <div class="card-title">&#128205; &#51060;&#46041; &#44592;&#47197;</div>
+    <div id="gpsTimeline"></div>
+  </div>
+
   <!-- 10-minute countdown timer -->
   <div class="card" id="countdownCard" style="display:none; background:#FFF3E0; border:2px solid #FF9800; text-align:center">
     <div style="font-size:0.75rem; font-weight:700; color:#E65100; margin-bottom:6px">&#9888; 10&#48516; &#51060;&#45236; &#51648;&#51216;&#51012; &#46496;&#45208;&#50556; &#54633;&#45768;&#45796;!</div>
@@ -642,6 +672,16 @@ body {
   <div class="card" id="expiredCard" style="display:none; background:#FFEBEE; border:2px solid #F44336; text-align:center">
     <div style="font-size:1.2rem; font-weight:900; color:#F44336">&#9888; &#49884;&#44036; &#52488;&#44284;!</div>
     <div style="font-size:0.8rem; color:#C62828; margin-top:4px">10&#48516;&#51060; &#52488;&#44284;&#46104;&#50632;&#49845;&#45768;&#45796;. &#51593;&#49884; &#52636;&#48156;&#54616;&#49464;&#50836;.</div>
+  </div>
+
+  <!-- Live Messages -->
+  <div class="card" id="messageSection" style="display:none">
+    <div class="card-title">&#128172; &#47700;&#49884;&#51648;</div>
+    <div id="messageList" style="max-height:200px; overflow-y:auto; margin-bottom:8px"></div>
+    <div style="display:flex; gap:6px">
+      <input class="form-input" id="messageInput" placeholder="&#47700;&#49884;&#51648; &#51077;&#47141;..." onkeydown="if(event.key==='Enter')sendMessage()" style="flex:1; font-size:0.85rem; padding:8px">
+      <button class="btn btn-primary btn-sm" onclick="sendMessage()" style="padding:8px 16px">&#48372;&#45236;&#44592;</button>
+    </div>
   </div>
 
   <div class="btn-row" style="margin-top:10px">
@@ -820,12 +860,62 @@ let scanner = null;
 let signaturePad = null;
 let historyTab = 'all';
 
-// ===== LOCAL DB (localStorage, will be replaced with Firebase) =====
+// ===== DB (localStorage + Firebase sync) =====
 function getDB() {
   const data = localStorage.getItem('km-logistics-db');
   return data ? JSON.parse(data) : { products: {}, invoices: [], nextInvoiceNum: 1 };
 }
-function saveDB(db) { localStorage.setItem('km-logistics-db', JSON.stringify(db)); }
+function saveDB(db) {
+  localStorage.setItem('km-logistics-db', JSON.stringify(db));
+  // Sync invoices to Firebase
+  try { fbDB.ref('invoices').set(db.invoices || []); } catch(e) {}
+  try { fbDB.ref('products').set(db.products || {}); } catch(e) {}
+}
+
+// Sync stock to Firebase
+function saveStockToFirebase(stockDB) {
+  try { fbDB.ref('stock').set(stockDB); } catch(e) {}
+}
+
+// Listen for real-time updates from Firebase
+function initFirebaseListeners() {
+  // Invoices
+  fbDB.ref('invoices').on('value', snap => {
+    const data = snap.val();
+    if (data) {
+      const db = getDB();
+      db.invoices = data;
+      localStorage.setItem('km-logistics-db', JSON.stringify(db));
+      // Refresh current page if on dashboard or history
+      if (currentPage === 'dashboard') loadDashboard();
+      if (currentPage === 'history') loadHistory();
+    }
+  });
+  // Stock
+  fbDB.ref('stock').on('value', snap => {
+    const data = snap.val();
+    if (data) {
+      localStorage.setItem('km-stock-db', JSON.stringify(data));
+      if (currentPage === 'stock') loadStockBoard();
+    }
+  });
+  // Work orders (live updates for workers)
+  fbDB.ref('workOrders').on('value', snap => {
+    const data = snap.val();
+    if (data) {
+      const db = getDB();
+      db.workOrders = Object.values(data);
+      localStorage.setItem('km-logistics-db', JSON.stringify(db));
+    }
+  });
+  // Messages
+  fbDB.ref('messages').on('child_added', snap => {
+    const msg = snap.val();
+    if (msg && msg.to === currentUser?.storeId && !msg.read) {
+      showToast(`💬 ${msg.fromName}: ${msg.text}`);
+    }
+  });
+}
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
@@ -892,6 +982,7 @@ function showApp() {
   populateMonthFilter();
 
   document.getElementById('stockStoreName').textContent = `${currentUser.storeNameKr} · ${currentUser.name}`;
+  initFirebaseListeners();
   showPage('stock');
 }
 
@@ -1373,6 +1464,47 @@ function loadInvoiceDetail(invoiceId) {
       }
     }
   }
+
+  // GPS section
+  const gpsSection = document.getElementById('gpsSection');
+  const gpsDisplay = document.getElementById('gpsDisplay');
+  gpsSection.style.display = 'none';
+  gpsDisplay.style.display = 'none';
+
+  if (inv.pickupBy && !inv.departureGPS) {
+    // Pickup done but not departed yet - show departure button
+    gpsSection.style.display = 'block';
+    document.getElementById('departBtn').disabled = false;
+    document.getElementById('departBtn').innerHTML = '&#128667; 출발 (GPS 기록)';
+  }
+
+  if (inv.departureGPS) {
+    gpsDisplay.style.display = 'block';
+    let timeline = `<div style="font-size:0.75rem; padding:6px 0; border-bottom:1px solid #f0f0f0">
+      <span style="color:#4CAF50; font-weight:700">&#128994; 출발</span> ${new Date(inv.departureGPS.time).toLocaleString('ko-KR')} · ${inv.departureGPS.by}
+    </div>`;
+    if (inv.arrivalGPS) {
+      timeline += `<div style="font-size:0.75rem; padding:6px 0">
+        <span style="color:#1565C0; font-weight:700">&#128309; 도착</span> ${new Date(inv.arrivalGPS.time).toLocaleString('ko-KR')} · ${inv.arrivalGPS.by}
+      </div>`;
+    } else {
+      timeline += `<button class="btn btn-primary btn-sm" onclick="recordArrival()" style="margin-top:6px">&#128205; 도착 기록</button>`;
+    }
+    document.getElementById('gpsTimeline').innerHTML = timeline;
+  }
+
+  // Message section - always show for active invoices
+  const msgSection = document.getElementById('messageSection');
+  if (inv.status !== 'confirmed' || (inv.pickupBy && !inv.arrivalGPS)) {
+    msgSection.style.display = 'block';
+    loadMessages(inv.id);
+    // Listen for new messages in real-time
+    fbDB.ref('messages').orderByChild('invoiceId').equalTo(inv.id).on('child_added', () => {
+      loadMessages(inv.id);
+    });
+  } else {
+    msgSection.style.display = 'none';
+  }
 }
 
 // ===== STEP 1: HANDOVER SIGNATURE =====
@@ -1712,7 +1844,10 @@ function getStockDB() {
   const data = localStorage.getItem('km-stock-db');
   return data ? JSON.parse(data) : {};
 }
-function saveStockDB(db) { localStorage.setItem('km-stock-db', JSON.stringify(db)); }
+function saveStockDB(db) {
+  localStorage.setItem('km-stock-db', JSON.stringify(db));
+  saveStockToFirebase(db);
+}
 
 function loadStockBoard() {
   // Auto-delete stock data older than 30 days
@@ -1857,6 +1992,138 @@ function removeStockItem(index) {
     saveStockDB(stockDB);
     loadStockBoard();
   }
+}
+
+// ===== GPS TRACKING =====
+function recordDeparture() {
+  if (!currentInvoice) return;
+  if (!navigator.geolocation) { showToast('GPS를 지원하지 않습니다'); return; }
+
+  document.getElementById('departBtn').disabled = true;
+  document.getElementById('departBtn').textContent = 'GPS 확인 중...';
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    const db = getDB();
+    const inv = db.invoices.find(i => i.id === currentInvoice.id);
+    if (!inv) return;
+
+    inv.departureGPS = {
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude,
+      accuracy: pos.coords.accuracy,
+      time: new Date().toISOString(),
+      by: currentUser.name
+    };
+    saveDB(db);
+
+    // Also save to Firebase directly for real-time tracking
+    fbDB.ref('liveTracking/' + inv.id).set({
+      invoiceNo: inv.invoiceNo,
+      driver: currentUser.name,
+      fromStore: inv.fromStore,
+      toStore: inv.toStore,
+      departureTime: inv.departureGPS.time,
+      lastLocation: { lat: pos.coords.latitude, lng: pos.coords.longitude },
+      lastUpdate: new Date().toISOString(),
+      status: 'in-transit'
+    });
+
+    showToast('출발 기록 완료!');
+    loadInvoiceDetail(inv.id);
+
+    // Start continuous location updates
+    startLocationUpdates(inv.id);
+  }, err => {
+    showToast('GPS 위치를 가져올 수 없습니다');
+    document.getElementById('departBtn').disabled = false;
+    document.getElementById('departBtn').textContent = '🚛 출발 (GPS 기록)';
+  }, { enableHighAccuracy: true, timeout: 10000 });
+}
+
+function recordArrival() {
+  if (!currentInvoice) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    const db = getDB();
+    const inv = db.invoices.find(i => i.id === currentInvoice.id);
+    if (!inv) return;
+
+    inv.arrivalGPS = {
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude,
+      accuracy: pos.coords.accuracy,
+      time: new Date().toISOString(),
+      by: currentUser.name
+    };
+    saveDB(db);
+
+    fbDB.ref('liveTracking/' + inv.id + '/status').set('arrived');
+    fbDB.ref('liveTracking/' + inv.id + '/arrivalTime').set(inv.arrivalGPS.time);
+
+    showToast('도착 기록 완료!');
+    loadInvoiceDetail(inv.id);
+  }, () => showToast('GPS 오류'), { enableHighAccuracy: true });
+}
+
+let locationWatchId = null;
+function startLocationUpdates(invoiceId) {
+  if (locationWatchId) navigator.geolocation.clearWatch(locationWatchId);
+  locationWatchId = navigator.geolocation.watchPosition(pos => {
+    fbDB.ref('liveTracking/' + invoiceId + '/lastLocation').set({
+      lat: pos.coords.latitude, lng: pos.coords.longitude
+    });
+    fbDB.ref('liveTracking/' + invoiceId + '/lastUpdate').set(new Date().toISOString());
+  }, () => {}, { enableHighAccuracy: true, maximumAge: 30000 });
+}
+
+// ===== MESSAGING =====
+function sendMessage() {
+  const input = document.getElementById('messageInput');
+  const text = input.value.trim();
+  if (!text || !currentInvoice) return;
+
+  const inv = currentInvoice;
+  const msg = {
+    invoiceId: inv.id,
+    from: currentUser.storeId,
+    fromName: currentUser.name,
+    to: inv.fromStore === currentUser.storeId ? inv.toStore : inv.fromStore,
+    text,
+    time: new Date().toISOString(),
+    read: false
+  };
+
+  fbDB.ref('messages').push(msg);
+  input.value = '';
+  loadMessages(inv.id);
+}
+
+function loadMessages(invoiceId) {
+  const list = document.getElementById('messageList');
+  fbDB.ref('messages').orderByChild('invoiceId').equalTo(invoiceId).once('value', snap => {
+    const msgs = [];
+    snap.forEach(child => msgs.push(child.val()));
+    msgs.sort((a, b) => a.time.localeCompare(b.time));
+
+    if (msgs.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:10px;color:#ccc;font-size:0.75rem">메시지 없음</div>';
+      return;
+    }
+
+    list.innerHTML = msgs.map(m => {
+      const isMe = m.from === currentUser.storeId;
+      const align = isMe ? 'flex-end' : 'flex-start';
+      const bg = isMe ? '#1565C0' : '#e0e0e0';
+      const color = isMe ? 'white' : '#333';
+      const time = new Date(m.time).toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' });
+      return `<div style="display:flex;justify-content:${align};margin-bottom:4px">
+        <div style="background:${bg};color:${color};padding:6px 12px;border-radius:12px;max-width:75%;font-size:0.8rem">
+          <div>${m.text}</div>
+          <div style="font-size:0.55rem;opacity:0.7;margin-top:2px">${m.fromName} · ${time}</div>
+        </div>
+      </div>`;
+    }).join('');
+    list.scrollTop = list.scrollHeight;
+  });
 }
 
 // ===== HISTORY =====
