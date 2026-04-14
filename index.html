@@ -775,6 +775,51 @@ body {
   </div>
 </div>
 
+<!-- ===== PAGE: WORK ORDER SUCCESS ===== -->
+<div class="page" id="page-work-order-success">
+  <div style="text-align:center; padding:40px 20px">
+    <div style="width:80px; height:80px; border-radius:50%; background:#E8F5E9; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:2.5rem">&#10004;</div>
+    <div style="font-size:1.3rem; font-weight:900; color:#2E7D32; margin-bottom:8px">&#50836;&#52397;&#49436; &#51204;&#49569; &#50756;&#47308;!</div>
+    <div style="font-size:0.85rem; color:#666; margin-bottom:24px">&#45812;&#45817;&#51088;&#50640;&#44172; &#50629;&#47924;&#44032; &#48176;&#51221;&#46104;&#50632;&#49845;&#45768;&#45796;</div>
+  </div>
+
+  <div class="card" style="border:2px solid #E8F5E9">
+    <div class="card-title">&#45796;&#51020; &#45800;&#44228;</div>
+    <div style="padding:8px 0">
+      <div style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #f0f0f0">
+        <div style="width:28px; height:28px; border-radius:50%; background:#e3f2fd; display:flex; align-items:center; justify-content:center; font-weight:700; color:#1565C0; font-size:0.8rem">1</div>
+        <div style="font-size:0.85rem">&#45812;&#45817;&#51088;&#44032; <b>"&#45236; &#50629;&#47924; &#54869;&#51064;"</b>&#50640;&#49436; &#49688;&#46973;</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #f0f0f0">
+        <div style="width:28px; height:28px; border-radius:50%; background:#E8F5E9; display:flex; align-items:center; justify-content:center; font-weight:700; color:#2E7D32; font-size:0.8rem">2</div>
+        <div style="font-size:0.85rem">&#52636;&#48156; &#48260;&#53948; &#8594; GPS &#44592;&#47197; &#49884;&#51089;</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #f0f0f0">
+        <div style="width:28px; height:28px; border-radius:50%; background:#FFF3E0; display:flex; align-items:center; justify-content:center; font-weight:700; color:#E65100; font-size:0.8rem">3</div>
+        <div style="font-size:0.85rem">&#46020;&#52265; &#48260;&#53948; &#8594; GPS &#44592;&#47197; &#50756;&#47308;</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; padding:10px 0">
+        <div style="width:28px; height:28px; border-radius:50%; background:#F3E5F5; display:flex; align-items:center; justify-content:center; font-weight:700; color:#7B1FA2; font-size:0.8rem">4</div>
+        <div style="font-size:0.85rem"><b>"&#49892;&#49884;&#44036; &#54788;&#54889;"</b>&#50640;&#49436; &#49345;&#53468; &#54869;&#51064; &#44032;&#45733;</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn btn-primary" onclick="showPage('tracking')" style="padding:14px">
+      &#128205; &#49892;&#49884;&#44036; &#54788;&#54889; &#48372;&#44592;
+    </button>
+  </div>
+  <div class="btn-row" style="margin-top:8px">
+    <button class="btn btn-outline" onclick="showPage('work-order-view')" style="padding:12px">
+      &#128203; &#50836;&#52397;&#49436; &#48372;&#44592;
+    </button>
+    <button class="btn btn-secondary" onclick="showPage('stock')" style="padding:12px">
+      &#127968; &#47700;&#51064;&#51004;&#47196;
+    </button>
+  </div>
+</div>
+
 <!-- ===== PAGE: LIVE TRACKING (Manager) ===== -->
 <div class="page" id="page-tracking">
   <div style="text-align:center; padding:10px 0">
@@ -1037,6 +1082,7 @@ function showPage(page, data) {
     'stock': '재고 현황 / Stock Board',
     'work-order': '작업 요청서',
     'work-order-view': '작업 요청서',
+    'work-order-success': '요청 완료',
     'tracking': '실시간 현황',
     'worker-task': '업무 현황',
     'dashboard': 'Dashboard',
@@ -1865,8 +1911,12 @@ function generateWorkOrder() {
   });
   saveDB(db);
 
+  // Save to Firebase
+  const woData = db.workOrders[db.workOrders.length - 1];
+  fbDB.ref('workOrders/' + woData.id).set(woData);
+
   woItems = [];
-  showPage('work-order-view');
+  showPage('work-order-success');
 }
 
 function shareWorkOrder() {
