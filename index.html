@@ -360,6 +360,11 @@ body {
 .new-product-form .form-input { margin-bottom: 8px; }
 
 /* ===== PRINT STYLES ===== */
+@keyframes alertPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
 @media print {
   body { padding: 0; max-width: 100%; background: white; }
   .header, .bottom-nav, .btn, .btn-row, .back-btn, .notif-btn,
@@ -862,6 +867,15 @@ body {
     <img src="logo.png" alt="Kimchi Mart" style="width:140px; margin-bottom:4px">
     <div style="font-size:0.75rem; font-weight:700; color:#1565C0; letter-spacing:2px">L O G I S T I C S</div>
     <div style="font-size:0.6rem; color:#999; margin-top:2px" id="stockStoreName"></div>
+  </div>
+
+  <!-- Pending Tasks Alert -->
+  <div id="pendingTaskAlert" style="display:none; margin-bottom:12px; cursor:pointer" onclick="showPage('worker-task')">
+    <div style="background:#F44336; color:white; border-radius:12px; padding:16px; text-align:center; animation: alertPulse 1.5s infinite; box-shadow:0 4px 12px rgba(244,67,54,0.4)">
+      <div style="font-size:1.3rem; font-weight:900">&#128276; &#49352; &#50629;&#47924;&#44032; &#51080;&#49845;&#45768;&#45796;!</div>
+      <div style="font-size:0.85rem; margin-top:4px; opacity:0.9" id="pendingTaskDetail"></div>
+      <div style="font-size:0.75rem; margin-top:8px; background:rgba(255,255,255,0.2); display:inline-block; padding:4px 16px; border-radius:20px; font-weight:700">&#50668;&#44592;&#47484; &#45580;&#47084; &#54869;&#51064;</div>
+    </div>
   </div>
 
   <!-- Quick Actions -->
@@ -1964,7 +1978,25 @@ function saveStockDB(db) {
   saveStockToFirebase(db);
 }
 
+function checkPendingTasks() {
+  const db = getDB();
+  const myStore = currentUser.storeId;
+  const pending = (db.workOrders || []).filter(wo =>
+    wo.toStore === myStore && (!wo.status || wo.status === 'pending')
+  );
+  const alert = document.getElementById('pendingTaskAlert');
+  const detail = document.getElementById('pendingTaskDetail');
+  if (pending.length > 0) {
+    alert.style.display = 'block';
+    const totalItems = pending.reduce((s, wo) => s + (wo.items || []).length, 0);
+    detail.textContent = `${pending.length}건의 업무 · ${totalItems}개 품목 픽업 대기`;
+  } else {
+    alert.style.display = 'none';
+  }
+}
+
 function loadStockBoard() {
+  checkPendingTasks();
   // Auto-delete stock data older than 30 days
   const stockDB = getStockDB();
   let cleaned = false;
@@ -2266,7 +2298,8 @@ function loadWorkerTasks() {
 
   // Show work orders with big action buttons
   activeWOs.forEach(wo => {
-    const fromStore = STORES.find(s => s.id === wo.fromStore) || { code: '?', nameKr: '?' };
+    const firstItemStore = (wo.items && wo.items[0]) ? wo.items[0].storeId : wo.fromStore;
+    const fromStore = STORES.find(s => s.id === firstItemStore) || { code: '?', nameKr: '?' };
     const status = wo.status || 'pending';
     const statusColors = {
       'pending': { bg: '#FFF3E0', border: '#FF9800', text: '대기 중', icon: '&#128276;' },
@@ -2322,6 +2355,9 @@ function loadWorkerTasks() {
     } else if (status === 'arrived') {
       html += `<div style="text-align:center; padding:12px; background:#E8F5E9; border-radius:8px; color:#2E7D32; font-weight:700">&#10004; 도착 완료</div>`;
     }
+
+    // Delete button for all tasks
+    html += `<button onclick="deleteWorkOrder('${wo.id}')" style="width:100%;margin-top:8px;padding:8px;background:#ffebee;border:none;border-radius:8px;color:#F44336;font-size:0.75rem;cursor:pointer;font-weight:600">&#128465; 삭제</button>`;
 
     // Messages
     html += `<div style="margin-top:10px; border-top:1px solid #eee; padding-top:8px">
@@ -2385,6 +2421,17 @@ function updateWoStatus(woId, newStatus) {
   saveDB(db);
   // Also sync to Firebase
   fbDB.ref('workOrders/' + woId).update({ status: newStatus, [`${newStatus}At`]: now, [`${newStatus}By`]: currentUser.name });
+  loadWorkerTasks();
+}
+
+function deleteWorkOrder(woId) {
+  if (!confirm('이 업무를 삭제하시겠습니까?')) return;
+  const db = getDB();
+  db.workOrders = (db.workOrders || []).filter(w => w.id !== woId);
+  saveDB(db);
+  fbDB.ref('workOrders/' + woId).remove();
+  fbDB.ref('liveTracking/' + woId).remove();
+  showToast('삭제됨');
   loadWorkerTasks();
 }
 
