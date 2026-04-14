@@ -76,34 +76,36 @@ body {
   background: linear-gradient(160deg, #ffffff 0%, #e3f2fd 40%, #bbdefb 100%);
 }
 .login-logo-img { width: 220px; margin-bottom: 8px; }
-.login-transfer-icon {
-  display: flex; align-items: center; justify-content: center; gap: 0;
-  margin-bottom: 20px; width: 260px; position: relative; height: 50px;
+.store-map {
+  position: relative; width: 300px; height: 280px; margin: 0 auto 16px;
 }
-.login-transfer-icon .store-icon {
-  font-size: 1.4rem; z-index: 1;
+.store-map .store-dot {
+  position: absolute; text-align: center; z-index: 2;
 }
-.login-transfer-icon .store-left { position: absolute; left: 0; }
-.login-transfer-icon .store-right { position: absolute; right: 0; }
-.login-transfer-icon .road-line {
-  width: 100%; height: 2px; background: repeating-linear-gradient(90deg, #90CAF5 0, #90CAF5 8px, transparent 8px, transparent 16px);
-  position: absolute; top: 50%;
+.store-map .store-dot .dot {
+  width: 10px; height: 10px; border-radius: 50%; background: #1565C0;
+  margin: 0 auto 3px; box-shadow: 0 0 6px rgba(21,101,192,0.4);
 }
-.login-transfer-icon .truck-wrap {
-  position: absolute; animation: driveAcross 3s ease-in-out infinite;
-  display: flex; flex-direction: column; align-items: center;
+.store-map .store-dot .dot-label {
+  font-size: 0.55rem; font-weight: 700; color: #333; white-space: nowrap;
 }
-.login-transfer-icon .truck-wrap .truck-emoji { font-size: 1.8rem; }
-.login-transfer-icon .truck-wrap .truck-k {
-  font-size: 0.5rem; font-weight: 900; color: #C62828;
-  background: white; border-radius: 3px; padding: 0 3px;
-  position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
-  line-height: 1; border: 1px solid #C62828;
+.store-map .roads {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
 }
-@keyframes driveAcross {
-  0% { left: 20px; }
-  50% { left: calc(100% - 55px); }
-  100% { left: 20px; }
+.store-map .roads line { stroke: #90CAF5; stroke-width: 1.5; stroke-dasharray: 4 4; }
+.store-map .truck-move {
+  position: absolute; font-size: 1.4rem; z-index: 3;
+  animation: truckRoute 8s ease-in-out infinite;
+}
+@keyframes truckRoute {
+  0%   { left: 140px; top: 230px; }
+  14%  { left: 100px; top: 160px; }
+  28%  { left: 170px; top: 140px; }
+  42%  { left: 80px;  top: 80px; }
+  56%  { left: 180px; top: 60px; }
+  70%  { left: 140px; top: 10px; }
+  85%  { left: 180px; top: 60px; }
+  100% { left: 140px; top: 230px; }
 }
 .login-subtitle { color: #1565C0; font-size: 0.8rem; margin-bottom: 20px; text-align: center; }
 .login-card {
@@ -382,14 +384,24 @@ body {
 <!-- ===== LOGIN PAGE ===== -->
 <div class="login-page" id="loginPage">
   <img src="logo.png" alt="Kimchi Mart" class="login-logo-img">
-  <div class="login-transfer-icon">
-    <div class="road-line"></div>
-    <span class="store-icon store-left">&#127970;</span>
-    <div class="truck-wrap">
-      <span class="truck-emoji">&#128667;</span>
-      <span class="truck-k">K</span>
-    </div>
-    <span class="store-icon store-right">&#127970;</span>
+  <div class="store-map">
+    <svg class="roads" viewBox="0 0 300 280">
+      <line x1="150" y1="240" x2="110" y2="170"/>
+      <line x1="150" y1="240" x2="180" y2="150"/>
+      <line x1="110" y1="170" x2="180" y2="150"/>
+      <line x1="110" y1="170" x2="90" y2="90"/>
+      <line x1="180" y1="150" x2="190" y2="70"/>
+      <line x1="90" y1="90" x2="190" y2="70"/>
+      <line x1="150" y1="20" x2="190" y2="70"/>
+      <line x1="150" y1="20" x2="90" y2="90"/>
+    </svg>
+    <div class="store-dot" style="left:130px; top:230px"><div class="dot"></div><div class="dot-label">Miami</div></div>
+    <div class="store-dot" style="left:85px; top:158px"><div class="dot"></div><div class="dot-label">Pembroke</div></div>
+    <div class="store-dot" style="left:160px; top:138px"><div class="dot"></div><div class="dot-label">Hollywood</div></div>
+    <div class="store-dot" style="left:60px; top:78px"><div class="dot"></div><div class="dot-label">Coral Springs</div></div>
+    <div class="store-dot" style="left:168px; top:58px"><div class="dot"></div><div class="dot-label">Ft. Lauderdale</div></div>
+    <div class="store-dot" style="left:120px; top:8px"><div class="dot"></div><div class="dot-label">W. Palm Beach</div></div>
+    <div class="truck-move">&#128667;</div>
   </div>
   <div class="login-subtitle" style="font-size:1.1rem; font-weight:700; letter-spacing:3px; color:#1565C0">L O G I S T I C S</div>
   <div class="login-card">
