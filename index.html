@@ -743,7 +743,11 @@ body {
         <label class="form-label">&#45572;&#44396;&#50640;&#44172;? (&#45812;&#45817;&#51088; &#51060;&#47492;)</label>
         <input class="form-input" id="woAssignee" placeholder="&#50696;: &#44608;&#52384;&#49688;" style="font-size:1rem; padding:12px">
       </div>
-      <div style="font-size:0.7rem; color:#999; margin-top:4px">&#54408;&#47785;&#47560;&#45796; &#45796;&#47480; &#51648;&#51216;&#50640;&#49436; &#44032;&#51256;&#50732; &#49688; &#51080;&#49845;&#45768;&#45796;</div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">&#45812;&#45817;&#51088; &#51204;&#54868;&#48264;&#54840;</label>
+        <input class="form-input" id="woPhone" type="tel" placeholder="&#50696;: 786-555-1234" style="font-size:1rem; padding:12px">
+      </div>
+      <div style="font-size:0.7rem; color:#999; margin-top:4px">&#50836;&#52397;&#49436; &#49373;&#49457; &#49884; &#45812;&#45817;&#51088;&#50640;&#44172; &#47928;&#51088;&#44032; &#51088;&#46041; &#48156;&#49569;&#46121;&#45768;&#45796;</div>
     </div>
   </div>
 
@@ -792,7 +796,8 @@ body {
   <div style="text-align:center; padding:40px 20px">
     <div style="width:80px; height:80px; border-radius:50%; background:#E8F5E9; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:2.5rem">&#10004;</div>
     <div style="font-size:1.3rem; font-weight:900; color:#2E7D32; margin-bottom:8px">&#50836;&#52397;&#49436; &#51204;&#49569; &#50756;&#47308;!</div>
-    <div style="font-size:0.85rem; color:#666; margin-bottom:24px">&#45812;&#45817;&#51088;&#50640;&#44172; &#50629;&#47924;&#44032; &#48176;&#51221;&#46104;&#50632;&#49845;&#45768;&#45796;</div>
+    <div style="font-size:0.85rem; color:#666; margin-bottom:8px">&#45812;&#45817;&#51088;&#50640;&#44172; &#50629;&#47924;&#44032; &#48176;&#51221;&#46104;&#50632;&#49845;&#45768;&#45796;</div>
+    <div style="font-size:0.8rem; color:#4CAF50; font-weight:600; margin-bottom:24px">&#128172; &#47928;&#51088; &#48156;&#49569;&#51060; &#50676;&#47160;&#49845;&#45768;&#45796;</div>
   </div>
 
   <div class="card" style="border:2px solid #E8F5E9">
@@ -1928,6 +1933,15 @@ function generateWorkOrder() {
   fbDB.ref('workOrders/' + woData.id).set(woData);
 
   woItems = [];
+
+  // Send SMS notification to assignee
+  const phone = document.getElementById('woPhone').value.trim();
+  if (phone) {
+    const itemNames = (woData.items || []).map(i => i.name).join(', ');
+    const smsBody = `[김치마트] ${assignee}님, 픽업 업무가 배정되었습니다.\n\n품목: ${itemNames}\n\n앱에서 확인: https://specialmasterdj-sketch.github.io/kimchi-logistics/\n\n요청자: ${currentUser.name} (${myStore.code})`;
+    window.open(`sms:${phone}?body=${encodeURIComponent(smsBody)}`, '_blank');
+  }
+
   showPage('work-order-success');
 }
 
