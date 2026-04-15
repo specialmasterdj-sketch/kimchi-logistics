@@ -937,6 +937,18 @@ body {
   </button>
 </nav>
 
+<!-- ===== COMPLETION OVERLAY ===== -->
+<div id="completionOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:300; align-items:center; justify-content:center">
+  <div style="background:white; border-radius:20px; padding:40px 30px; text-align:center; max-width:340px; width:90%; animation:slideUp 0.3s ease">
+    <div style="width:80px; height:80px; border-radius:50%; background:#E8F5E9; display:flex; align-items:center; justify-content:center; margin:0 auto 16px">
+      <span style="font-size:2.5rem">&#10004;</span>
+    </div>
+    <div id="completionTitle" style="font-size:1.4rem; font-weight:900; color:#2E7D32; margin-bottom:8px"></div>
+    <div id="completionSub" style="font-size:0.85rem; color:#666; margin-bottom:20px"></div>
+    <button onclick="closeCompletion()" style="width:100%; padding:14px; background:#1565C0; color:white; border:none; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer">&#54869;&#51064;</button>
+  </div>
+</div>
+
 <!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
 
@@ -1657,7 +1669,7 @@ function confirmHandover() {
   inv.handoverSig = handoverPad.toDataURL('image/png');
   saveDB(db);
 
-  showToast('인도 확인 완료! 픽업자 서명을 받으세요.');
+  showCompletionScreen('인도 확인 완료!', '픽업자의 서명을 받으세요', null);
   loadInvoiceDetail(inv.id);
 }
 
@@ -1697,7 +1709,8 @@ function confirmPickup() {
   inv.confirmedAt = new Date().toISOString();
   saveDB(db);
 
-  showToast('픽업 확인 완료! 10분 내 출발하세요.');
+  // Show completion overlay
+  showCompletionScreen('픽업 완료!', '10분 이내 출발하세요', inv.id);
   loadInvoiceDetail(inv.id);
   startCountdown(inv.id);
 }
@@ -2684,6 +2697,18 @@ function printInvoice() {
 }
 
 // ===== TOAST =====
+function showCompletionScreen(title, subtitle) {
+  document.getElementById('completionTitle').textContent = title;
+  document.getElementById('completionSub').textContent = subtitle;
+  document.getElementById('completionOverlay').style.display = 'flex';
+  // Vibrate if available
+  try { navigator.vibrate([200, 100, 200]); } catch(e) {}
+}
+
+function closeCompletion() {
+  document.getElementById('completionOverlay').style.display = 'none';
+}
+
 function showToast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
