@@ -853,6 +853,12 @@ body {
     <div class="empty-icon">&#128667;</div>
     <div class="empty-text">&#54788;&#51116; &#51060;&#46041; &#51473;&#51064; &#51089;&#50629;&#51088; &#50630;&#51020;</div>
   </div>
+
+  <!-- 6개 지점 바로가기 -->
+  <div style="margin-top:18px">
+    <div style="font-size:0.8rem; font-weight:700; color:#333; margin-bottom:8px">&#127970; &#51648;&#51216;&#48324; &#51116;&#44256; &#54869;&#51064;</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px" id="storeQuickBtns"></div>
+  </div>
 </div>
 
 <!-- ===== PAGE: WORKER TASK (Big buttons for worker) ===== -->
@@ -1741,21 +1747,14 @@ function startCountdown(invoiceId) {
       clearInterval(countdownInterval);
       card.style.display = 'none';
       expiredCard.style.display = 'block';
-      // Play alert sound
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        for (let i = 0; i < 3; i++) {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain); gain.connect(ctx.destination);
-          osc.frequency.value = 880;
-          osc.type = 'square';
-          gain.gain.value = 0.3;
-          osc.start(ctx.currentTime + i * 0.4);
-          osc.stop(ctx.currentTime + i * 0.4 + 0.2);
-        }
-      } catch(e) {}
+      // Repeating alarm until user departs
+      startDepartureAlarm();
       return;
+    }
+    // Play warning beep at 3 minutes, 1 minute remaining
+    if (remaining === 180 || remaining === 60) {
+      playBeep(660, 1);
+      if (navigator.vibrate) navigator.vibrate(300);
     }
     const mins = Math.floor(remaining / 60);
     const secs = remaining % 60;
@@ -1779,6 +1778,55 @@ function startCountdown(invoiceId) {
 
   updateTimer();
   countdownInterval = setInterval(updateTimer, 1000);
+}
+
+// ===== DEPARTURE ALARM =====
+let departureAlarmInterval = null;
+
+function playBeep(freq, count) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < count; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'square';
+      gain.gain.value = 0.4;
+      osc.start(ctx.currentTime + i * 0.35);
+      osc.stop(ctx.currentTime + i * 0.35 + 0.2);
+    }
+  } catch(e) {}
+}
+
+function startDepartureAlarm() {
+  stopDepartureAlarm();
+  // Immediate alarm
+  playBeep(880, 5);
+  if (navigator.vibrate) navigator.vibrate([300, 200, 300, 200, 300]);
+
+  // Repeat every 15 seconds
+  departureAlarmInterval = setInterval(() => {
+    playBeep(880, 5);
+    if (navigator.vibrate) navigator.vibrate([300, 200, 300, 200, 300]);
+    // Flash expired card
+    const ec = document.getElementById('expiredCard');
+    if (ec) {
+      ec.style.background = '#F44336';
+      ec.querySelector('div').style.color = 'white';
+      setTimeout(() => {
+        ec.style.background = '#FFEBEE';
+        ec.querySelector('div').style.color = '#F44336';
+      }, 500);
+    }
+  }, 15000);
+}
+
+function stopDepartureAlarm() {
+  if (departureAlarmInterval) {
+    clearInterval(departureAlarmInterval);
+    departureAlarmInterval = null;
+  }
 }
 
 // ===== WORK ORDER =====
@@ -2067,7 +2115,7 @@ function loadStockBoard() {
     const borderColor = stock.items.length > 0 ? '#4CAF50' : '#e0e0e0';
     const meBg = isMe ? 'background:#e3f2fd;' : '';
     const meLabel = isMe ? ' <span style="background:#1565C0;color:white;font-size:0.55rem;padding:1px 6px;border-radius:4px;font-weight:700">MY</span>' : '';
-    allHtml += `<div class="card" style="border-left:4px solid ${borderColor}; padding:10px 12px; margin-bottom:8px; ${meBg}">`;
+    allHtml += `<div class="card" data-store-id="${store.id}" style="border-left:4px solid ${borderColor}; padding:10px 12px; margin-bottom:8px; ${meBg}">`;
     allHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px">`;
     allHtml += `<span style="font-weight:700; font-size:0.85rem">${store.nameKr} <span style="color:#999; font-size:0.7rem">(${store.code})</span>${meLabel}</span>`;
     if (stock.updatedAt) {
@@ -2180,13 +2228,30 @@ function recordDeparture() {
     fbDB.ref('liveTracking/' + inv.id).set({
       invoiceNo: inv.invoiceNo,
       driver: currentUser.name,
+      phone: currentUser.phone || '',
       fromStore: inv.fromStore,
       toStore: inv.toStore,
+      departedAt: inv.departureGPS.time,
       departureTime: inv.departureGPS.time,
       lastLocation: { lat: pos.coords.latitude, lng: pos.coords.longitude },
       lastUpdate: new Date().toISOString(),
       status: 'in-transit'
     });
+
+    // Auto-notify: send departure message
+    const toStoreName = STORES.find(s => s.id === inv.toStore)?.nameKr || inv.toStore;
+    fbDB.ref('messages/' + inv.id).push({
+      text: `[자동알림] ${currentUser.name}님이 ${toStoreName}(으)로 출발했습니다. (${inv.invoiceNo})`,
+      fromName: '시스템',
+      fromStore: 'system',
+      time: new Date().toISOString()
+    });
+
+    // Stop departure alarm when departure is recorded
+    stopDepartureAlarm();
+    if (countdownInterval) clearInterval(countdownInterval);
+    document.getElementById('countdownCard').style.display = 'none';
+    document.getElementById('expiredCard').style.display = 'none';
 
     showToast('출발 기록 완료!');
     loadInvoiceDetail(inv.id);
@@ -2218,6 +2283,28 @@ function recordArrival() {
 
     fbDB.ref('liveTracking/' + inv.id + '/status').set('arrived');
     fbDB.ref('liveTracking/' + inv.id + '/arrivalTime').set(inv.arrivalGPS.time);
+
+    // Auto-notify: send completion message to the requesting store
+    const toStoreName = STORES.find(s => s.id === inv.toStore)?.nameKr || inv.toStore;
+    const fromStoreName = STORES.find(s => s.id === inv.fromStore)?.nameKr || inv.fromStore;
+    fbDB.ref('messages/' + inv.id).push({
+      text: `[자동알림] ${currentUser.name}님이 ${toStoreName}에 도착했습니다. (${inv.invoiceNo})`,
+      fromName: '시스템',
+      fromStore: 'system',
+      time: new Date().toISOString()
+    });
+    // Also push to notifications feed for the destination store
+    fbDB.ref('notifications').push({
+      type: 'arrival',
+      invoiceId: inv.id,
+      invoiceNo: inv.invoiceNo,
+      driver: currentUser.name,
+      fromStore: inv.fromStore,
+      toStore: inv.toStore,
+      message: `${currentUser.name}님이 ${fromStoreName}에서 출발한 물품이 ${toStoreName}에 도착했습니다.`,
+      time: new Date().toISOString(),
+      read: false
+    });
 
     showToast('도착 기록 완료!');
     loadInvoiceDetail(inv.id);
@@ -2506,6 +2593,7 @@ function loadTracking() {
     if (!data || Object.keys(data).length === 0) {
       list.innerHTML = '';
       empty.style.display = 'block';
+      renderStoreQuickButtons();
       return;
     }
     empty.style.display = 'none';
@@ -2527,8 +2615,8 @@ function loadTracking() {
       html += `<div class="card" style="border-left:4px solid ${st.color}; margin-bottom:8px">
         <div style="display:flex; justify-content:space-between; align-items:center">
           <div>
-            <div style="font-weight:800; font-size:0.9rem">${st.icon} ${t.driver || '?'}</div>
-            <div style="font-size:0.7rem; color:#666">${fromStore?.code || '?'} &#10132; ${toStore?.code || '?'}</div>
+            <div style="font-weight:800; font-size:0.9rem">${st.icon} ${t.driver || '미지정'}</div>
+            <div style="font-size:0.7rem; color:#666">${fromStore?.code || '미지정'} &#10132; ${toStore?.code || '미지정'}</div>
           </div>
           <div style="text-align:right">
             <span style="background:${st.color};color:white;padding:2px 8px;border-radius:8px;font-size:0.6rem;font-weight:700">${st.text}</span>
@@ -2540,6 +2628,27 @@ function loadTracking() {
     });
     list.innerHTML = html;
   });
+
+  // Render 6 store quick-access buttons
+  renderStoreQuickButtons();
+}
+
+function renderStoreQuickButtons() {
+  const colors = { miami:'#4CAF50', pembroke:'#2196F3', hollywood:'#FF9800', coral:'#9C27B0', fortlauder:'#F44336', westpalm:'#00838F' };
+  const container = document.getElementById('storeQuickBtns');
+  if (!container) return;
+  const stockDB = getStockDB();
+  container.innerHTML = STORES.map(s => {
+    const c = colors[s.id] || '#999';
+    const stock = stockDB[s.id] || {};
+    const items = stock.items || [];
+    const count = items.length;
+    const badge = count > 0 ? `<span style="background:${c};color:white;font-size:0.55rem;padding:1px 5px;border-radius:8px;margin-left:2px">${count}</span>` : '';
+    return `<button onclick="showPage('stock');setTimeout(()=>{const el=document.querySelector('[data-store-id=\\'${s.id}\\']');if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},200)" style="background:white;border:2px solid ${c};border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;transition:transform 0.1s;-webkit-tap-highlight-color:transparent" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform=''">
+      <div style="font-size:0.75rem;font-weight:800;color:${c}">${s.code}</div>
+      <div style="font-size:0.55rem;color:#666;margin-top:2px">${s.nameKr.split(' (')[0]}${badge}</div>
+    </button>`;
+  }).join('');
 }
 
 // ===== HISTORY =====
