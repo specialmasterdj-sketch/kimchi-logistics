@@ -2372,14 +2372,16 @@ function loadWorkerTasks() {
     // Delete button for all tasks
     html += `<button onclick="deleteWorkOrder('${wo.id}')" style="width:100%;margin-top:8px;padding:8px;background:#ffebee;border:none;border-radius:8px;color:#F44336;font-size:0.75rem;cursor:pointer;font-weight:600">&#128465; 삭제</button>`;
 
-    // Messages
+    // Messages (hide input for arrived status)
     html += `<div style="margin-top:10px; border-top:1px solid #eee; padding-top:8px">
-      <div id="woMsg_${wo.id}" style="max-height:120px; overflow-y:auto; margin-bottom:6px"></div>
-      <div style="display:flex; gap:6px">
+      <div id="woMsg_${wo.id}" style="max-height:120px; overflow-y:auto; margin-bottom:6px"></div>`;
+    if (status !== 'arrived') {
+      html += `<div style="display:flex; gap:6px">
         <input class="form-input" id="woMsgInput_${wo.id}" placeholder="메시지..." onkeydown="if(event.key==='Enter')sendWoMessage('${wo.id}')" style="flex:1; font-size:0.8rem; padding:8px">
         <button class="btn btn-primary btn-sm" onclick="sendWoMessage('${wo.id}')" style="padding:8px 14px">보내기</button>
-      </div>
-    </div>`;
+      </div>`;
+    }
+    html += `</div>`;
 
     html += '</div>';
   });
@@ -2450,6 +2452,7 @@ function deleteWorkOrder(woId) {
 
 function sendWoMessage(woId) {
   const input = document.getElementById('woMsgInput_' + woId);
+  if (!input) return;
   const text = input.value.trim();
   if (!text) return;
   fbDB.ref('woMessages/' + woId).push({
@@ -2457,26 +2460,40 @@ function sendWoMessage(woId) {
     text, time: new Date().toISOString()
   });
   input.value = '';
-  loadWoMessages(woId);
+  input.focus();
+  // Manually refresh messages without rebuilding page
+  setTimeout(() => renderWoMessages(woId), 300);
 }
 
+const woMsgListeners = {};
 function loadWoMessages(woId) {
+  // Avoid duplicate listeners
+  if (woMsgListeners[woId]) return;
+  woMsgListeners[woId] = true;
+  fbDB.ref('woMessages/' + woId).orderByChild('time').limitToLast(20).on('value', snap => {
+    renderWoMessages(woId, snap);
+  });
+}
+
+function renderWoMessages(woId, snap) {
   const el = document.getElementById('woMsg_' + woId);
   if (!el) return;
-  fbDB.ref('woMessages/' + woId).orderByChild('time').limitToLast(20).on('value', snap => {
-    const msgs = [];
-    snap.forEach(child => msgs.push(child.val()));
-    if (msgs.length === 0) { el.innerHTML = ''; return; }
-    el.innerHTML = msgs.map(m => {
-      const isMe = m.from === currentUser.storeId;
-      return `<div style="text-align:${isMe?'right':'left'};margin-bottom:3px">
-        <span style="display:inline-block;background:${isMe?'#1565C0':'#e0e0e0'};color:${isMe?'white':'#333'};padding:4px 10px;border-radius:10px;font-size:0.75rem;max-width:80%">
-          ${m.text} <span style="font-size:0.55rem;opacity:0.7">${m.fromName}</span>
-        </span>
-      </div>`;
-    }).join('');
-    el.scrollTop = el.scrollHeight;
-  });
+  if (!snap) {
+    fbDB.ref('woMessages/' + woId).orderByChild('time').limitToLast(20).once('value', s => renderWoMessages(woId, s));
+    return;
+  }
+  const msgs = [];
+  snap.forEach(child => msgs.push(child.val()));
+  if (msgs.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = msgs.map(m => {
+    const isMe = m.from === currentUser.storeId;
+    return `<div style="text-align:${isMe?'right':'left'};margin-bottom:3px">
+      <span style="display:inline-block;background:${isMe?'#1565C0':'#e0e0e0'};color:${isMe?'white':'#333'};padding:4px 10px;border-radius:10px;font-size:0.75rem;max-width:80%">
+        ${m.text} <span style="font-size:0.55rem;opacity:0.7">${m.fromName}</span>
+      </span>
+    </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
 }
 
 // ===== MANAGER TRACKING PAGE =====
