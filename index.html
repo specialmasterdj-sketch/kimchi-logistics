@@ -747,7 +747,7 @@ body {
       <!-- filled by JS -->
     </select>
     <select class="form-select" id="filterStore" onchange="loadHistory()" style="flex:1">
-      <option value="">&#51204;&#52404; &#51648;&#51216;</option>
+      <option value="" data-t="js_all_stores">&#51204;&#52404; &#51648;&#51216;</option>
     </select>
   </div>
 
@@ -778,10 +778,10 @@ body {
         <input class="form-input" id="woAssignee" data-t-placeholder="wo_assignee_ph" placeholder="&#50696;: &#44608;&#52384;&#49688;" style="font-size:1rem; padding:12px">
       </div>
       <div class="form-group" style="margin-bottom:10px">
-        <label class="form-label">&#45812;&#45817;&#51088; &#51204;&#54868;&#48264;&#54840;</label>
-        <input class="form-input" id="woPhone" type="tel" placeholder="&#50696;: 786-555-1234" style="font-size:1rem; padding:12px">
+        <label class="form-label" data-t="js_wo_phone_label">&#45812;&#45817;&#51088; &#51204;&#54868;&#48264;&#54840;</label>
+        <input class="form-input" id="woPhone" type="tel" data-t-placeholder="js_wo_phone_ph" placeholder="&#50696;: 786-555-1234" style="font-size:1rem; padding:12px">
       </div>
-      <div style="font-size:0.7rem; color:#999; margin-top:4px">&#50836;&#52397;&#49436; &#49373;&#49457; &#49884; &#45812;&#45817;&#51088;&#50640;&#44172; &#47928;&#51088;&#44032; &#51088;&#46041; &#48156;&#49569;&#46121;&#45768;&#45796;</div>
+      <div style="font-size:0.7rem; color:#999; margin-top:4px" data-t="js_wo_auto_sms">&#50836;&#52397;&#49436; &#49373;&#49457; &#49884; &#45812;&#45817;&#51088;&#50640;&#44172; &#47928;&#51088;&#44032; &#51088;&#46041; &#48156;&#49569;&#46121;&#45768;&#45796;</div>
     </div>
   </div>
 
@@ -790,16 +790,16 @@ body {
     <div id="woItemsList"></div>
     <div style="background:#f0f7ff; border-radius:10px; padding:10px; margin-top:8px">
       <div style="display:flex; gap:6px; margin-bottom:6px">
-        <input class="form-input" id="woItemName" placeholder="&#54408;&#47785;&#47749;" onkeydown="if(event.key==='Enter')addWoItem()" style="flex:2; font-size:0.95rem; padding:10px">
+        <input class="form-input" id="woItemName" data-t-placeholder="js_wo_item_name_ph" placeholder="&#54408;&#47785;&#47749;" onkeydown="if(event.key==='Enter')addWoItem()" style="flex:2; font-size:0.95rem; padding:10px">
         <input class="form-input" id="woItemQty" type="number" min="1" value="1" style="flex:0.5; font-size:0.95rem; padding:10px; text-align:center">
       </div>
       <div style="display:flex; gap:6px">
         <select class="form-select" id="woItemStore" style="flex:2; font-size:0.85rem; padding:8px">
-          <option value="">&#50612;&#46356;&#49436;?</option>
+          <option value="" data-t="js_where_from">&#50612;&#46356;&#49436;?</option>
         </select>
-        <button class="btn btn-success" onclick="addWoItem()" style="flex:1; padding:10px; font-size:0.9rem; font-weight:700">&#52628;&#44032;</button>
+        <button class="btn btn-success" onclick="addWoItem()" style="flex:1; padding:10px; font-size:0.9rem; font-weight:700" data-t="add_btn">&#52628;&#44032;</button>
       </div>
-      <label style="display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; background:#FFF3E0; padding:12px; border-radius:10px; font-size:0.9rem; font-weight:700; color:#E65100; margin-top:8px; border:2px dashed #FF9800">
+      <label style="display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; background:#FFF3E0; padding:12px; border-radius:10px; font-size:0.9rem; font-weight:700; color:#E65100; margin-top:8px; border:2px dashed #FF9800" data-t="js_photo_capture">
         &#128247; &#49324;&#51652; &#52237;&#50612;&#49436; &#52628;&#44032;
         <input type="file" accept="image/*" capture="environment" id="woPhoto" onchange="addWoPhoto(event)" style="display:none">
       </label>
@@ -874,18 +874,18 @@ body {
 <!-- ===== PAGE: LIVE TRACKING (Manager) ===== -->
 <div class="page" id="page-tracking">
   <div style="text-align:center; padding:10px 0">
-    <div style="font-size:1.2rem; font-weight:900; color:#1565C0">&#128205; &#49892;&#49884;&#44036; &#54788;&#54889;</div>
+    <div style="font-size:1.2rem; font-weight:900; color:#1565C0" data-t="js_stock_tracking">&#128205; &#49892;&#49884;&#44036; &#54788;&#54889;</div>
     <div style="font-size:0.7rem; color:#999">Live Tracking</div>
   </div>
   <div id="trackingList"></div>
   <div class="empty-state" id="trackingEmpty" style="display:none">
     <div class="empty-icon">&#128667;</div>
-    <div class="empty-text">&#54788;&#51116; &#51060;&#46041; &#51473;&#51064; &#51089;&#50629;&#51088; &#50630;&#51020;</div>
+    <div class="empty-text" data-t="js_tracking_no_workers">&#54788;&#51116; &#51060;&#46041; &#51473;&#51064; &#51089;&#50629;&#51088; &#50630;&#51020;</div>
   </div>
 
-  <!-- 6개 지점 바로가기 -->
+  <!-- Store quick buttons -->
   <div style="margin-top:18px">
-    <div style="font-size:0.8rem; font-weight:700; color:#333; margin-bottom:8px">&#127970; &#51648;&#51216;&#48324; &#51116;&#44256; &#54869;&#51064;</div>
+    <div style="font-size:0.8rem; font-weight:700; color:#333; margin-bottom:8px" data-t="js_store_stock_check">&#127970; &#51648;&#51216;&#48324; &#51116;&#44256; &#54869;&#51064;</div>
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px" id="storeQuickBtns"></div>
   </div>
 </div>
@@ -907,9 +907,9 @@ body {
   <!-- Pending Tasks Alert -->
   <div id="pendingTaskAlert" style="display:none; margin-bottom:12px; cursor:pointer" onclick="showPage('worker-task')">
     <div style="background:#F44336; color:white; border-radius:12px; padding:16px; text-align:center; animation: alertPulse 1.5s infinite; box-shadow:0 4px 12px rgba(244,67,54,0.4)">
-      <div style="font-size:1.3rem; font-weight:900">&#128276; &#49352; &#50629;&#47924;&#44032; &#51080;&#49845;&#45768;&#45796;!</div>
+      <div style="font-size:1.3rem; font-weight:900" data-t="js_new_task_alert">&#128276; &#49352; &#50629;&#47924;&#44032; &#51080;&#49845;&#45768;&#45796;!</div>
       <div style="font-size:0.85rem; margin-top:4px; opacity:0.9" id="pendingTaskDetail"></div>
-      <div style="font-size:0.75rem; margin-top:8px; background:rgba(255,255,255,0.2); display:inline-block; padding:4px 16px; border-radius:20px; font-weight:700">&#50668;&#44592;&#47484; &#45580;&#47084; &#54869;&#51064;</div>
+      <div style="font-size:0.75rem; margin-top:8px; background:rgba(255,255,255,0.2); display:inline-block; padding:4px 16px; border-radius:20px; font-weight:700" data-t="js_tap_to_check">&#50668;&#44592;&#47484; &#45580;&#47084; &#54869;&#51064;</div>
     </div>
   </div>
 
@@ -1126,14 +1126,14 @@ function showApp() {
 
   // Populate "to store" dropdown (exclude current store)
   const toSelect = document.getElementById('invoiceToStore');
-  toSelect.innerHTML = '<option value="">-- 받는 지점 선택 --</option>';
+  toSelect.innerHTML = `<option value="">${T('js_to_store_ph')}</option>`;
   STORES.filter(s => s.id !== currentUser.storeId).forEach(s => {
     toSelect.innerHTML += `<option value="${s.id}">${s.nameKr} (${s.code})</option>`;
   });
 
   // Populate filter dropdowns
   const filterStore = document.getElementById('filterStore');
-  filterStore.innerHTML = '<option value="">전체 지점</option>';
+  filterStore.innerHTML = `<option value="">${T('js_all_stores')}</option>`;
   STORES.forEach(s => {
     filterStore.innerHTML += `<option value="${s.id}">${s.nameKr}</option>`;
   });
@@ -1156,19 +1156,8 @@ function showPage(page, data) {
   if (pageEl) pageEl.classList.add('active');
 
   // Update header
-  const titles = {
-    'stock': '재고 현황 / Stock Board',
-    'work-order': '작업 요청서',
-    'work-order-view': '작업 요청서',
-    'work-order-success': '요청 완료',
-    'tracking': '실시간 현황',
-    'worker-task': '업무 현황',
-    'dashboard': 'Dashboard',
-    'new-invoice': '새 인보이스 / New Invoice',
-    'invoice-detail': '인보이스 상세 / Invoice Detail',
-    'history': '이력 조회 / History'
-  };
-  document.getElementById('headerTitle').textContent = titles[page] || 'Dashboard';
+  const titleKey = 'page_' + page.replace(/-/g, '_');
+  document.getElementById('headerTitle').textContent = T(titleKey) || 'Dashboard';
 
   // Back button
   document.getElementById('backBtn').classList.toggle('visible', pageHistory.length > 0 && page !== 'stock' && page !== 'dashboard');
@@ -1236,7 +1225,7 @@ function loadDashboard() {
 
   const pendingList = document.getElementById('pendingList');
   if (pendingInvs.length === 0) {
-    pendingList.innerHTML = '<div class="empty-state"><div class="empty-icon">&#10004;</div><div class="empty-text">대기 중인 인보이스 없음</div></div>';
+    pendingList.innerHTML = `<div class="empty-state"><div class="empty-icon">&#10004;</div><div class="empty-text">${T('js_no_pending_inv')}</div></div>`;
   } else {
     pendingList.innerHTML = pendingInvs.slice(0, 5).map(inv => renderInvoiceItem(inv)).join('');
   }
@@ -1249,7 +1238,7 @@ function loadDashboard() {
 
   const recentList = document.getElementById('recentList');
   if (recent.length === 0) {
-    recentList.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128203;</div><div class="empty-text">인보이스 이력이 없습니다</div></div>';
+    recentList.innerHTML = `<div class="empty-state"><div class="empty-icon">&#128203;</div><div class="empty-text">${T('js_no_invoice_history')}</div></div>`;
   } else {
     recentList.innerHTML = recent.map(inv => renderInvoiceItem(inv)).join('');
   }
@@ -1259,21 +1248,21 @@ function renderInvoiceItem(inv) {
   const fromStore = STORES.find(s => s.id === inv.fromStore);
   const toStore = STORES.find(s => s.id === inv.toStore);
   const statusMap = {
-    'issued': { cls: 'status-issued', badge: 'badge-issued', text: '대기' },
-    'handed-over': { cls: 'status-pending', badge: 'badge-pending', text: '인도완료' },
-    'confirmed': { cls: 'status-confirmed', badge: 'badge-confirmed', text: '완료' }
+    'issued': { cls: 'status-issued', badge: 'badge-issued', text: T('js_status_pending') },
+    'handed-over': { cls: 'status-pending', badge: 'badge-pending', text: T('js_status_handedover') },
+    'confirmed': { cls: 'status-confirmed', badge: 'badge-confirmed', text: T('js_status_done') }
   };
   const st = statusMap[inv.status] || statusMap['issued'];
   const statusClass = st.cls;
   const badgeClass = st.badge;
   const statusText = st.text;
   const dateStr = new Date(inv.createdAt).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  const typeLabel = inv.type === 'urgent' ? ' [긴급]' : '';
+  const typeLabel = inv.type === 'urgent' ? T('js_type_urgent') : '';
 
   return `
     <div class="invoice-item ${statusClass}" onclick="showPage('invoice-detail', '${inv.id}')">
       <div class="invoice-route">${fromStore ? fromStore.code : '?'} <span class="arrow">&#10132;</span> ${toStore ? toStore.code : '?'}${typeLabel}</div>
-      <div class="invoice-summary">${inv.items.length}개 품목 · $${inv.totalSale.toFixed(2)}</div>
+      <div class="invoice-summary">${inv.items.length}${T('js_items_count')} · $${inv.totalSale.toFixed(2)}</div>
       <div class="invoice-meta">
         <span>${inv.invoiceNo} · ${dateStr}</span>
         <span class="status-badge ${badgeClass}">${statusText}</span>
@@ -1329,7 +1318,7 @@ function startScanner() {
     onScanSuccess,
     () => {}
   ).catch(err => {
-    showToast('카메라 접근 실패. 권한을 확인하세요.');
+    showToast(T('js_camera_fail'));
     container.style.display = 'none';
   });
 }
@@ -1345,7 +1334,7 @@ function stopScanner() {
 
 function onScanSuccess(barcode) {
   stopScanner();
-  document.getElementById('scannedBarcode').textContent = `바코드: ${barcode}`;
+  document.getElementById('scannedBarcode').textContent = `${T('js_barcode_prefix')}: ${barcode}`;
   document.getElementById('scanResult').classList.add('show');
 
   // Check if product exists in DB
@@ -1361,7 +1350,7 @@ function onScanSuccess(barcode) {
       qty: 1,
       costPrice: product.costPrice
     });
-    showToast(`${product.name} 추가됨`);
+    showToast(`${product.name} ${T('js_added')}`);
   } else {
     // Unknown product - show registration form
     document.getElementById('newProductForm').style.display = 'block';
@@ -1380,7 +1369,7 @@ function registerAndAddProduct() {
   const costPrice = parseFloat(document.getElementById('npCost').value);
 
   if (!name || isNaN(costPrice) || costPrice <= 0) {
-    showToast('제품명과 원가를 입력하세요');
+    showToast(T('js_enter_name_cost'));
     return;
   }
 
@@ -1392,7 +1381,7 @@ function registerAndAddProduct() {
   // Add to invoice
   addItemToInvoice({ barcode, name, nameEn, qty: 1, costPrice });
   document.getElementById('newProductForm').style.display = 'none';
-  showToast(`${name} 등록 & 추가됨`);
+  showToast(`${name} ${T('js_registered_added')}`);
 }
 
 function cancelNewProduct() {
@@ -1413,7 +1402,7 @@ function addManualProduct() {
   const costPrice = parseFloat(document.getElementById('manualCost').value);
 
   if (!name || isNaN(costPrice) || costPrice <= 0) {
-    showToast('제품명과 원가를 입력하세요');
+    showToast(T('js_enter_name_cost'));
     return;
   }
 
@@ -1422,7 +1411,7 @@ function addManualProduct() {
   document.getElementById('manualQty').value = '1';
   document.getElementById('manualCost').value = '';
   hideManualAdd();
-  showToast(`${name} 추가됨`);
+  showToast(`${name} ${T('js_added')}`);
 }
 
 // ===== INVOICE ITEMS =====
@@ -1493,8 +1482,8 @@ function updateProductList() {
 // ===== ISSUE INVOICE =====
 function issueInvoice() {
   const toStoreId = document.getElementById('invoiceToStore').value;
-  if (!toStoreId) { showToast('받는 지점을 선택하세요'); return; }
-  if (invoiceItems.length === 0) { showToast('제품을 추가하세요'); return; }
+  if (!toStoreId) { showToast(T('js_select_to_store')); return; }
+  if (invoiceItems.length === 0) { showToast(T('js_add_products')); return; }
 
   const db = getDB();
   const num = db.nextInvoiceNum++;
@@ -1527,7 +1516,7 @@ function issueInvoice() {
   db.invoices.push(invoice);
   saveDB(db);
 
-  showToast(`인보이스 ${invoiceNo} 발행 완료!`);
+  showToast(`${invoiceNo} ${T('js_invoice_issued')}`);
   showPage('invoice-detail', invoice.id);
 }
 
@@ -1538,7 +1527,7 @@ let pickupPad = null;
 function loadInvoiceDetail(invoiceId) {
   const db = getDB();
   currentInvoice = db.invoices.find(i => i.id === invoiceId);
-  if (!currentInvoice) { showToast('인보이스를 찾을 수 없습니다'); return; }
+  if (!currentInvoice) { showToast(T('js_invoice_not_found')); return; }
 
   const inv = currentInvoice;
   const fromStore = STORES.find(s => s.id === inv.fromStore);
@@ -1546,14 +1535,14 @@ function loadInvoiceDetail(invoiceId) {
   const dateStr = new Date(inv.createdAt).toLocaleDateString('ko-KR', {
     year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
   });
-  const typeLabel = inv.type === 'urgent' ? '긴급/쉘브 (10%)' : '일반 (5%)';
+  const typeLabel = inv.type === 'urgent' ? T('js_type_urgent_detail') : T('js_type_normal_detail');
   const typeClass = inv.type === 'urgent' ? 'type-urgent' : 'type-normal';
 
   // Status text
   let statusHtml = '';
-  if (inv.status === 'issued') statusHtml = '<span class="status-badge badge-issued" style="margin-left:8px">대기</span>';
-  else if (inv.status === 'handed-over') statusHtml = '<span class="status-badge" style="background:#FF9800;margin-left:8px">인도완료</span>';
-  else if (inv.status === 'confirmed') statusHtml = '<span class="status-badge badge-confirmed" style="margin-left:8px">완료</span>';
+  if (inv.status === 'issued') statusHtml = `<span class="status-badge badge-issued" style="margin-left:8px">${T('js_status_pending')}</span>`;
+  else if (inv.status === 'handed-over') statusHtml = `<span class="status-badge" style="background:#FF9800;margin-left:8px">${T('js_status_handedover')}</span>`;
+  else if (inv.status === 'confirmed') statusHtml = `<span class="status-badge badge-confirmed" style="margin-left:8px">${T('js_status_done')}</span>`;
 
   document.getElementById('invoiceDetailHeader').innerHTML = `
     <div class="invoice-number">${inv.invoiceNo} ${statusHtml}</div>
@@ -1575,7 +1564,7 @@ function loadInvoiceDetail(invoiceId) {
   `).join('');
 
   document.getElementById('detailTotal').innerHTML = `
-    <div>합계 (원가: $${inv.totalCost.toFixed(2)})</div>
+    <div>${T('js_total_cost_prefix')} $${inv.totalCost.toFixed(2)})</div>
     <div class="total-amount">$${inv.totalSale.toFixed(2)}</div>
   `;
 
@@ -1638,20 +1627,20 @@ function loadInvoiceDetail(invoiceId) {
     // Pickup done but not departed yet - show departure button
     gpsSection.style.display = 'block';
     document.getElementById('departBtn').disabled = false;
-    document.getElementById('departBtn').innerHTML = '&#128667; 출발 (GPS 기록)';
+    document.getElementById('departBtn').innerHTML = `&#128667; ${T('js_depart_gps_btn')}`;
   }
 
   if (inv.departureGPS) {
     gpsDisplay.style.display = 'block';
     let timeline = `<div style="font-size:0.75rem; padding:6px 0; border-bottom:1px solid #f0f0f0">
-      <span style="color:#4CAF50; font-weight:700">&#128994; 출발</span> ${new Date(inv.departureGPS.time).toLocaleString('ko-KR')} · ${inv.departureGPS.by}
+      <span style="color:#4CAF50; font-weight:700">&#128994; ${T('js_gps_departure')}</span> ${new Date(inv.departureGPS.time).toLocaleString('ko-KR')} · ${inv.departureGPS.by}
     </div>`;
     if (inv.arrivalGPS) {
       timeline += `<div style="font-size:0.75rem; padding:6px 0">
-        <span style="color:#1565C0; font-weight:700">&#128309; 도착</span> ${new Date(inv.arrivalGPS.time).toLocaleString('ko-KR')} · ${inv.arrivalGPS.by}
+        <span style="color:#1565C0; font-weight:700">&#128309; ${T('js_gps_arrival')}</span> ${new Date(inv.arrivalGPS.time).toLocaleString('ko-KR')} · ${inv.arrivalGPS.by}
       </div>`;
     } else {
-      timeline += `<button class="btn btn-primary btn-sm" onclick="recordArrival()" style="margin-top:6px">&#128205; 도착 기록</button>`;
+      timeline += `<button class="btn btn-primary btn-sm" onclick="recordArrival()" style="margin-top:6px">&#128205; ${T('js_arrival_record_btn')}</button>`;
     }
     document.getElementById('gpsTimeline').innerHTML = timeline;
   }
@@ -1691,8 +1680,8 @@ function clearHandoverSig() {
 
 function confirmHandover() {
   const name = document.getElementById('handoverName').value.trim();
-  if (!name) { showToast('인도자 이름을 입력하세요'); return; }
-  if (!handoverPad || handoverPad.isEmpty()) { showToast('인도자 서명을 해주세요'); return; }
+  if (!name) { showToast(T('js_handover_name_required')); return; }
+  if (!handoverPad || handoverPad.isEmpty()) { showToast(T('js_handover_sig_required')); return; }
 
   const db = getDB();
   const inv = db.invoices.find(i => i.id === currentInvoice.id);
@@ -1704,7 +1693,7 @@ function confirmHandover() {
   inv.handoverSig = handoverPad.toDataURL('image/png');
   saveDB(db);
 
-  showCompletionScreen('인도 확인 완료!', '픽업자의 서명을 받으세요', null);
+  showCompletionScreen(T('js_handover_complete'), T('js_handover_next'), null);
   loadInvoiceDetail(inv.id);
 }
 
@@ -1729,8 +1718,8 @@ function clearPickupSig() {
 
 function confirmPickup() {
   const name = document.getElementById('pickupName').value.trim();
-  if (!name) { showToast('픽업자 이름을 입력하세요'); return; }
-  if (!pickupPad || pickupPad.isEmpty()) { showToast('픽업자 서명을 해주세요'); return; }
+  if (!name) { showToast(T('js_pickup_name_required')); return; }
+  if (!pickupPad || pickupPad.isEmpty()) { showToast(T('js_pickup_sig_required')); return; }
 
   const db = getDB();
   const inv = db.invoices.find(i => i.id === currentInvoice.id);
@@ -1745,7 +1734,7 @@ function confirmPickup() {
   saveDB(db);
 
   // Show completion overlay
-  showCompletionScreen('픽업 완료!', '10분 이내 출발하세요', inv.id);
+  showCompletionScreen(T('js_pickup_complete'), T('js_pickup_depart'), inv.id);
   loadInvoiceDetail(inv.id);
   startCountdown(inv.id);
 }
@@ -1868,7 +1857,7 @@ function initWorkOrder() {
   document.getElementById('woMemo').value = '';
   // Populate store dropdown for items
   const sel = document.getElementById('woItemStore');
-  sel.innerHTML = '<option value="">어디서?</option>';
+  sel.innerHTML = `<option value="">${T('js_where_from')}</option>`;
   STORES.filter(s => s.id !== currentUser.storeId).forEach(s => {
     sel.innerHTML += `<option value="${s.id}">${s.nameKr} (${s.code})</option>`;
   });
@@ -1878,8 +1867,8 @@ function addWoItem() {
   const name = document.getElementById('woItemName').value.trim();
   const qty = parseInt(document.getElementById('woItemQty').value) || 1;
   const storeId = document.getElementById('woItemStore').value;
-  if (!name) { showToast('품목명을 입력하세요'); return; }
-  if (!storeId) { showToast('어디서 가져올지 선택하세요'); return; }
+  if (!name) { showToast(T('js_enter_item_name')); return; }
+  if (!storeId) { showToast(T('js_select_from_store')); return; }
   const store = STORES.find(s => s.id === storeId);
   woItems.push({ name, qty, storeId, storeCode: store.code, storeNameKr: store.nameKr, photo: null });
   document.getElementById('woItemName').value = '';
@@ -1907,7 +1896,7 @@ function addWoPhoto(e) {
       const storeId = document.getElementById('woItemStore').value;
       const store = storeId ? STORES.find(s => s.id === storeId) : null;
       woItems.push({
-        name: '사진 품목 (이름 수정 가능)',
+        name: T('js_photo_item_name'),
         qty: 1,
         storeId: storeId || '',
         storeCode: store ? store.code : '?',
@@ -1915,7 +1904,7 @@ function addWoPhoto(e) {
         photo: photo
       });
       renderWoItems();
-      showToast('사진 추가됨! 품목명을 눌러 수정하세요');
+      showToast(T('js_photo_added'));
     };
     img.src = ev.target.result;
   };
@@ -1931,7 +1920,7 @@ function removeWoItem(i) {
 function renderWoItems() {
   const el = document.getElementById('woItemsList');
   if (woItems.length === 0) {
-    el.innerHTML = '<div style="text-align:center;padding:12px;color:#ccc;font-size:0.8rem">아래에서 품목을 추가하세요</div>';
+    el.innerHTML = `<div style="text-align:center;padding:12px;color:#ccc;font-size:0.8rem">${T('js_add_items_below')}</div>`;
     return;
   }
   el.innerHTML = woItems.map((item, i) => `
@@ -1952,8 +1941,8 @@ function renderWoItems() {
 
 function generateWorkOrder() {
   const assignee = document.getElementById('woAssignee').value.trim();
-  if (!assignee) { showToast('담당자 이름을 입력하세요'); return; }
-  if (woItems.length === 0) { showToast('품목을 추가하세요'); return; }
+  if (!assignee) { showToast(T('js_enter_assignee')); return; }
+  if (woItems.length === 0) { showToast(T('js_add_items_required')); return; }
 
   const myStore = STORES.find(s => s.id === currentUser.storeId);
   // Group items by store
@@ -1970,8 +1959,8 @@ function generateWorkOrder() {
   let checklistHtml = '';
   Object.keys(storeGroups).forEach(storeId => {
     const store = STORES.find(s => s.id === storeId);
-    const storeName = store ? `${store.code} (${store.nameKr})` : '미정';
-    checklistHtml += `<div style="background:#e3f2fd; border-radius:8px; padding:8px 12px; margin:10px 0 6px; font-weight:700; font-size:0.8rem; color:#1565C0">&#127970; ${storeName}&#50640;&#49436; &#44032;&#51256;&#50732; &#44163;</div>`;
+    const storeName = store ? `${store.code} (${store.nameKr})` : T('js_store_unknown');
+    checklistHtml += `<div style="background:#e3f2fd; border-radius:8px; padding:8px 12px; margin:10px 0 6px; font-weight:700; font-size:0.8rem; color:#1565C0">&#127970; ${storeName} ${T('js_pickup_from')}</div>`;
     storeGroups[storeId].forEach(item => {
       checklistHtml += `
         <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid #f0f0f0; font-size:0.95rem">
@@ -2042,7 +2031,7 @@ function generateWorkOrder() {
   const phone = document.getElementById('woPhone').value.trim();
   if (phone) {
     const itemNames = (woData.items || []).map(i => i.name).join(', ');
-    const smsBody = `[김치마트] ${assignee}님, 픽업 업무가 배정되었습니다.\n\n품목: ${itemNames}\n\n앱에서 확인: https://specialmasterdj-sketch.github.io/kimchi-logistics/\n\n요청자: ${currentUser.name} (${myStore.code})`;
+    const smsBody = `[Kimchi Mart] ${assignee}${T('js_sms_body_prefix')}\n\n${T('js_sms_items')}: ${itemNames}\n\n${T('js_sms_check_app')}: https://specialmasterdj-sketch.github.io/kimchi-logistics/\n\n${T('js_sms_requester')}: ${currentUser.name} (${myStore.code})`;
     window.open(`sms:${phone}?body=${encodeURIComponent(smsBody)}`, '_blank');
   }
 
@@ -2052,9 +2041,9 @@ function generateWorkOrder() {
 function shareWorkOrder() {
   const content = document.getElementById('woViewContent').innerText;
   if (navigator.share) {
-    navigator.share({ title: '작업 요청서', text: content }).catch(() => {});
+    navigator.share({ title: T('js_share_title'), text: content }).catch(() => {});
   } else {
-    navigator.clipboard.writeText(content).then(() => showToast('클립보드에 복사됨'));
+    navigator.clipboard.writeText(content).then(() => showToast(T('js_copied_clipboard')));
   }
 }
 
@@ -2079,7 +2068,7 @@ function checkPendingTasks() {
   if (pending.length > 0) {
     alert.style.display = 'block';
     const totalItems = pending.reduce((s, wo) => s + (wo.items || []).length, 0);
-    detail.textContent = `${pending.length}건의 업무 · ${totalItems}개 품목 픽업 대기`;
+    detail.textContent = `${pending.length}${T('js_pending_tasks_detail_prefix')} · ${totalItems}${T('js_pending_tasks_detail_suffix')}`;
   } else {
     alert.style.display = 'none';
   }
@@ -2109,10 +2098,10 @@ function loadStockBoard() {
   const myList = document.getElementById('myStockList');
 
   if (myStock.items.length === 0) {
-    myList.innerHTML = '<div style="text-align:center;padding:16px;color:#999;font-size:0.8rem">등록된 재고 없음<br><span style="font-size:0.65rem">아래에서 품목을 추가하세요</span></div>';
+    myList.innerHTML = `<div style="text-align:center;padding:16px;color:#999;font-size:0.8rem">${T('js_no_stock')}<br><span style="font-size:0.65rem">${T('js_add_items_below_sub')}</span></div>`;
   } else {
     let html = '<div style="margin-top:8px">';
-    html += '<div style="display:grid; grid-template-columns:2fr 1fr 30px; gap:4px; padding:4px 8px; font-size:0.6rem; font-weight:700; color:#1565C0; text-transform:uppercase"><div>품목</div><div style="text-align:center">수량</div><div></div></div>';
+    html += `<div style="display:grid; grid-template-columns:2fr 1fr 30px; gap:4px; padding:4px 8px; font-size:0.6rem; font-weight:700; color:#1565C0; text-transform:uppercase"><div>${T('js_stock_item_header')}</div><div style="text-align:center">${T('js_stock_qty_header')}</div><div></div></div>`;
     myStock.items.forEach((item, i) => {
       const qtyColor = item.qty <= 2 ? '#F44336' : item.qty <= 5 ? '#FF9800' : '#333';
       html += `<div style="display:grid; grid-template-columns:2fr auto 30px; gap:4px; padding:6px 8px; border-bottom:1px solid #f0f0f0; align-items:center; font-size:0.85rem">
@@ -2128,8 +2117,8 @@ function loadStockBoard() {
     if (myStock.updatedAt) {
       const daysLeft = Math.max(0, 30 - Math.floor((Date.now() - new Date(myStock.updatedAt).getTime()) / (24*60*60*1000)));
       const daysColor = daysLeft <= 7 ? '#F44336' : daysLeft <= 14 ? '#FF9800' : '#999';
-      html += `<div style="font-size:0.6rem; color:#999; padding:6px 8px; text-align:right">업데이트: ${new Date(myStock.updatedAt).toLocaleString('ko-KR')} · ${myStock.updatedBy || ''}</div>`;
-      html += `<div style="font-size:0.6rem; color:${daysColor}; padding:2px 8px; text-align:right; font-weight:600">&#9888; ${daysLeft}일 후 자동 삭제</div>`;
+      html += `<div style="font-size:0.6rem; color:#999; padding:6px 8px; text-align:right">${T('js_stock_updated')}: ${new Date(myStock.updatedAt).toLocaleString('ko-KR')} · ${myStock.updatedBy || ''}</div>`;
+      html += `<div style="font-size:0.6rem; color:${daysColor}; padding:2px 8px; text-align:right; font-weight:600">&#9888; ${daysLeft}${T('js_stock_auto_delete')}</div>`;
     }
     html += '</div>';
     myList.innerHTML = html;
@@ -2152,7 +2141,7 @@ function loadStockBoard() {
     }
     allHtml += '</div>';
     if (stock.items.length === 0) {
-      allHtml += '<div style="font-size:0.75rem; color:#ccc; padding:4px 0">등록된 재고 없음</div>';
+      allHtml += `<div style="font-size:0.75rem; color:#ccc; padding:4px 0">${T('js_no_stock_short')}</div>`;
     } else {
       allHtml += '<div style="display:flex; flex-wrap:wrap; gap:4px">';
       stock.items.forEach(item => {
@@ -2170,24 +2159,24 @@ function loadStockBoard() {
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return '방금';
-  if (mins < 60) return `${mins}분 전`;
+  if (mins < 1) return T('js_time_just_now');
+  if (mins < 60) return `${mins}${T('js_time_mins_ago')}`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}시간 전`;
-  return `${Math.floor(hrs / 24)}일 전`;
+  if (hrs < 24) return `${hrs}${T('js_time_hours_ago')}`;
+  return `${Math.floor(hrs / 24)}${T('js_time_days_ago')}`;
 }
 
 
 function addStockItem() {
   const name = document.getElementById('stockItemName').value.trim();
   const qty = parseInt(document.getElementById('stockItemQty').value) || 0;
-  if (!name) { showToast('품목명을 입력하세요'); return; }
+  if (!name) { showToast(T('js_enter_item_name')); return; }
 
   const stockDB = getStockDB();
   const myStore = currentUser.storeId;
   if (!stockDB[myStore]) stockDB[myStore] = { items: [], updatedAt: null, updatedBy: null };
 
-  if (stockDB[myStore].items.length >= 20) { showToast('최대 20개까지 등록 가능합니다'); return; }
+  if (stockDB[myStore].items.length >= 20) { showToast(T('js_max_stock_items')); return; }
 
   // Check duplicate
   const existing = stockDB[myStore].items.find(i => i.name === name);
@@ -2203,7 +2192,7 @@ function addStockItem() {
   document.getElementById('stockItemName').value = '';
   document.getElementById('stockItemQty').value = '';
   document.getElementById('stockItemName').focus();
-  showToast(`${name} 추가됨`);
+  showToast(`${name} ${T('js_added')}`);
   loadStockBoard();
 }
 
@@ -2234,10 +2223,10 @@ function removeStockItem(index) {
 // ===== GPS TRACKING =====
 function recordDeparture() {
   if (!currentInvoice) return;
-  if (!navigator.geolocation) { showToast('GPS를 지원하지 않습니다'); return; }
+  if (!navigator.geolocation) { showToast(T('js_gps_not_supported')); return; }
 
   document.getElementById('departBtn').disabled = true;
-  document.getElementById('departBtn').textContent = 'GPS 확인 중...';
+  document.getElementById('departBtn').textContent = T('js_gps_checking');
 
   navigator.geolocation.getCurrentPosition(pos => {
     const db = getDB();
@@ -2270,8 +2259,8 @@ function recordDeparture() {
     // Auto-notify: send departure message
     const toStoreName = STORES.find(s => s.id === inv.toStore)?.nameKr || inv.toStore;
     fbDB.ref('messages/' + inv.id).push({
-      text: `[자동알림] ${currentUser.name}님이 ${toStoreName}(으)로 출발했습니다. (${inv.invoiceNo})`,
-      fromName: '시스템',
+      text: `${T('js_auto_notify_prefix')} ${currentUser.name}${T('js_auto_notify_depart')} ${toStoreName}${T('js_auto_notify_depart_to')}(${inv.invoiceNo})`,
+      fromName: T('js_system'),
       fromStore: 'system',
       time: new Date().toISOString()
     });
@@ -2282,15 +2271,15 @@ function recordDeparture() {
     document.getElementById('countdownCard').style.display = 'none';
     document.getElementById('expiredCard').style.display = 'none';
 
-    showToast('출발 기록 완료!');
+    showToast(T('js_depart_recorded'));
     loadInvoiceDetail(inv.id);
 
     // Start continuous location updates
     startLocationUpdates(inv.id);
   }, err => {
-    showToast('GPS 위치를 가져올 수 없습니다');
+    showToast(T('js_gps_position_fail'));
     document.getElementById('departBtn').disabled = false;
-    document.getElementById('departBtn').textContent = '🚛 출발 (GPS 기록)';
+    document.getElementById('departBtn').textContent = `🚛 ${T('js_depart_gps_btn')}`;
   }, { enableHighAccuracy: true, timeout: 10000 });
 }
 
@@ -2317,8 +2306,8 @@ function recordArrival() {
     const toStoreName = STORES.find(s => s.id === inv.toStore)?.nameKr || inv.toStore;
     const fromStoreName = STORES.find(s => s.id === inv.fromStore)?.nameKr || inv.fromStore;
     fbDB.ref('messages/' + inv.id).push({
-      text: `[자동알림] ${currentUser.name}님이 ${toStoreName}에 도착했습니다. (${inv.invoiceNo})`,
-      fromName: '시스템',
+      text: `${T('js_auto_notify_prefix')} ${currentUser.name}${T('js_auto_notify_arrived')} ${toStoreName} (${inv.invoiceNo})`,
+      fromName: T('js_system'),
       fromStore: 'system',
       time: new Date().toISOString()
     });
@@ -2330,14 +2319,14 @@ function recordArrival() {
       driver: currentUser.name,
       fromStore: inv.fromStore,
       toStore: inv.toStore,
-      message: `${currentUser.name}님이 ${fromStoreName}에서 출발한 물품이 ${toStoreName}에 도착했습니다.`,
+      message: `${currentUser.name}${T('js_auto_notify_arrival_msg')}${fromStoreName}${T('js_auto_notify_arrival_suffix')} ${toStoreName}`,
       time: new Date().toISOString(),
       read: false
     });
 
-    showToast('도착 기록 완료!');
+    showToast(T('js_arrival_recorded'));
     loadInvoiceDetail(inv.id);
-  }, () => showToast('GPS 오류'), { enableHighAccuracy: true });
+  }, () => showToast(T('js_gps_error')), { enableHighAccuracy: true });
 }
 
 let locationWatchId = null;
@@ -2381,7 +2370,7 @@ function loadMessages(invoiceId) {
     msgs.sort((a, b) => a.time.localeCompare(b.time));
 
     if (msgs.length === 0) {
-      list.innerHTML = '<div style="text-align:center;padding:10px;color:#ccc;font-size:0.75rem">메시지 없음</div>';
+      list.innerHTML = `<div style="text-align:center;padding:10px;color:#ccc;font-size:0.75rem">${T('js_no_messages')}</div>`;
       return;
     }
 
@@ -2419,7 +2408,7 @@ function loadWorkerTasks() {
   ).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   if (activeWOs.length === 0 && activeInvs.length === 0) {
-    content.innerHTML = '<div class="empty-state"><div class="empty-icon">&#10004;</div><div class="empty-text">현재 배정된 업무 없음</div></div>';
+    content.innerHTML = `<div class="empty-state"><div class="empty-icon">&#10004;</div><div class="empty-text">${T('js_no_assigned_tasks')}</div></div>`;
     return;
   }
 
@@ -2431,26 +2420,26 @@ function loadWorkerTasks() {
     const fromStore = STORES.find(s => s.id === firstItemStore) || { code: '?', nameKr: '?' };
     const status = wo.status || 'pending';
     const statusColors = {
-      'pending': { bg: '#FFF3E0', border: '#FF9800', text: '대기 중', icon: '&#128276;' },
-      'accepted': { bg: '#E3F2FD', border: '#1565C0', text: '수락됨', icon: '&#10004;' },
-      'departed': { bg: '#E8F5E9', border: '#4CAF50', text: '이동 중', icon: '&#128667;' },
-      'arrived': { bg: '#F3E5F5', border: '#9C27B0', text: '도착', icon: '&#128205;' }
+      'pending': { bg: '#FFF3E0', border: '#FF9800', text: T('js_wo_status_pending'), icon: '&#128276;' },
+      'accepted': { bg: '#E3F2FD', border: '#1565C0', text: T('js_wo_status_accepted'), icon: '&#10004;' },
+      'departed': { bg: '#E8F5E9', border: '#4CAF50', text: T('js_wo_status_departed'), icon: '&#128667;' },
+      'arrived': { bg: '#F3E5F5', border: '#9C27B0', text: T('js_wo_status_arrived'), icon: '&#128205;' }
     };
     const st = statusColors[status] || statusColors['pending'];
 
     html += `<div class="card" style="border:2px solid ${st.border}; margin-bottom:12px">`;
     html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
-      <div style="font-weight:800; font-size:1rem">${st.icon} ${fromStore.code}에서 픽업</div>
+      <div style="font-weight:800; font-size:1rem">${st.icon} ${fromStore.code}${T('js_pickup_from_store')}</div>
       <span style="background:${st.border};color:white;padding:3px 10px;border-radius:10px;font-size:0.65rem;font-weight:700">${st.text}</span>
     </div>`;
-    html += `<div style="font-size:0.75rem; color:#666; margin-bottom:6px">담당: ${wo.assignee} · ${new Date(wo.createdAt).toLocaleString('ko-KR')}</div>`;
-    html += `<div style="font-size:0.75rem; color:#666; margin-bottom:10px">요청: ${wo.createdBy}</div>`;
+    html += `<div style="font-size:0.75rem; color:#666; margin-bottom:6px">${T('js_wo_assignee')}: ${wo.assignee} · ${new Date(wo.createdAt).toLocaleString('ko-KR')}</div>`;
+    html += `<div style="font-size:0.75rem; color:#666; margin-bottom:10px">${T('js_wo_requester')}: ${wo.createdBy}</div>`;
 
     // Items list
     html += '<div style="background:#f5f5f5; border-radius:8px; padding:8px; margin-bottom:10px">';
     (wo.items || []).forEach(item => {
       html += `<div style="display:flex; justify-content:space-between; padding:4px 0; font-size:0.8rem">
-        <span>${item.name}</span><span style="font-weight:700; color:#1565C0">${item.qty}개</span>
+        <span>${item.name}</span><span style="font-weight:700; color:#1565C0">${item.qty}${T('js_unit_count')}</span>
       </div>`;
     });
     html += '</div>';
@@ -2458,43 +2447,43 @@ function loadWorkerTasks() {
     // Big action buttons based on status
     if (status === 'pending') {
       html += `<button class="btn btn-primary" onclick="updateWoStatus('${wo.id}','accepted')" style="padding:16px; font-size:1.1rem; font-weight:800">
-        &#10004; &#49688;&#46973; (&#50629;&#47924; &#54869;&#51064;)
+        &#10004; ${T('js_accept_task')}
       </button>`;
     } else if (status === 'accepted') {
       html += `<button class="btn btn-success" onclick="updateWoStatus('${wo.id}','departed')" style="padding:16px; font-size:1.1rem; font-weight:800">
-        &#128667; &#52636;&#48156; (GPS &#44592;&#47197;)
+        &#128667; ${T('js_depart_gps')}
       </button>`;
     } else if (status === 'departed') {
       html += `<div id="woTimer_${wo.id}" style="text-align:center; font-size:0.8rem; color:#666; margin-bottom:8px"></div>`;
       html += `<button class="btn btn-warning" onclick="updateWoStatus('${wo.id}','arrived')" style="padding:16px; font-size:1.1rem; font-weight:800">
-        &#128205; &#46020;&#52265; (GPS &#44592;&#47197;)
+        &#128205; ${T('js_arrive_gps')}
       </button>`;
       // Show elapsed time
       if (wo.departedAt) {
         const mins = Math.floor((Date.now() - new Date(wo.departedAt).getTime()) / 60000);
         document.addEventListener('DOMContentLoaded', () => {
           const el = document.getElementById('woTimer_' + wo.id);
-          if (el) el.textContent = `이동 중: ${mins}분 경과`;
+          if (el) el.textContent = `${T('js_in_transit_elapsed')}: ${mins}${T('js_elapsed_mins')}`;
         });
         setTimeout(() => {
           const el = document.getElementById('woTimer_' + wo.id);
-          if (el) el.textContent = `이동 중: ${mins}분 경과`;
+          if (el) el.textContent = `${T('js_in_transit_elapsed')}: ${mins}${T('js_elapsed_mins')}`;
         }, 100);
       }
     } else if (status === 'arrived') {
-      html += `<div style="text-align:center; padding:12px; background:#E8F5E9; border-radius:8px; color:#2E7D32; font-weight:700">&#10004; 도착 완료</div>`;
+      html += `<div style="text-align:center; padding:12px; background:#E8F5E9; border-radius:8px; color:#2E7D32; font-weight:700">&#10004; ${T('js_arrival_complete')}</div>`;
     }
 
     // Delete button for all tasks
-    html += `<button onclick="deleteWorkOrder('${wo.id}')" style="width:100%;margin-top:8px;padding:8px;background:#ffebee;border:none;border-radius:8px;color:#F44336;font-size:0.75rem;cursor:pointer;font-weight:600">&#128465; 삭제</button>`;
+    html += `<button onclick="deleteWorkOrder('${wo.id}')" style="width:100%;margin-top:8px;padding:8px;background:#ffebee;border:none;border-radius:8px;color:#F44336;font-size:0.75rem;cursor:pointer;font-weight:600">&#128465; ${T('js_delete')}</button>`;
 
     // Messages (hide input for arrived status)
     html += `<div style="margin-top:10px; border-top:1px solid #eee; padding-top:8px">
       <div id="woMsg_${wo.id}" style="max-height:120px; overflow-y:auto; margin-bottom:6px"></div>`;
     if (status !== 'arrived') {
       html += `<div style="display:flex; gap:6px">
-        <input class="form-input" id="woMsgInput_${wo.id}" placeholder="메시지..." onkeydown="if(event.key==='Enter')sendWoMessage('${wo.id}')" style="flex:1; font-size:0.8rem; padding:8px">
-        <button class="btn btn-primary btn-sm" onclick="sendWoMessage('${wo.id}')" style="padding:8px 14px">보내기</button>
+        <input class="form-input" id="woMsgInput_${wo.id}" placeholder="${T('js_message_ph')}" onkeydown="if(event.key==='Enter')sendWoMessage('${wo.id}')" style="flex:1; font-size:0.8rem; padding:8px">
+        <button class="btn btn-primary btn-sm" onclick="sendWoMessage('${wo.id}')" style="padding:8px 14px">${T('js_send')}</button>
       </div>`;
     }
     html += `</div>`;
@@ -2519,7 +2508,7 @@ function updateWoStatus(woId, newStatus) {
   if (newStatus === 'accepted') {
     wo.acceptedAt = now;
     wo.acceptedBy = currentUser.name;
-    showToast('업무 수락 완료!');
+    showToast(T('js_task_accepted'));
   } else if (newStatus === 'departed') {
     wo.departedAt = now;
     // GPS
@@ -2536,7 +2525,7 @@ function updateWoStatus(woId, newStatus) {
       // Start continuous updates
       startLocationUpdates(woId);
     }, () => {});
-    showToast('출발! GPS 기록 중...');
+    showToast(T('js_departed_gps_tracking'));
   } else if (newStatus === 'arrived') {
     wo.arrivedAt = now;
     navigator.geolocation.getCurrentPosition(pos => {
@@ -2546,7 +2535,7 @@ function updateWoStatus(woId, newStatus) {
       fbDB.ref('liveTracking/' + woId + '/arrivedAt').set(now);
     }, () => {});
     if (locationWatchId) { navigator.geolocation.clearWatch(locationWatchId); locationWatchId = null; }
-    showToast('도착 완료!');
+    showToast(T('js_arrived_complete'));
   }
 
   saveDB(db);
@@ -2556,13 +2545,13 @@ function updateWoStatus(woId, newStatus) {
 }
 
 function deleteWorkOrder(woId) {
-  if (!confirm('이 업무를 삭제하시겠습니까?')) return;
+  if (!confirm(T('js_confirm_delete_task'))) return;
   const db = getDB();
   db.workOrders = (db.workOrders || []).filter(w => w.id !== woId);
   saveDB(db);
   fbDB.ref('workOrders/' + woId).remove();
   fbDB.ref('liveTracking/' + woId).remove();
-  showToast('삭제됨');
+  showToast(T('js_deleted'));
   loadWorkerTasks();
 }
 
@@ -2631,28 +2620,28 @@ function loadTracking() {
     Object.keys(data).forEach(key => {
       const t = data[key];
       const statusMap = {
-        'in-transit': { text: '이동 중', color: '#FF9800', icon: '&#128667;' },
-        'arrived': { text: '도착', color: '#4CAF50', icon: '&#128205;' }
+        'in-transit': { text: T('js_tracking_in_transit'), color: '#FF9800', icon: '&#128667;' },
+        'arrived': { text: T('js_tracking_arrived'), color: '#4CAF50', icon: '&#128205;' }
       };
       const st = statusMap[t.status] || statusMap['in-transit'];
       const fromStore = STORES.find(s => s.id === t.fromStore);
       const toStore = STORES.find(s => s.id === t.toStore);
       const lastUpdate = t.lastUpdate ? timeAgo(t.lastUpdate) : '';
       const depTime = t.departedAt ? new Date(t.departedAt).toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' }) : '';
-      const elapsed = t.departedAt ? Math.floor((Date.now() - new Date(t.departedAt).getTime()) / 60000) + '분' : '';
+      const elapsed = t.departedAt ? Math.floor((Date.now() - new Date(t.departedAt).getTime()) / 60000) + T('js_time_mins_ago') : '';
 
       html += `<div class="card" style="border-left:4px solid ${st.color}; margin-bottom:8px">
         <div style="display:flex; justify-content:space-between; align-items:center">
           <div>
-            <div style="font-weight:800; font-size:0.9rem">${st.icon} ${t.driver || '미지정'}</div>
-            <div style="font-size:0.7rem; color:#666">${fromStore?.code || '미지정'} &#10132; ${toStore?.code || '미지정'}</div>
+            <div style="font-weight:800; font-size:0.9rem">${st.icon} ${t.driver || T('js_tracking_unassigned')}</div>
+            <div style="font-size:0.7rem; color:#666">${fromStore?.code || T('js_tracking_unassigned')} &#10132; ${toStore?.code || T('js_tracking_unassigned')}</div>
           </div>
           <div style="text-align:right">
             <span style="background:${st.color};color:white;padding:2px 8px;border-radius:8px;font-size:0.6rem;font-weight:700">${st.text}</span>
             <div style="font-size:0.6rem; color:#999; margin-top:2px">${elapsed} · ${lastUpdate}</div>
           </div>
         </div>
-        <div style="font-size:0.65rem; color:#999; margin-top:4px">출발: ${depTime} ${t.phone ? '· &#128222; ' + t.phone : ''}</div>
+        <div style="font-size:0.65rem; color:#999; margin-top:4px">${T('js_tracking_departed')}: ${depTime} ${t.phone ? '· &#128222; ' + t.phone : ''}</div>
       </div>`;
     });
     list.innerHTML = html;
@@ -2717,7 +2706,7 @@ function loadHistory() {
 
   const list = document.getElementById('historyList');
   if (invoices.length === 0) {
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128203;</div><div class="empty-text">해당 기간 인보이스 없음</div></div>';
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">&#128203;</div><div class="empty-text">${T('js_no_invoices_period')}</div></div>`;
   } else {
     list.innerHTML = invoices.map(inv => renderInvoiceItem(inv)).join('');
   }
@@ -2730,23 +2719,23 @@ function loadHistory() {
 
   document.getElementById('monthlySummary').innerHTML = `
     <div class="summary-row">
-      <span class="label">보낸 인보이스</span>
-      <span class="value">${sentInvs.length}건</span>
+      <span class="label">${T('js_sent_invoices')}</span>
+      <span class="value">${sentInvs.length}${T('js_count_suffix')}</span>
     </div>
     <div class="summary-row">
-      <span class="label">보낸 금액 (판매가)</span>
+      <span class="label">${T('js_sent_amount')}</span>
       <span class="value income">$${totalSent.toFixed(2)}</span>
     </div>
     <div class="summary-row">
-      <span class="label">받은 인보이스</span>
-      <span class="value">${recvInvs.length}건</span>
+      <span class="label">${T('js_received_invoices')}</span>
+      <span class="value">${recvInvs.length}${T('js_count_suffix')}</span>
     </div>
     <div class="summary-row">
-      <span class="label">받은 금액 (판매가)</span>
+      <span class="label">${T('js_received_amount')}</span>
       <span class="value expense">$${totalRecv.toFixed(2)}</span>
     </div>
     <div class="summary-row" style="border-top:2px solid #1565C0; margin-top:4px; padding-top:10px">
-      <span class="label" style="font-weight:700">순 정산액</span>
+      <span class="label" style="font-weight:700">${T('js_net_settlement')}</span>
       <span class="value" style="color:${(totalSent - totalRecv) >= 0 ? '#4CAF50' : '#F44336'}">
         ${(totalSent - totalRecv) >= 0 ? '+' : ''}$${(totalSent - totalRecv).toFixed(2)}
       </span>
@@ -2761,7 +2750,7 @@ function emailInvoice() {
   const fromStore = STORES.find(s => s.id === inv.fromStore);
   const toStore = STORES.find(s => s.id === inv.toStore);
   const dateStr = new Date(inv.createdAt).toLocaleString('ko-KR');
-  const typeLabel = inv.type === 'urgent' ? '긴급/쉘브 (+10%)' : '일반 (+5%)';
+  const typeLabel = inv.type === 'urgent' ? T('js_email_type_urgent') : T('js_email_type_normal');
 
   let itemsHtml = inv.items.map(item => `
     <tr>
@@ -2775,7 +2764,7 @@ function emailInvoice() {
   if (inv.handoverBy) {
     sigHtml += `
       <div style="margin-top:20px;padding:12px;background:#FFF8E1;border-radius:8px">
-        <div style="font-weight:700;font-size:14px;margin-bottom:6px">보내는 사람: ${inv.handoverBy}</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:6px">${T('js_email_sender')}: ${inv.handoverBy}</div>
         <div style="font-size:12px;color:#999">${new Date(inv.handoverAt).toLocaleString('ko-KR')}</div>
         ${inv.handoverSig ? '<img src="'+inv.handoverSig+'" style="max-width:300px;max-height:80px;margin-top:8px;border:1px solid #ddd;border-radius:4px">' : ''}
       </div>`;
@@ -2783,7 +2772,7 @@ function emailInvoice() {
   if (inv.pickupBy) {
     sigHtml += `
       <div style="margin-top:10px;padding:12px;background:#E8F5E9;border-radius:8px">
-        <div style="font-weight:700;font-size:14px;margin-bottom:6px">가져간 사람: ${inv.pickupBy}</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:6px">${T('js_email_pickup')}: ${inv.pickupBy}</div>
         <div style="font-size:12px;color:#999">${new Date(inv.pickupAt).toLocaleString('ko-KR')}</div>
         ${inv.pickupSig ? '<img src="'+inv.pickupSig+'" style="max-width:300px;max-height:80px;margin-top:8px;border:1px solid #ddd;border-radius:4px">' : ''}
       </div>`;
@@ -2810,20 +2799,20 @@ function emailInvoice() {
         <div style="font-size:11px;color:#666;margin-top:4px">${fromStore.name} &#8594; ${toStore.name}</div>
       </div>
       <div style="font-size:12px;color:#666;margin-bottom:16px">
-        <div>날짜: ${dateStr}</div>
-        <div>작성자: ${inv.createdBy}</div>
+        <div>${T('js_email_date')}: ${dateStr}</div>
+        <div>${T('js_email_author')}: ${inv.createdBy}</div>
       </div>
       <table style="width:100%;border-collapse:collapse">
         <tr style="background:#e3f2fd">
-          <th style="padding:8px 12px;text-align:left;font-size:11px;color:#1565C0">품목</th>
-          <th style="padding:8px 12px;text-align:center;font-size:11px;color:#1565C0">수량</th>
-          <th style="padding:8px 12px;text-align:right;font-size:11px;color:#1565C0">원가</th>
-          <th style="padding:8px 12px;text-align:right;font-size:11px;color:#1565C0">판매가</th>
+          <th style="padding:8px 12px;text-align:left;font-size:11px;color:#1565C0">${T('js_email_th_item')}</th>
+          <th style="padding:8px 12px;text-align:center;font-size:11px;color:#1565C0">${T('js_email_th_qty')}</th>
+          <th style="padding:8px 12px;text-align:right;font-size:11px;color:#1565C0">${T('js_email_th_cost')}</th>
+          <th style="padding:8px 12px;text-align:right;font-size:11px;color:#1565C0">${T('js_email_th_sale')}</th>
         </tr>
         ${itemsHtml}
       </table>
       <div style="display:flex;justify-content:space-between;padding:12px;border-top:3px solid #1565C0;margin-top:4px;font-weight:800;font-size:16px">
-        <span>합계 (원가: $${inv.totalCost.toFixed(2)})</span>
+        <span>${T('js_email_total_cost')} $${inv.totalCost.toFixed(2)})</span>
         <span style="color:#1565C0">$${inv.totalSale.toFixed(2)}</span>
       </div>
       ${sigHtml}
@@ -2838,7 +2827,7 @@ function emailInvoice() {
   win.document.write(html);
   win.document.close();
 
-  showToast('인보이스가 새 창에 열렸습니다. 이메일로 보내세요.');
+  showToast(T('js_email_opened'));
 
   // Mark as email sent
   const db = getDB();
@@ -2999,10 +2988,149 @@ const TRANSLATIONS = {
     page_stock: '재고 현황 / Stock Board',
     page_work_order: '작업 요청서',
     page_work_order_view: '작업 요청서',
+    page_work_order_success: '요청 완료',
+    page_tracking: '실시간 현황',
+    page_worker_task: '업무 현황',
     page_dashboard: '대시보드',
     page_new_invoice: '새 인보이스 / New Invoice',
     page_invoice_detail: '인보이스 상세 / Invoice Detail',
-    page_history: '이력 조회 / History'
+    page_history: '이력 조회 / History',
+    // Dynamic JS strings
+    js_to_store_ph: '-- 받는 지점 선택 --',
+    js_all_stores: '전체 지점',
+    js_no_pending_inv: '대기 중인 인보이스 없음',
+    js_no_invoice_history: '인보이스 이력이 없습니다',
+    js_status_pending: '대기',
+    js_status_handedover: '인도완료',
+    js_status_done: '완료',
+    js_type_urgent: ' [긴급]',
+    js_items_count: '개 품목',
+    js_camera_fail: '카메라 접근 실패. 권한을 확인하세요.',
+    js_barcode_prefix: '바코드',
+    js_added: '추가됨',
+    js_enter_name_cost: '제품명과 원가를 입력하세요',
+    js_registered_added: '등록 & 추가됨',
+    js_select_to_store: '받는 지점을 선택하세요',
+    js_add_products: '제품을 추가하세요',
+    js_invoice_issued: '발행 완료!',
+    js_invoice_not_found: '인보이스를 찾을 수 없습니다',
+    js_type_urgent_detail: '긴급/쉘브 (10%)',
+    js_type_normal_detail: '일반 (5%)',
+    js_total_cost_prefix: '합계 (원가:',
+    js_depart_gps_btn: '출발 (GPS 기록)',
+    js_gps_departure: '출발',
+    js_gps_arrival: '도착',
+    js_arrival_record_btn: '도착 기록',
+    js_handover_name_required: '인도자 이름을 입력하세요',
+    js_handover_sig_required: '인도자 서명을 해주세요',
+    js_handover_complete: '인도 확인 완료!',
+    js_handover_next: '픽업자의 서명을 받으세요',
+    js_pickup_name_required: '픽업자 이름을 입력하세요',
+    js_pickup_sig_required: '픽업자 서명을 해주세요',
+    js_pickup_complete: '픽업 완료!',
+    js_pickup_depart: '10분 이내 출발하세요',
+    js_where_from: '어디서?',
+    js_enter_item_name: '품목명을 입력하세요',
+    js_select_from_store: '어디서 가져올지 선택하세요',
+    js_photo_item_name: '사진 품목 (이름 수정 가능)',
+    js_photo_added: '사진 추가됨! 품목명을 눌러 수정하세요',
+    js_add_items_below: '아래에서 품목을 추가하세요',
+    js_enter_assignee: '담당자 이름을 입력하세요',
+    js_add_items_required: '품목을 추가하세요',
+    js_store_unknown: '미정',
+    js_pickup_from: '에서 가져올 것',
+    js_sms_body_prefix: '님, 픽업 업무가 배정되었습니다.',
+    js_sms_items: '품목',
+    js_sms_check_app: '앱에서 확인',
+    js_sms_requester: '요청자',
+    js_share_title: '작업 요청서',
+    js_copied_clipboard: '클립보드에 복사됨',
+    js_pending_tasks_detail_suffix: '개 품목 픽업 대기',
+    js_pending_tasks_detail_prefix: '건의 업무',
+    js_no_stock: '등록된 재고 없음',
+    js_add_items_below_sub: '아래에서 품목을 추가하세요',
+    js_stock_item_header: '품목',
+    js_stock_qty_header: '수량',
+    js_stock_updated: '업데이트',
+    js_stock_auto_delete: '일 후 자동 삭제',
+    js_no_stock_short: '등록된 재고 없음',
+    js_time_just_now: '방금',
+    js_time_mins_ago: '분 전',
+    js_time_hours_ago: '시간 전',
+    js_time_days_ago: '일 전',
+    js_max_stock_items: '최대 20개까지 등록 가능합니다',
+    js_gps_not_supported: 'GPS를 지원하지 않습니다',
+    js_gps_checking: 'GPS 확인 중...',
+    js_auto_notify_depart: '님이',
+    js_auto_notify_depart_to: '(으)로 출발했습니다.',
+    js_system: '시스템',
+    js_auto_notify_prefix: '[자동알림]',
+    js_depart_recorded: '출발 기록 완료!',
+    js_gps_position_fail: 'GPS 위치를 가져올 수 없습니다',
+    js_auto_notify_arrived: '에 도착했습니다.',
+    js_auto_notify_arrival_msg: '에서 출발한 물품이',
+    js_auto_notify_arrival_suffix: '에 도착했습니다.',
+    js_arrival_recorded: '도착 기록 완료!',
+    js_gps_error: 'GPS 오류',
+    js_no_messages: '메시지 없음',
+    js_no_assigned_tasks: '현재 배정된 업무 없음',
+    js_wo_status_pending: '대기 중',
+    js_wo_status_accepted: '수락됨',
+    js_wo_status_departed: '이동 중',
+    js_wo_status_arrived: '도착',
+    js_pickup_from_store: '에서 픽업',
+    js_wo_assignee: '담당',
+    js_wo_requester: '요청',
+    js_unit_count: '개',
+    js_accept_task: '수락 (업무 확인)',
+    js_depart_gps: '출발 (GPS 기록)',
+    js_arrive_gps: '도착 (GPS 기록)',
+    js_in_transit_elapsed: '이동 중',
+    js_elapsed_mins: '분 경과',
+    js_arrival_complete: '도착 완료',
+    js_delete: '삭제',
+    js_message_ph: '메시지...',
+    js_send: '보내기',
+    js_task_accepted: '업무 수락 완료!',
+    js_departed_gps_tracking: '출발! GPS 기록 중...',
+    js_arrived_complete: '도착 완료!',
+    js_confirm_delete_task: '이 업무를 삭제하시겠습니까?',
+    js_deleted: '삭제됨',
+    js_tracking_in_transit: '이동 중',
+    js_tracking_arrived: '도착',
+    js_tracking_unassigned: '미지정',
+    js_tracking_departed: '출발',
+    js_no_invoices_period: '해당 기간 인보이스 없음',
+    js_sent_invoices: '보낸 인보이스',
+    js_sent_amount: '보낸 금액 (판매가)',
+    js_received_invoices: '받은 인보이스',
+    js_received_amount: '받은 금액 (판매가)',
+    js_net_settlement: '순 정산액',
+    js_count_suffix: '건',
+    js_email_type_urgent: '긴급/쉘브 (+10%)',
+    js_email_type_normal: '일반 (+5%)',
+    js_email_sender: '보내는 사람',
+    js_email_pickup: '가져간 사람',
+    js_email_date: '날짜',
+    js_email_author: '작성자',
+    js_email_th_item: '품목',
+    js_email_th_qty: '수량',
+    js_email_th_cost: '원가',
+    js_email_th_sale: '판매가',
+    js_email_total_cost: '합계 (원가:',
+    js_email_opened: '인보이스가 새 창에 열렸습니다. 이메일로 보내세요.',
+    js_stock_tracking: '실시간 현황',
+    js_stock_my_tasks: '내 업무 확인',
+    js_new_task_alert: '새 업무가 있습니다!',
+    js_tap_to_check: '여기를 눌러 확인',
+    js_store_stock_check: '지점별 재고 확인',
+    js_tracking_no_workers: '현재 이동 중인 작업자 없음',
+    login_phone: '전화번호 / Phone',
+    js_wo_phone_label: '담당자 전화번호',
+    js_wo_phone_ph: '예: 786-555-1234',
+    js_wo_auto_sms: '요청서 생성 시 담당자에게 문자가 자동 발송됩니다',
+    js_photo_capture: '\ud83d\udcf7 사진 찍어서 추가',
+    js_wo_item_name_ph: '품목명'
   },
   en: {
     // Login
@@ -3123,10 +3251,149 @@ const TRANSLATIONS = {
     page_stock: 'Stock Board',
     page_work_order: 'Work Order',
     page_work_order_view: 'Work Order',
+    page_work_order_success: 'Request Complete',
+    page_tracking: 'Live Tracking',
+    page_worker_task: 'My Tasks',
     page_dashboard: 'Dashboard',
     page_new_invoice: 'New Invoice',
     page_invoice_detail: 'Invoice Detail',
-    page_history: 'History'
+    page_history: 'History',
+    // Dynamic JS strings
+    js_to_store_ph: '-- Select Destination --',
+    js_all_stores: 'All Stores',
+    js_no_pending_inv: 'No pending invoices',
+    js_no_invoice_history: 'No invoice history',
+    js_status_pending: 'Pending',
+    js_status_handedover: 'Handed Over',
+    js_status_done: 'Done',
+    js_type_urgent: ' [Urgent]',
+    js_items_count: ' items',
+    js_camera_fail: 'Camera access failed. Check permissions.',
+    js_barcode_prefix: 'Barcode',
+    js_added: 'added',
+    js_enter_name_cost: 'Enter product name and cost',
+    js_registered_added: 'registered & added',
+    js_select_to_store: 'Select destination store',
+    js_add_products: 'Add products first',
+    js_invoice_issued: 'issued!',
+    js_invoice_not_found: 'Invoice not found',
+    js_type_urgent_detail: 'Urgent/Shelve (10%)',
+    js_type_normal_detail: 'Normal (5%)',
+    js_total_cost_prefix: 'Total (Cost:',
+    js_depart_gps_btn: 'Depart (GPS Record)',
+    js_gps_departure: 'Departed',
+    js_gps_arrival: 'Arrived',
+    js_arrival_record_btn: 'Record Arrival',
+    js_handover_name_required: 'Enter handover name',
+    js_handover_sig_required: 'Handover signature required',
+    js_handover_complete: 'Handover confirmed!',
+    js_handover_next: 'Get the pickup person\'s signature',
+    js_pickup_name_required: 'Enter pickup name',
+    js_pickup_sig_required: 'Pickup signature required',
+    js_pickup_complete: 'Pickup complete!',
+    js_pickup_depart: 'Depart within 10 minutes',
+    js_where_from: 'From where?',
+    js_enter_item_name: 'Enter item name',
+    js_select_from_store: 'Select which store to pick up from',
+    js_photo_item_name: 'Photo item (edit name)',
+    js_photo_added: 'Photo added! Tap name to edit',
+    js_add_items_below: 'Add items below',
+    js_enter_assignee: 'Enter assignee name',
+    js_add_items_required: 'Add items first',
+    js_store_unknown: 'Unknown',
+    js_pickup_from: 'Items to pick up from',
+    js_sms_body_prefix: ', you have been assigned a pickup task.',
+    js_sms_items: 'Items',
+    js_sms_check_app: 'Check the app',
+    js_sms_requester: 'Requested by',
+    js_share_title: 'Work Order',
+    js_copied_clipboard: 'Copied to clipboard',
+    js_pending_tasks_detail_suffix: ' items awaiting pickup',
+    js_pending_tasks_detail_prefix: ' tasks',
+    js_no_stock: 'No stock registered',
+    js_add_items_below_sub: 'Add items below',
+    js_stock_item_header: 'Item',
+    js_stock_qty_header: 'Qty',
+    js_stock_updated: 'Updated',
+    js_stock_auto_delete: ' days until auto-delete',
+    js_no_stock_short: 'No stock registered',
+    js_time_just_now: 'Just now',
+    js_time_mins_ago: 'm ago',
+    js_time_hours_ago: 'h ago',
+    js_time_days_ago: 'd ago',
+    js_max_stock_items: 'Maximum 20 items allowed',
+    js_gps_not_supported: 'GPS not supported',
+    js_gps_checking: 'Checking GPS...',
+    js_auto_notify_depart: ' departed',
+    js_auto_notify_depart_to: ' heading to ',
+    js_system: 'System',
+    js_auto_notify_prefix: '[Auto]',
+    js_depart_recorded: 'Departure recorded!',
+    js_gps_position_fail: 'Cannot get GPS position',
+    js_auto_notify_arrived: ' has arrived.',
+    js_auto_notify_arrival_msg: ' shipment from ',
+    js_auto_notify_arrival_suffix: ' has arrived.',
+    js_arrival_recorded: 'Arrival recorded!',
+    js_gps_error: 'GPS error',
+    js_no_messages: 'No messages',
+    js_no_assigned_tasks: 'No assigned tasks',
+    js_wo_status_pending: 'Pending',
+    js_wo_status_accepted: 'Accepted',
+    js_wo_status_departed: 'In Transit',
+    js_wo_status_arrived: 'Arrived',
+    js_pickup_from_store: ' Pickup from ',
+    js_wo_assignee: 'Assigned',
+    js_wo_requester: 'Requester',
+    js_unit_count: '',
+    js_accept_task: 'Accept (Confirm Task)',
+    js_depart_gps: 'Depart (GPS Record)',
+    js_arrive_gps: 'Arrive (GPS Record)',
+    js_in_transit_elapsed: 'In transit',
+    js_elapsed_mins: 'min elapsed',
+    js_arrival_complete: 'Arrival Complete',
+    js_delete: 'Delete',
+    js_message_ph: 'Message...',
+    js_send: 'Send',
+    js_task_accepted: 'Task accepted!',
+    js_departed_gps_tracking: 'Departed! GPS tracking...',
+    js_arrived_complete: 'Arrived!',
+    js_confirm_delete_task: 'Delete this task?',
+    js_deleted: 'Deleted',
+    js_tracking_in_transit: 'In Transit',
+    js_tracking_arrived: 'Arrived',
+    js_tracking_unassigned: 'Unassigned',
+    js_tracking_departed: 'Departed',
+    js_no_invoices_period: 'No invoices for this period',
+    js_sent_invoices: 'Sent Invoices',
+    js_sent_amount: 'Sent Amount (Sale)',
+    js_received_invoices: 'Received Invoices',
+    js_received_amount: 'Received Amount (Sale)',
+    js_net_settlement: 'Net Settlement',
+    js_count_suffix: '',
+    js_email_type_urgent: 'Urgent/Shelve (+10%)',
+    js_email_type_normal: 'Normal (+5%)',
+    js_email_sender: 'Sender',
+    js_email_pickup: 'Picked up by',
+    js_email_date: 'Date',
+    js_email_author: 'Created by',
+    js_email_th_item: 'Item',
+    js_email_th_qty: 'Qty',
+    js_email_th_cost: 'Cost',
+    js_email_th_sale: 'Sale',
+    js_email_total_cost: 'Total (Cost:',
+    js_email_opened: 'Invoice opened in new window. Send via email.',
+    js_stock_tracking: 'Live Tracking',
+    js_stock_my_tasks: 'My Tasks',
+    js_new_task_alert: 'New task available!',
+    js_tap_to_check: 'Tap to check',
+    js_store_stock_check: 'Store Stock Check',
+    js_tracking_no_workers: 'No workers in transit',
+    login_phone: 'Phone',
+    js_wo_phone_label: 'Assignee Phone',
+    js_wo_phone_ph: 'e.g. 786-555-1234',
+    js_wo_auto_sms: 'SMS will be sent automatically to assignee when order is created',
+    js_photo_capture: '\ud83d\udcf7 Take photo to add',
+    js_wo_item_name_ph: 'Item name'
   },
   es: {
     // Login
@@ -3247,10 +3514,149 @@ const TRANSLATIONS = {
     page_stock: 'Inventario',
     page_work_order: 'Orden de Trabajo',
     page_work_order_view: 'Orden de Trabajo',
+    page_work_order_success: 'Solicitud Completada',
+    page_tracking: 'Seguimiento en Vivo',
+    page_worker_task: 'Mis Tareas',
     page_dashboard: 'Panel',
     page_new_invoice: 'Nueva Factura',
     page_invoice_detail: 'Detalle de Factura',
-    page_history: 'Historial'
+    page_history: 'Historial',
+    // Dynamic JS strings
+    js_to_store_ph: '-- Seleccionar Destino --',
+    js_all_stores: 'Todas las Tiendas',
+    js_no_pending_inv: 'Sin facturas pendientes',
+    js_no_invoice_history: 'Sin historial de facturas',
+    js_status_pending: 'Pendiente',
+    js_status_handedover: 'Entregado',
+    js_status_done: 'Completado',
+    js_type_urgent: ' [Urgente]',
+    js_items_count: ' art\u00edculos',
+    js_camera_fail: 'Acceso a c\u00e1mara fallido. Verifique permisos.',
+    js_barcode_prefix: 'C\u00f3digo',
+    js_added: 'agregado',
+    js_enter_name_cost: 'Ingrese nombre y costo del producto',
+    js_registered_added: 'registrado y agregado',
+    js_select_to_store: 'Seleccione tienda destino',
+    js_add_products: 'Agregue productos primero',
+    js_invoice_issued: '\u00a1emitida!',
+    js_invoice_not_found: 'Factura no encontrada',
+    js_type_urgent_detail: 'Urgente (10%)',
+    js_type_normal_detail: 'Normal (5%)',
+    js_total_cost_prefix: 'Total (Costo:',
+    js_depart_gps_btn: 'Salir (Registro GPS)',
+    js_gps_departure: 'Salida',
+    js_gps_arrival: 'Llegada',
+    js_arrival_record_btn: 'Registrar Llegada',
+    js_handover_name_required: 'Ingrese nombre de entrega',
+    js_handover_sig_required: 'Se requiere firma de entrega',
+    js_handover_complete: '\u00a1Entrega confirmada!',
+    js_handover_next: 'Obtenga la firma de quien recoge',
+    js_pickup_name_required: 'Ingrese nombre de recogida',
+    js_pickup_sig_required: 'Se requiere firma de recogida',
+    js_pickup_complete: '\u00a1Recogida completa!',
+    js_pickup_depart: 'Salga en 10 minutos',
+    js_where_from: '\u00bfDe d\u00f3nde?',
+    js_enter_item_name: 'Ingrese nombre del art\u00edculo',
+    js_select_from_store: 'Seleccione de qu\u00e9 tienda recoger',
+    js_photo_item_name: 'Art\u00edculo foto (editar nombre)',
+    js_photo_added: '\u00a1Foto agregada! Toque el nombre para editar',
+    js_add_items_below: 'Agregue art\u00edculos abajo',
+    js_enter_assignee: 'Ingrese nombre del asignado',
+    js_add_items_required: 'Agregue art\u00edculos primero',
+    js_store_unknown: 'Desconocido',
+    js_pickup_from: 'Recoger de',
+    js_sms_body_prefix: ', se le asign\u00f3 una tarea de recogida.',
+    js_sms_items: 'Art\u00edculos',
+    js_sms_check_app: 'Verificar en la app',
+    js_sms_requester: 'Solicitado por',
+    js_share_title: 'Orden de Trabajo',
+    js_copied_clipboard: 'Copiado al portapapeles',
+    js_pending_tasks_detail_suffix: ' art\u00edculos esperando recogida',
+    js_pending_tasks_detail_prefix: ' tareas',
+    js_no_stock: 'Sin inventario registrado',
+    js_add_items_below_sub: 'Agregue art\u00edculos abajo',
+    js_stock_item_header: 'Art\u00edculo',
+    js_stock_qty_header: 'Cant.',
+    js_stock_updated: 'Actualizado',
+    js_stock_auto_delete: ' d\u00edas para eliminaci\u00f3n autom\u00e1tica',
+    js_no_stock_short: 'Sin inventario registrado',
+    js_time_just_now: 'Ahora',
+    js_time_mins_ago: 'min',
+    js_time_hours_ago: 'h',
+    js_time_days_ago: 'd',
+    js_max_stock_items: 'M\u00e1ximo 20 art\u00edculos permitidos',
+    js_gps_not_supported: 'GPS no soportado',
+    js_gps_checking: 'Verificando GPS...',
+    js_auto_notify_depart: ' sali\u00f3',
+    js_auto_notify_depart_to: ' hacia ',
+    js_system: 'Sistema',
+    js_auto_notify_prefix: '[Auto]',
+    js_depart_recorded: '\u00a1Salida registrada!',
+    js_gps_position_fail: 'No se puede obtener posici\u00f3n GPS',
+    js_auto_notify_arrived: ' ha llegado.',
+    js_auto_notify_arrival_msg: ' env\u00edo desde ',
+    js_auto_notify_arrival_suffix: ' ha llegado.',
+    js_arrival_recorded: '\u00a1Llegada registrada!',
+    js_gps_error: 'Error GPS',
+    js_no_messages: 'Sin mensajes',
+    js_no_assigned_tasks: 'Sin tareas asignadas',
+    js_wo_status_pending: 'Pendiente',
+    js_wo_status_accepted: 'Aceptado',
+    js_wo_status_departed: 'En Tr\u00e1nsito',
+    js_wo_status_arrived: 'Llegado',
+    js_pickup_from_store: ' Recoger de ',
+    js_wo_assignee: 'Asignado',
+    js_wo_requester: 'Solicitante',
+    js_unit_count: '',
+    js_accept_task: 'Aceptar (Confirmar Tarea)',
+    js_depart_gps: 'Salir (Registro GPS)',
+    js_arrive_gps: 'Llegar (Registro GPS)',
+    js_in_transit_elapsed: 'En tr\u00e1nsito',
+    js_elapsed_mins: 'min transcurridos',
+    js_arrival_complete: 'Llegada Completa',
+    js_delete: 'Eliminar',
+    js_message_ph: 'Mensaje...',
+    js_send: 'Enviar',
+    js_task_accepted: '\u00a1Tarea aceptada!',
+    js_departed_gps_tracking: '\u00a1Sali\u00f3! Rastreo GPS...',
+    js_arrived_complete: '\u00a1Lleg\u00f3!',
+    js_confirm_delete_task: '\u00bfEliminar esta tarea?',
+    js_deleted: 'Eliminado',
+    js_tracking_in_transit: 'En Tr\u00e1nsito',
+    js_tracking_arrived: 'Llegado',
+    js_tracking_unassigned: 'Sin asignar',
+    js_tracking_departed: 'Sali\u00f3',
+    js_no_invoices_period: 'Sin facturas en este per\u00edodo',
+    js_sent_invoices: 'Facturas Enviadas',
+    js_sent_amount: 'Monto Enviado (Venta)',
+    js_received_invoices: 'Facturas Recibidas',
+    js_received_amount: 'Monto Recibido (Venta)',
+    js_net_settlement: 'Liquidaci\u00f3n Neta',
+    js_count_suffix: '',
+    js_email_type_urgent: 'Urgente (+10%)',
+    js_email_type_normal: 'Normal (+5%)',
+    js_email_sender: 'Remitente',
+    js_email_pickup: 'Recogido por',
+    js_email_date: 'Fecha',
+    js_email_author: 'Creado por',
+    js_email_th_item: 'Art\u00edculo',
+    js_email_th_qty: 'Cant.',
+    js_email_th_cost: 'Costo',
+    js_email_th_sale: 'Venta',
+    js_email_total_cost: 'Total (Costo:',
+    js_email_opened: 'Factura abierta en nueva ventana. Env\u00ede por correo.',
+    js_stock_tracking: 'Seguimiento en Vivo',
+    js_stock_my_tasks: 'Mis Tareas',
+    js_new_task_alert: '\u00a1Nueva tarea disponible!',
+    js_tap_to_check: 'Toque para verificar',
+    js_store_stock_check: 'Inventario por Tienda',
+    js_tracking_no_workers: 'Ning\u00fan trabajador en tr\u00e1nsito',
+    login_phone: 'Tel\u00e9fono',
+    js_wo_phone_label: 'Tel\u00e9fono del asignado',
+    js_wo_phone_ph: 'Ej: 786-555-1234',
+    js_wo_auto_sms: 'Se enviar\u00e1 SMS al asignado al crear la orden',
+    js_photo_capture: '\ud83d\udcf7 Tomar foto para agregar',
+    js_wo_item_name_ph: 'Nombre del art\u00edculo'
   }
 };
 
