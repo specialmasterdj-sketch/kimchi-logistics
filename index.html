@@ -382,6 +382,29 @@ body {
   #signatureDisplay { display: block !important; }
   #signatureDisplay img { max-height: 100px; }
 }
+
+/* ===== LANGUAGE SWITCHER ===== */
+.lang-switcher {
+  display: flex; gap: 2px; background: rgba(255,255,255,0.15); border-radius: 6px; padding: 2px;
+}
+.lang-btn {
+  background: transparent; border: none; color: rgba(255,255,255,0.7);
+  padding: 3px 7px; border-radius: 4px; font-size: 0.6rem; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;
+}
+.lang-btn.active {
+  background: rgba(255,255,255,0.3); color: white;
+}
+.lang-btn:hover { color: white; }
+
+/* ===== HOME BUTTON ===== */
+.home-btn {
+  background: rgba(255,255,255,0.2); border: none; color: white;
+  width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; text-decoration: none; transition: background 0.2s;
+}
+.home-btn:hover { background: rgba(255,255,255,0.35); }
 </style>
 </head>
 <body>
@@ -411,22 +434,22 @@ body {
   <div class="login-subtitle" style="font-size:1.1rem; font-weight:700; letter-spacing:3px; color:#1565C0">L O G I S T I C S</div>
   <div class="login-card">
     <div class="form-group">
-      <label class="form-label">&#51648;&#51216; &#49440;&#53469; / Select Store</label>
+      <label class="form-label" data-t="login_store_label">&#51648;&#51216; &#49440;&#53469; / Select Store</label>
       <select class="form-select" id="loginStore">
-        <option value="">-- &#51648;&#51216; &#49440;&#53469; --</option>
+        <option value="" data-t="login_store_placeholder">-- &#51648;&#51216; &#49440;&#53469; --</option>
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">&#51060;&#47492; / Name</label>
-      <input class="form-input" id="loginName" type="text" placeholder="&#51060;&#47492;&#51012; &#51077;&#47141;&#54616;&#49464;&#50836;">
+      <label class="form-label" data-t="login_name_label">&#51060;&#47492; / Name</label>
+      <input class="form-input" id="loginName" type="text" data-t-placeholder="login_name_ph" placeholder="&#51060;&#47492;&#51012; &#51077;&#47141;&#54616;&#49464;&#50836;">
     </div>
     <div class="form-group">
-      <label class="form-label">&#51204;&#54868;&#48264;&#54840; / Phone</label>
+      <label class="form-label" data-t="login_phone">&#51204;&#54868;&#48264;&#54840; / Phone</label>
       <input class="form-input" id="loginPhone" type="tel" placeholder="&#50696;: 786-555-1234">
     </div>
-    <button class="btn-login" id="loginBtn" onclick="doLogin()" disabled>&#49884;&#51089; / Start</button>
+    <button class="btn-login" id="loginBtn" onclick="doLogin()" disabled data-t="login_start_btn">&#49884;&#51089; / Start</button>
   </div>
-  <div class="login-version">v1.0 &middot; Kimchi Mart Internal</div>
+  <div class="login-version" data-t="login_version">v1.0 &middot; Kimchi Mart Internal</div>
 </div>
 
 <!-- ===== HEADER (shown after login) ===== -->
@@ -437,9 +460,15 @@ body {
     <h1 id="headerTitle">Dashboard</h1>
     <div class="subtitle" id="headerSub"></div>
   </div>
-  <button onclick="logout()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:4px 12px; border-radius:8px; font-size:0.65rem; font-weight:600; cursor:pointer">
+  <div class="lang-switcher" id="langSwitcher">
+    <button class="lang-btn active" onclick="setLang('ko')">KO</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('es')">ES</button>
+  </div>
+  <button onclick="logout()" data-t="logout_btn" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:4px 12px; border-radius:8px; font-size:0.65rem; font-weight:600; cursor:pointer">
     &#47196;&#44536;&#50500;&#50883;
   </button>
+  <a href="https://specialmasterdj-sketch.github.io/kfood-guide/apps.html" class="home-btn" title="Apps Hub">&#127968;</a>
 </div>
 
 <!-- ===== PAGE: DASHBOARD ===== -->
@@ -455,15 +484,15 @@ body {
   <div class="stat-grid three">
     <div class="stat-card">
       <div class="stat-number blue" id="statIssued">0</div>
-      <div class="stat-label">&#48156;&#54665; / Issued</div>
+      <div class="stat-label" data-t="stat_issued">&#48156;&#54665; / Issued</div>
     </div>
     <div class="stat-card">
       <div class="stat-number orange" id="statPending">0</div>
-      <div class="stat-label">&#45824;&#44592; / Pending</div>
+      <div class="stat-label" data-t="stat_pending">&#45824;&#44592; / Pending</div>
     </div>
     <div class="stat-card">
       <div class="stat-number green" id="statConfirmed">0</div>
-      <div class="stat-label">&#50756;&#47308; / Done</div>
+      <div class="stat-label" data-t="stat_done">&#50756;&#47308; / Done</div>
     </div>
   </div>
 
@@ -471,32 +500,32 @@ body {
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px">
     <div class="card" onclick="showPage('new-invoice')" style="cursor:pointer; text-align:center; padding:20px 12px; border:2px solid #1565C0; transition:transform 0.1s">
       <div style="font-size:2rem; margin-bottom:6px">&#128196;</div>
-      <div style="font-size:0.85rem; font-weight:700; color:#1565C0">&#49352; &#51064;&#48372;&#51060;&#49828;</div>
-      <div style="font-size:0.65rem; color:#999">New Invoice</div>
+      <div style="font-size:0.85rem; font-weight:700; color:#1565C0" data-t="dash_new_invoice">&#49352; &#51064;&#48372;&#51060;&#49828;</div>
+      <div style="font-size:0.65rem; color:#999" data-t="dash_new_invoice_sub">New Invoice</div>
     </div>
     <div class="card" onclick="showPage('history')" style="cursor:pointer; text-align:center; padding:20px 12px; transition:transform 0.1s">
       <div style="font-size:2rem; margin-bottom:6px">&#128203;</div>
-      <div style="font-size:0.85rem; font-weight:700; color:#333">&#51060;&#47141; / &#51221;&#49328;</div>
-      <div style="font-size:0.65rem; color:#999">History</div>
+      <div style="font-size:0.85rem; font-weight:700; color:#333" data-t="dash_history">&#51060;&#47141; / &#51221;&#49328;</div>
+      <div style="font-size:0.65rem; color:#999" data-t="dash_history_sub">History</div>
     </div>
   </div>
 
   <!-- Pending -->
   <div class="section-title">
-    &#54869;&#51064; &#45824;&#44592; / Pending
-    <button class="see-all" onclick="showPage('history')">&#51204;&#52404;&#48372;&#44592;</button>
+    <span data-t="dash_pending_title">&#54869;&#51064; &#45824;&#44592; / Pending</span>
+    <button class="see-all" onclick="showPage('history')" data-t="see_all">&#51204;&#52404;&#48372;&#44592;</button>
   </div>
   <div id="pendingList"></div>
 
   <!-- Recent -->
   <div class="section-title" style="margin-top:14px">
-    &#52572;&#44540; &#51064;&#48372;&#51060;&#49828; / Recent
-    <button class="see-all" onclick="showPage('history')">&#51204;&#52404;&#48372;&#44592;</button>
+    <span data-t="dash_recent_title">&#52572;&#44540; &#51064;&#48372;&#51060;&#49828; / Recent</span>
+    <button class="see-all" onclick="showPage('history')" data-t="see_all2">&#51204;&#52404;&#48372;&#44592;</button>
   </div>
   <div id="recentList"></div>
 
   <!-- Logout -->
-  <button class="btn btn-secondary" onclick="logout()" style="margin-top:20px; font-size:0.75rem">
+  <button class="btn btn-secondary" onclick="logout()" style="margin-top:20px; font-size:0.75rem" data-t="dash_logout">
     &#47196;&#44536;&#50500;&#50883; / Logout
   </button>
 </div>
@@ -504,32 +533,32 @@ body {
 <!-- ===== PAGE: NEW INVOICE ===== -->
 <div class="page" id="page-new-invoice">
   <div class="card">
-    <div class="card-title">&#51064;&#48372;&#51060;&#49828; &#51221;&#48372; / Invoice Info</div>
+    <div class="card-title" data-t="inv_info_title">&#51064;&#48372;&#51060;&#49828; &#51221;&#48372; / Invoice Info</div>
     <div class="form-group" style="margin-top:10px">
-      <label class="form-label">&#48155;&#45716; &#51648;&#51216; / To Store</label>
+      <label class="form-label" data-t="inv_to_store">&#48155;&#45716; &#51648;&#51216; / To Store</label>
       <select class="form-select" id="invoiceToStore">
-        <option value="">-- &#48155;&#45716; &#51648;&#51216; &#49440;&#53469; --</option>
+        <option value="" data-t="inv_to_store_ph">-- &#48155;&#45716; &#51648;&#51216; &#49440;&#53469; --</option>
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">&#50976;&#54805; / Type</label>
+      <label class="form-label" data-t="inv_type_label">&#50976;&#54805; / Type</label>
       <div class="tabs" style="margin-bottom:0">
-        <button class="tab active" onclick="setInvoiceType('normal', this)">&#51068;&#48152; (5%)</button>
-        <button class="tab" onclick="setInvoiceType('urgent', this)">&#44596;&#44553;-&#49472;&#48652; (10%)</button>
+        <button class="tab active" onclick="setInvoiceType('normal', this)" data-t="inv_type_normal">&#51068;&#48152; (5%)</button>
+        <button class="tab" onclick="setInvoiceType('urgent', this)" data-t="inv_type_urgent">&#44596;&#44553;-&#49472;&#48652; (10%)</button>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">&#51228;&#54408; &#52628;&#44032; / Add Products</div>
+    <div class="card-title" data-t="inv_add_products">&#51228;&#54408; &#52628;&#44032; / Add Products</div>
     <div class="btn-row" style="margin-top:8px">
-      <button class="btn btn-primary" onclick="startScanner()">&#128247; &#48148;&#53076;&#46300; &#49828;&#52884;</button>
-      <button class="btn btn-outline" onclick="showManualAdd()">&#9998; &#51649;&#51217; &#51077;&#47141;</button>
+      <button class="btn btn-primary" onclick="startScanner()" data-t="inv_scan_btn">&#128247; &#48148;&#53076;&#46300; &#49828;&#52884;</button>
+      <button class="btn btn-outline" onclick="showManualAdd()" data-t="inv_manual_btn">&#9998; &#51649;&#51217; &#51077;&#47141;</button>
     </div>
 
     <div id="scannerContainer" style="display:none; margin-top:12px">
       <div id="scannerView" class="scanner-area"></div>
-      <button class="btn btn-secondary btn-sm" onclick="stopScanner()" style="margin-top:6px">&#49828;&#52884; &#51473;&#51648;</button>
+      <button class="btn btn-secondary btn-sm" onclick="stopScanner()" style="margin-top:6px" data-t="inv_scan_stop">&#49828;&#52884; &#51473;&#51648;</button>
     </div>
 
     <div class="scan-result" id="scanResult">
@@ -538,51 +567,51 @@ body {
 
     <!-- New product form (shown when unknown barcode) -->
     <div id="newProductForm" class="new-product-form" style="display:none">
-      <div class="form-label" style="margin-bottom:8px; color:#E65100">&#49352; &#51228;&#54408; &#46321;&#47197; / New Product</div>
-      <input class="form-input" id="npBarcode" placeholder="&#48148;&#53076;&#46300;" readonly>
-      <input class="form-input" id="npName" placeholder="&#51228;&#54408;&#47749; (&#54620;&#44544;)">
-      <input class="form-input" id="npNameEn" placeholder="Product Name (English)">
-      <input class="form-input" id="npCost" type="number" step="0.01" placeholder="&#50896;&#44032; (Cost Price) $">
+      <div class="form-label" style="margin-bottom:8px; color:#E65100" data-t="np_title">&#49352; &#51228;&#54408; &#46321;&#47197; / New Product</div>
+      <input class="form-input" id="npBarcode" data-t-placeholder="np_barcode_ph" placeholder="&#48148;&#53076;&#46300;" readonly>
+      <input class="form-input" id="npName" data-t-placeholder="np_name_ph" placeholder="&#51228;&#54408;&#47749; (&#54620;&#44544;)">
+      <input class="form-input" id="npNameEn" data-t-placeholder="np_name_en_ph" placeholder="Product Name (English)">
+      <input class="form-input" id="npCost" type="number" step="0.01" data-t-placeholder="np_cost_ph" placeholder="&#50896;&#44032; (Cost Price) $">
       <div class="btn-row">
-        <button class="btn btn-success btn-sm" onclick="registerAndAddProduct()">&#46321;&#47197; &amp; &#52628;&#44032;</button>
-        <button class="btn btn-secondary btn-sm" onclick="cancelNewProduct()">&#52712;&#49548;</button>
+        <button class="btn btn-success btn-sm" onclick="registerAndAddProduct()" data-t="np_register_btn">&#46321;&#47197; &amp; &#52628;&#44032;</button>
+        <button class="btn btn-secondary btn-sm" onclick="cancelNewProduct()" data-t="cancel_btn">&#52712;&#49548;</button>
       </div>
     </div>
 
     <!-- Manual add form -->
     <div id="manualAddForm" style="display:none; margin-top:10px">
-      <input class="form-input" id="manualName" placeholder="&#51228;&#54408;&#47749;" style="margin-bottom:8px">
+      <input class="form-input" id="manualName" data-t-placeholder="manual_name_ph" placeholder="&#51228;&#54408;&#47749;" style="margin-bottom:8px">
       <div style="display:flex; gap:8px">
-        <input class="form-input" id="manualQty" type="number" min="1" value="1" placeholder="&#49688;&#47049;(&#48149;&#49828;)" style="flex:0.5">
-        <input class="form-input" id="manualCost" type="number" step="0.01" placeholder="&#50896;&#44032; $" style="flex:1">
+        <input class="form-input" id="manualQty" type="number" min="1" value="1" data-t-placeholder="manual_qty_ph" placeholder="&#49688;&#47049;(&#48149;&#49828;)" style="flex:0.5">
+        <input class="form-input" id="manualCost" type="number" step="0.01" data-t-placeholder="manual_cost_ph" placeholder="&#50896;&#44032; $" style="flex:1">
       </div>
       <div class="btn-row">
-        <button class="btn btn-success btn-sm" onclick="addManualProduct()">&#52628;&#44032;</button>
-        <button class="btn btn-secondary btn-sm" onclick="hideManualAdd()">&#52712;&#49548;</button>
+        <button class="btn btn-success btn-sm" onclick="addManualProduct()" data-t="add_btn">&#52628;&#44032;</button>
+        <button class="btn btn-secondary btn-sm" onclick="hideManualAdd()" data-t="cancel_btn2">&#52712;&#49548;</button>
       </div>
     </div>
   </div>
 
   <!-- Product List -->
   <div class="card" id="productListCard" style="display:none">
-    <div class="card-title">&#51228;&#54408; &#47785;&#47197; / Product List (<span id="productCount">0</span>)</div>
+    <div class="card-title" data-t="inv_product_list_title">&#51228;&#54408; &#47785;&#47197; / Product List (<span id="productCount">0</span>)</div>
     <div class="product-table">
       <div class="product-table-header">
-        <div>&#51228;&#54408;&#47749;</div>
-        <div style="text-align:center">&#49688;&#47049;</div>
-        <div style="text-align:right">&#50896;&#44032;</div>
-        <div style="text-align:right">&#54032;&#47588;&#44032;</div>
+        <div data-t="th_product">&#51228;&#54408;&#47749;</div>
+        <div style="text-align:center" data-t="th_qty">&#49688;&#47049;</div>
+        <div style="text-align:right" data-t="th_cost">&#50896;&#44032;</div>
+        <div style="text-align:right" data-t="th_sale">&#54032;&#47588;&#44032;</div>
         <div></div>
       </div>
       <div id="productRows"></div>
       <div class="product-total">
-        <div>&#54633;&#44228; / Total</div>
+        <div data-t="total_label">&#54633;&#44228; / Total</div>
         <div class="total-amount" id="invoiceTotal">$0.00</div>
       </div>
     </div>
   </div>
 
-  <button class="btn btn-success" id="issueInvoiceBtn" onclick="issueInvoice()" style="display:none; margin-top:10px">
+  <button class="btn btn-success" id="issueInvoiceBtn" onclick="issueInvoice()" style="display:none; margin-top:10px" data-t="issue_invoice_btn">
     &#10004; &#51064;&#48372;&#51060;&#49828; &#48156;&#54665; / Issue Invoice
   </button>
 </div>
@@ -594,13 +623,13 @@ body {
   </div>
 
   <div class="card">
-    <div class="card-title">&#51228;&#54408; &#47785;&#47197; / Items</div>
+    <div class="card-title" data-t="detail_items_title">&#51228;&#54408; &#47785;&#47197; / Items</div>
     <div class="product-table">
       <div class="product-table-header" style="grid-template-columns: 2fr 0.8fr 1fr 1fr">
-        <div>&#51228;&#54408;&#47749;</div>
-        <div style="text-align:center">&#49688;&#47049;</div>
-        <div style="text-align:right">&#50896;&#44032;</div>
-        <div style="text-align:right">&#54032;&#47588;&#44032;</div>
+        <div data-t="th_product2">&#51228;&#54408;&#47749;</div>
+        <div style="text-align:center" data-t="th_qty2">&#49688;&#47049;</div>
+        <div style="text-align:right" data-t="th_cost2">&#50896;&#44032;</div>
+        <div style="text-align:right" data-t="th_sale2">&#54032;&#47588;&#44032;</div>
       </div>
       <div id="detailProductRows"></div>
       <div class="product-total" id="detailTotal"></div>
@@ -609,24 +638,24 @@ body {
 
   <!-- Step 1: Handover person (sending store confirms who prepared/handed over) -->
   <div class="card" id="handoverSection" style="display:none">
-    <div class="card-title">&#9312; &#48372;&#45236;&#45716; &#49324;&#46988;</div>
-    <p style="font-size:0.75rem; color:#666; margin-bottom:8px">&#47932;&#44148; &#51456;&#48708;&#54620; &#49324;&#46988; &#51060;&#47492;</p>
-    <input class="form-input" id="handoverName" placeholder="&#51060;&#47492;">
+    <div class="card-title" data-t="handover_title">&#9312; &#48372;&#45236;&#45716; &#49324;&#46988;</div>
+    <p style="font-size:0.75rem; color:#666; margin-bottom:8px" data-t="handover_desc">&#47932;&#44148; &#51456;&#48708;&#54620; &#49324;&#46988; &#51060;&#47492;</p>
+    <input class="form-input" id="handoverName" data-t-placeholder="name_ph" placeholder="&#51060;&#47492;">
     <div class="signature-area" style="margin-top:10px">
       <canvas id="handoverCanvas"></canvas>
-      <div class="signature-label" id="handoverLabel">&#50668;&#44592;&#50640; &#49436;&#47749;</div>
+      <div class="signature-label" id="handoverLabel" data-t="sign_here">&#50668;&#44592;&#50640; &#49436;&#47749;</div>
     </div>
     <div class="signature-actions">
-      <button class="btn btn-secondary btn-sm" onclick="clearHandoverSig()">&#51648;&#50864;&#44592;</button>
+      <button class="btn btn-secondary btn-sm" onclick="clearHandoverSig()" data-t="clear_sig">&#51648;&#50864;&#44592;</button>
     </div>
-    <button class="btn btn-warning" onclick="confirmHandover()" style="margin-top:10px">
+    <button class="btn btn-warning" onclick="confirmHandover()" style="margin-top:10px" data-t="confirm_btn">
       &#10004; &#54869;&#51064;
     </button>
   </div>
 
   <!-- Step 1 completed display -->
   <div class="card" id="handoverDisplay" style="display:none">
-    <div class="card-title">&#9312; &#48372;&#45236;&#45716; &#49324;&#46988;</div>
+    <div class="card-title" data-t="handover_title2">&#9312; &#48372;&#45236;&#45716; &#49324;&#46988;</div>
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px">
       <div style="width:36px;height:36px;border-radius:50%;background:#FFF3E0;display:flex;align-items:center;justify-content:center;font-size:1.1rem">&#128100;</div>
       <div>
@@ -639,24 +668,24 @@ body {
 
   <!-- Step 2: Pickup person signature (person picking up signs) -->
   <div class="card" id="pickupSection" style="display:none">
-    <div class="card-title">&#9313; &#44032;&#51256;&#44032;&#45716; &#49324;&#46988;</div>
-    <p style="font-size:0.75rem; color:#666; margin-bottom:8px">&#47932;&#44148; &#44032;&#51256;&#44032;&#45716; &#49324;&#46988; &#51060;&#47492;&#44284; &#49436;&#47749;</p>
-    <input class="form-input" id="pickupName" placeholder="&#51060;&#47492;">
+    <div class="card-title" data-t="pickup_title">&#9313; &#44032;&#51256;&#44032;&#45716; &#49324;&#46988;</div>
+    <p style="font-size:0.75rem; color:#666; margin-bottom:8px" data-t="pickup_desc">&#47932;&#44148; &#44032;&#51256;&#44032;&#45716; &#49324;&#46988; &#51060;&#47492;&#44284; &#49436;&#47749;</p>
+    <input class="form-input" id="pickupName" data-t-placeholder="name_ph2" placeholder="&#51060;&#47492;">
     <div class="signature-area" style="margin-top:10px">
       <canvas id="pickupCanvas"></canvas>
-      <div class="signature-label" id="pickupLabel">&#50668;&#44592;&#50640; &#49436;&#47749;</div>
+      <div class="signature-label" id="pickupLabel" data-t="sign_here2">&#50668;&#44592;&#50640; &#49436;&#47749;</div>
     </div>
     <div class="signature-actions">
-      <button class="btn btn-secondary btn-sm" onclick="clearPickupSig()">&#51648;&#50864;&#44592;</button>
+      <button class="btn btn-secondary btn-sm" onclick="clearPickupSig()" data-t="clear_sig2">&#51648;&#50864;&#44592;</button>
     </div>
-    <button class="btn btn-success" onclick="confirmPickup()" style="margin-top:10px">
+    <button class="btn btn-success" onclick="confirmPickup()" style="margin-top:10px" data-t="confirm_btn2">
       &#10004; &#54869;&#51064;
     </button>
   </div>
 
   <!-- Step 2 completed display -->
   <div class="card" id="pickupDisplay" style="display:none">
-    <div class="card-title">&#9313; &#44032;&#51256;&#44036; &#49324;&#46988;</div>
+    <div class="card-title" data-t="pickup_done_title">&#9313; &#44032;&#51256;&#44036; &#49324;&#46988;</div>
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px">
       <div style="width:36px;height:36px;border-radius:50%;background:#E8F5E9;display:flex;align-items:center;justify-content:center;font-size:1.1rem">&#128100;</div>
       <div>
@@ -669,8 +698,8 @@ body {
 
   <!-- GPS & Departure -->
   <div class="card" id="gpsSection" style="display:none; border:2px solid #4CAF50">
-    <div class="card-title">&#128205; &#52636;&#48156; &#44592;&#47197;</div>
-    <button class="btn btn-success" onclick="recordDeparture()" id="departBtn" style="font-size:1rem; padding:14px">
+    <div class="card-title" data-t="gps_depart_title">&#128205; &#52636;&#48156; &#44592;&#47197;</div>
+    <button class="btn btn-success" onclick="recordDeparture()" id="departBtn" style="font-size:1rem; padding:14px" data-t="gps_depart_btn">
       &#128667; &#52636;&#48156; (GPS &#44592;&#47197;)
     </button>
     <div id="gpsInfo" style="display:none; margin-top:8px; font-size:0.75rem; color:#666; text-align:center"></div>
@@ -678,36 +707,36 @@ body {
 
   <!-- GPS Completed -->
   <div class="card" id="gpsDisplay" style="display:none">
-    <div class="card-title">&#128205; &#51060;&#46041; &#44592;&#47197;</div>
+    <div class="card-title" data-t="gps_travel_title">&#128205; &#51060;&#46041; &#44592;&#47197;</div>
     <div id="gpsTimeline"></div>
   </div>
 
   <!-- 10-minute countdown timer -->
   <div class="card" id="countdownCard" style="display:none; background:#FFF3E0; border:2px solid #FF9800; text-align:center">
-    <div style="font-size:0.75rem; font-weight:700; color:#E65100; margin-bottom:6px">&#9888; 10&#48516; &#51060;&#45236; &#51648;&#51216;&#51012; &#46496;&#45208;&#50556; &#54633;&#45768;&#45796;!</div>
+    <div style="font-size:0.75rem; font-weight:700; color:#E65100; margin-bottom:6px" data-t="countdown_warn">&#9888; 10&#48516; &#51060;&#45236; &#51648;&#51216;&#51012; &#46496;&#45208;&#50556; &#54633;&#45768;&#45796;!</div>
     <div id="countdownTimer" style="font-size:2.5rem; font-weight:900; color:#F44336; font-family:monospace">10:00</div>
-    <div style="font-size:0.65rem; color:#999; margin-top:4px">&#54589;&#50629; &#54980; &#51648;&#51216; &#52636;&#48156; &#51228;&#54620; &#49884;&#44036;</div>
+    <div style="font-size:0.65rem; color:#999; margin-top:4px" data-t="countdown_sub">&#54589;&#50629; &#54980; &#51648;&#51216; &#52636;&#48156; &#51228;&#54620; &#49884;&#44036;</div>
   </div>
 
   <!-- Expired warning -->
   <div class="card" id="expiredCard" style="display:none; background:#FFEBEE; border:2px solid #F44336; text-align:center">
-    <div style="font-size:1.2rem; font-weight:900; color:#F44336">&#9888; &#49884;&#44036; &#52488;&#44284;!</div>
-    <div style="font-size:0.8rem; color:#C62828; margin-top:4px">10&#48516;&#51060; &#52488;&#44284;&#46104;&#50632;&#49845;&#45768;&#45796;. &#51593;&#49884; &#52636;&#48156;&#54616;&#49464;&#50836;.</div>
+    <div style="font-size:1.2rem; font-weight:900; color:#F44336" data-t="expired_title">&#9888; &#49884;&#44036; &#52488;&#44284;!</div>
+    <div style="font-size:0.8rem; color:#C62828; margin-top:4px" data-t="expired_desc">10&#48516;&#51060; &#52488;&#44284;&#46104;&#50632;&#49845;&#45768;&#45796;. &#51593;&#49884; &#52636;&#48156;&#54616;&#49464;&#50836;.</div>
   </div>
 
   <!-- Live Messages -->
   <div class="card" id="messageSection" style="display:none">
-    <div class="card-title">&#128172; &#47700;&#49884;&#51648;</div>
+    <div class="card-title" data-t="msg_title">&#128172; &#47700;&#49884;&#51648;</div>
     <div id="messageList" style="max-height:200px; overflow-y:auto; margin-bottom:8px"></div>
     <div style="display:flex; gap:6px">
-      <input class="form-input" id="messageInput" placeholder="&#47700;&#49884;&#51648; &#51077;&#47141;..." onkeydown="if(event.key==='Enter')sendMessage()" style="flex:1; font-size:0.85rem; padding:8px">
-      <button class="btn btn-primary btn-sm" onclick="sendMessage()" style="padding:8px 16px">&#48372;&#45236;&#44592;</button>
+      <input class="form-input" id="messageInput" data-t-placeholder="msg_input_ph" placeholder="&#47700;&#49884;&#51648; &#51077;&#47141;..." onkeydown="if(event.key==='Enter')sendMessage()" style="flex:1; font-size:0.85rem; padding:8px">
+      <button class="btn btn-primary btn-sm" onclick="sendMessage()" style="padding:8px 16px" data-t="msg_send_btn">&#48372;&#45236;&#44592;</button>
     </div>
   </div>
 
   <div class="btn-row" style="margin-top:10px">
-    <button class="btn btn-outline btn-sm" onclick="printInvoice()">&#128424; &#51064;&#49604;</button>
-    <button class="btn btn-primary btn-sm" onclick="emailInvoice()">&#9993; &#51060;&#47700;&#51068;</button>
+    <button class="btn btn-outline btn-sm" onclick="printInvoice()" data-t="print_btn">&#128424; &#51064;&#49604;</button>
+    <button class="btn btn-primary btn-sm" onclick="emailInvoice()" data-t="email_btn">&#9993; &#51060;&#47700;&#51068;</button>
   </div>
 </div>
 
@@ -723,15 +752,15 @@ body {
   </div>
 
   <div class="tabs" style="margin-bottom:12px">
-    <button class="tab active" onclick="setHistoryTab('all', this)">&#51204;&#52404;</button>
-    <button class="tab" onclick="setHistoryTab('sent', this)">&#48372;&#45240;&#44163;</button>
-    <button class="tab" onclick="setHistoryTab('received', this)">&#48155;&#51008;&#44163;</button>
+    <button class="tab active" onclick="setHistoryTab('all', this)" data-t="hist_all">&#51204;&#52404;</button>
+    <button class="tab" onclick="setHistoryTab('sent', this)" data-t="hist_sent">&#48372;&#45240;&#44163;</button>
+    <button class="tab" onclick="setHistoryTab('received', this)" data-t="hist_received">&#48155;&#51008;&#44163;</button>
   </div>
 
   <div id="historyList"></div>
 
   <div class="card" style="margin-top:14px">
-    <div class="card-title">&#50900;&#44036; &#51221;&#49328; &#50836;&#50557; / Monthly Summary</div>
+    <div class="card-title" data-t="monthly_summary_title">&#50900;&#44036; &#51221;&#49328; &#50836;&#50557; / Monthly Summary</div>
     <div id="monthlySummary"></div>
   </div>
 </div>
@@ -740,13 +769,13 @@ body {
 <div class="page" id="page-work-order">
   <div class="card" style="border:2px solid #1565C0; background:#e3f2fd">
     <div style="text-align:center; margin-bottom:10px">
-      <div style="font-size:1.4rem; font-weight:900; color:#1565C0">&#128203; &#51089;&#50629; &#50836;&#52397;&#49436;</div>
-      <div style="font-size:0.7rem; color:#666">Pickup Work Order</div>
+      <div style="font-size:1.4rem; font-weight:900; color:#1565C0" data-t="wo_title">&#128203; &#51089;&#50629; &#50836;&#52397;&#49436;</div>
+      <div style="font-size:0.7rem; color:#666" data-t="wo_subtitle">Pickup Work Order</div>
     </div>
     <div style="background:white; border-radius:10px; padding:12px; margin-bottom:10px">
       <div class="form-group" style="margin-bottom:10px">
-        <label class="form-label">&#45572;&#44396;&#50640;&#44172;? (&#45812;&#45817;&#51088; &#51060;&#47492;)</label>
-        <input class="form-input" id="woAssignee" placeholder="&#50696;: &#44608;&#52384;&#49688;" style="font-size:1rem; padding:12px">
+        <label class="form-label" data-t="wo_assignee_label">&#45572;&#44396;&#50640;&#44172;? (&#45812;&#45817;&#51088; &#51060;&#47492;)</label>
+        <input class="form-input" id="woAssignee" data-t-placeholder="wo_assignee_ph" placeholder="&#50696;: &#44608;&#52384;&#49688;" style="font-size:1rem; padding:12px">
       </div>
       <div class="form-group" style="margin-bottom:10px">
         <label class="form-label">&#45812;&#45817;&#51088; &#51204;&#54868;&#48264;&#54840;</label>
@@ -757,7 +786,7 @@ body {
   </div>
 
   <div class="card">
-    <div class="card-title">&#44032;&#51256;&#50732; &#47932;&#54408; &#47785;&#47197;</div>
+    <div class="card-title" data-t="wo_items_title">&#44032;&#51256;&#50732; &#47932;&#54408; &#47785;&#47197;</div>
     <div id="woItemsList"></div>
     <div style="background:#f0f7ff; border-radius:10px; padding:10px; margin-top:8px">
       <div style="display:flex; gap:6px; margin-bottom:6px">
@@ -778,11 +807,11 @@ body {
   </div>
 
   <div class="card" id="woMemoCard">
-    <div class="card-title">&#47700;&#47784; / &#53945;&#51060;&#49324;&#54637;</div>
-    <textarea class="form-input" id="woMemo" placeholder="&#50696;: &#50976;&#53685;&#44592;&#54620; &#54869;&#51064; &#54596;&#49688;, &#45257;&#46041;&#52264;&#47049; &#54596;&#50836;" style="min-height:60px; font-size:0.9rem; resize:vertical"></textarea>
+    <div class="card-title" data-t="wo_memo_title">&#47700;&#47784; / &#53945;&#51060;&#49324;&#54637;</div>
+    <textarea class="form-input" id="woMemo" data-t-placeholder="wo_memo_ph" placeholder="&#50696;: &#50976;&#53685;&#44592;&#54620; &#54869;&#51064; &#54596;&#49688;, &#45257;&#46041;&#52264;&#47049; &#54596;&#50836;" style="min-height:60px; font-size:0.9rem; resize:vertical"></textarea>
   </div>
 
-  <button class="btn btn-primary" onclick="generateWorkOrder()" style="margin-top:10px; padding:14px; font-size:1rem">
+  <button class="btn btn-primary" onclick="generateWorkOrder()" style="margin-top:10px; padding:14px; font-size:1rem" data-t="wo_generate_btn">
     &#50836;&#52397;&#49436; &#49373;&#49457;
   </button>
 </div>
@@ -791,8 +820,8 @@ body {
 <div class="page" id="page-work-order-view">
   <div id="woViewContent"></div>
   <div class="btn-row" style="margin-top:10px">
-    <button class="btn btn-outline btn-sm" onclick="window.print()">&#128424; &#51064;&#49604;</button>
-    <button class="btn btn-primary btn-sm" onclick="shareWorkOrder()">&#128172; &#44277;&#50976;</button>
+    <button class="btn btn-outline btn-sm" onclick="window.print()" data-t="wo_print_btn">&#128424; &#51064;&#49604;</button>
+    <button class="btn btn-primary btn-sm" onclick="shareWorkOrder()" data-t="wo_share_btn">&#128172; &#44277;&#50976;</button>
   </div>
 </div>
 
@@ -886,39 +915,39 @@ body {
 
   <!-- Quick Actions -->
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px">
-    <button class="btn btn-primary" onclick="showPage('new-invoice')" style="font-size:0.8rem; padding:10px">
+    <button class="btn btn-primary" onclick="showPage('new-invoice')" style="font-size:0.8rem; padding:10px" data-t="stock_new_inv">
       &#10010; &#49352; &#51064;&#48372;&#51060;&#49828;
     </button>
-    <button class="btn btn-outline" onclick="showPage('dashboard')" style="font-size:0.8rem; padding:10px">
+    <button class="btn btn-outline" onclick="showPage('dashboard')" style="font-size:0.8rem; padding:10px" data-t="stock_dashboard">
       &#128202; &#45824;&#49884;&#48372;&#46300;
     </button>
   </div>
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px">
-    <button class="btn btn-warning" onclick="showPage('work-order')" style="font-size:0.8rem; padding:10px">
+    <button class="btn btn-warning" onclick="showPage('work-order')" style="font-size:0.8rem; padding:10px" data-t="stock_work_order">
       &#128203; &#50836;&#52397;&#49436;
     </button>
-    <button class="btn btn-secondary" onclick="showPage('tracking')" style="font-size:0.8rem; padding:10px; background:#E8F5E9; color:#2E7D32; border:1px solid #4CAF50">
+    <button class="btn btn-secondary" onclick="showPage('tracking')" style="font-size:0.8rem; padding:10px; background:#E8F5E9; color:#2E7D32; border:1px solid #4CAF50" data-t="stock_tracking">
       &#128205; &#49892;&#49884;&#44036; &#54788;&#54889;
     </button>
   </div>
-  <button class="btn btn-outline" onclick="showPage('worker-task')" style="font-size:0.8rem; padding:10px; margin-bottom:12px; border-color:#FF9800; color:#E65100">
+  <button class="btn btn-outline" onclick="showPage('worker-task')" style="font-size:0.8rem; padding:10px; margin-bottom:12px; border-color:#FF9800; color:#E65100" data-t="stock_my_tasks">
     &#128170; &#45236; &#50629;&#47924; &#54869;&#51064;
   </button>
 
   <!-- My Store Stock -->
   <div class="card" id="myStockCard">
-    <div class="card-title">&#128230; &#50864;&#47532; &#51648;&#51216; &#51116;&#44256; / My Stock</div>
+    <div class="card-title" data-t="my_stock_title">&#128230; &#50864;&#47532; &#51648;&#51216; &#51116;&#44256; / My Stock</div>
     <div id="myStockList"></div>
     <div style="background:#f0f7ff; border-radius:10px; padding:14px; margin-top:8px">
-      <input class="form-input" id="stockItemName" placeholder="&#54408;&#47785;&#47749; &#51077;&#47141; &#54980; Enter" onkeydown="if(event.key==='Enter')addStockItem()" style="font-size:1.1rem; padding:14px; border:2px solid #1565C0;">
+      <input class="form-input" id="stockItemName" data-t-placeholder="stock_item_ph" placeholder="&#54408;&#47785;&#47749; &#51077;&#47141; &#54980; Enter" onkeydown="if(event.key==='Enter')addStockItem()" style="font-size:1.1rem; padding:14px; border:2px solid #1565C0;">
       <input type="hidden" id="stockItemQty" value="1">
-      <button class="btn btn-success" onclick="addStockItem()" style="padding:16px; font-size:1.1rem; margin-top:8px; font-weight:800; letter-spacing:2px">&#52628; &#44032;</button>
+      <button class="btn btn-success" onclick="addStockItem()" style="padding:16px; font-size:1.1rem; margin-top:8px; font-weight:800; letter-spacing:2px" data-t="stock_add_btn">&#52628; &#44032;</button>
     </div>
   </div>
 
   <!-- All Stores Stock View -->
   <div class="section-title" style="margin-top:10px">
-    &#127970; &#51204;&#52404; &#51648;&#51216; &#51116;&#44256; &#54788;&#54889; / All Stores
+<span data-t="all_stores_title">&#127970; &#51204;&#52404; &#51648;&#51216; &#51116;&#44256; &#54788;&#54889; / All Stores</span>
   </div>
   <div id="allStoresStock"></div>
 </div>
@@ -927,19 +956,19 @@ body {
 <nav class="bottom-nav" id="bottomNav" style="display:none">
   <button class="nav-item" onclick="showPage('stock')">
     <span class="nav-icon">&#128230;</span>
-    <span class="nav-label">&#51116;&#44256;&#54788;&#54889;</span>
+    <span class="nav-label" data-t="nav_stock">&#51116;&#44256;&#54788;&#54889;</span>
   </button>
   <button class="nav-item" onclick="showPage('new-invoice')">
     <span class="nav-icon">&#128196;</span>
-    <span class="nav-label">&#51064;&#48372;&#51060;&#49828;</span>
+    <span class="nav-label" data-t="nav_invoice">&#51064;&#48372;&#51060;&#49828;</span>
   </button>
   <button class="nav-item" onclick="showPage('history')">
     <span class="nav-icon">&#128200;</span>
-    <span class="nav-label">&#50900;&#44036;&#51221;&#49328;</span>
+    <span class="nav-label" data-t="nav_history">&#50900;&#44036;&#51221;&#49328;</span>
   </button>
   <button class="nav-item" onclick="showPage('dashboard')">
     <span class="nav-icon">&#128202;</span>
-    <span class="nav-label">&#45824;&#49884;&#48372;&#46300;</span>
+    <span class="nav-label" data-t="nav_dashboard">&#45824;&#49884;&#48372;&#46300;</span>
   </button>
 </nav>
 
@@ -2848,6 +2877,452 @@ function logout() {
   currentUser = null;
   location.reload();
 }
+
+// ===== TRANSLATION SYSTEM =====
+const TRANSLATIONS = {
+  ko: {
+    // Login
+    login_store_label: '지점 선택 / Select Store',
+    login_store_placeholder: '-- 지점 선택 --',
+    login_name_label: '이름 / Name',
+    login_name_ph: '이름을 입력하세요',
+    login_start_btn: '시작 / Start',
+    login_version: 'v1.0 \u00b7 Kimchi Mart Internal',
+    // Header
+    logout_btn: '로그아웃',
+    // Dashboard
+    stat_issued: '발행 / Issued',
+    stat_pending: '대기 / Pending',
+    stat_done: '완료 / Done',
+    dash_new_invoice: '새 인보이스',
+    dash_new_invoice_sub: 'New Invoice',
+    dash_history: '이력 / 정산',
+    dash_history_sub: 'History',
+    dash_pending_title: '확인 대기 / Pending',
+    dash_recent_title: '최근 인보이스 / Recent',
+    see_all: '전체보기',
+    see_all2: '전체보기',
+    dash_logout: '로그아웃 / Logout',
+    // New Invoice
+    inv_info_title: '인보이스 정보 / Invoice Info',
+    inv_to_store: '받는 지점 / To Store',
+    inv_to_store_ph: '-- 받는 지점 선택 --',
+    inv_type_label: '유형 / Type',
+    inv_type_normal: '일반 (5%)',
+    inv_type_urgent: '긴급-셸브 (10%)',
+    inv_add_products: '제품 추가 / Add Products',
+    inv_scan_btn: '\ud83d\udcf7 바코드 스캔',
+    inv_manual_btn: '\u270e 직접 입력',
+    inv_scan_stop: '스캔 중지',
+    inv_product_list_title: '제품 목록 / Product List',
+    // New Product
+    np_title: '새 제품 등록 / New Product',
+    np_barcode_ph: '바코드',
+    np_name_ph: '제품명 (한글)',
+    np_name_en_ph: 'Product Name (English)',
+    np_cost_ph: '원가 (Cost Price) $',
+    np_register_btn: '등록 & 추가',
+    cancel_btn: '취소',
+    // Manual Add
+    manual_name_ph: '제품명',
+    manual_qty_ph: '수량(박스)',
+    manual_cost_ph: '원가 $',
+    add_btn: '추가',
+    cancel_btn2: '취소',
+    // Table Headers
+    th_product: '제품명', th_qty: '수량', th_cost: '원가', th_sale: '판매가',
+    th_product2: '제품명', th_qty2: '수량', th_cost2: '원가', th_sale2: '판매가',
+    total_label: '합계 / Total',
+    issue_invoice_btn: '\u2714 인보이스 발행 / Issue Invoice',
+    // Detail
+    detail_items_title: '제품 목록 / Items',
+    handover_title: '\u2460 보내는 사람',
+    handover_title2: '\u2460 보내는 사람',
+    handover_desc: '물건 준비한 사람 이름',
+    pickup_title: '\u2461 가져가는 사람',
+    pickup_desc: '물건 가져가는 사람 이름과 서명',
+    pickup_done_title: '\u2461 가져간 사람',
+    name_ph: '이름',
+    name_ph2: '이름',
+    sign_here: '여기에 서명',
+    sign_here2: '여기에 서명',
+    clear_sig: '지우기',
+    clear_sig2: '지우기',
+    confirm_btn: '\u2714 확인',
+    confirm_btn2: '\u2714 확인',
+    // GPS
+    gps_depart_title: '\ud83d\udccd 출발 기록',
+    gps_depart_btn: '\ud83d\ude9b 출발 (GPS 기록)',
+    gps_travel_title: '\ud83d\udccd 이동 기록',
+    // Countdown
+    countdown_warn: '\u26a0 10분 이내 지점을 떠나야 합니다!',
+    countdown_sub: '픽업 후 지점 출발 제한 시간',
+    expired_title: '\u26a0 시간 초과!',
+    expired_desc: '10분이 초과되었습니다. 즉시 출발하세요.',
+    // Messages
+    msg_title: '\ud83d\udcac 메시지',
+    msg_input_ph: '메시지 입력...',
+    msg_send_btn: '보내기',
+    // Print/Email
+    print_btn: '\ud83d\udda8 인쇄',
+    email_btn: '\u2709 이메일',
+    // History
+    hist_all: '전체',
+    hist_sent: '보낸것',
+    hist_received: '받은것',
+    monthly_summary_title: '월간 정산 요약 / Monthly Summary',
+    // Stock
+    stock_new_inv: '\u271a 새 인보이스',
+    stock_dashboard: '\ud83d\udcca 대시보드',
+    stock_work_order: '\ud83d\udccb 작업 요청서 만들기',
+    my_stock_title: '\ud83d\udce6 우리 지점 재고 / My Stock',
+    stock_item_ph: '품목명 입력 후 Enter',
+    stock_add_btn: '추 가',
+    all_stores_title: '\ud83c\udfe2 전체 지점 재고 현황 / All Stores',
+    // Bottom Nav
+    nav_stock: '재고현황',
+    nav_invoice: '인보이스',
+    nav_history: '월간정산',
+    nav_dashboard: '대시보드',
+    // Work Order
+    wo_title: '\ud83d\udccb 작업 요청서',
+    wo_subtitle: 'Pickup Work Order',
+    wo_assignee_label: '누구에게? (담당자 이름)',
+    wo_assignee_ph: '예: 김철수',
+    wo_items_title: '가져올 물품 목록',
+    wo_memo_title: '메모 / 특이사항',
+    wo_memo_ph: '예: 유통기한 확인 필수, 냉동차량 필요',
+    wo_generate_btn: '요청서 생성',
+    wo_print_btn: '\ud83d\udda8 인쇄',
+    wo_share_btn: '\ud83d\udcac 공유',
+    // Page titles (used in JS showPage)
+    page_stock: '재고 현황 / Stock Board',
+    page_work_order: '작업 요청서',
+    page_work_order_view: '작업 요청서',
+    page_dashboard: '대시보드',
+    page_new_invoice: '새 인보이스 / New Invoice',
+    page_invoice_detail: '인보이스 상세 / Invoice Detail',
+    page_history: '이력 조회 / History'
+  },
+  en: {
+    // Login
+    login_store_label: 'Select Store',
+    login_store_placeholder: '-- Select Store --',
+    login_name_label: 'Name',
+    login_name_ph: 'Enter your name',
+    login_start_btn: 'Start',
+    login_version: 'v1.0 \u00b7 Kimchi Mart Internal',
+    // Header
+    logout_btn: 'Logout',
+    // Dashboard
+    stat_issued: 'Issued',
+    stat_pending: 'Pending',
+    stat_done: 'Done',
+    dash_new_invoice: 'New Invoice',
+    dash_new_invoice_sub: 'Create Invoice',
+    dash_history: 'History',
+    dash_history_sub: 'Settlement',
+    dash_pending_title: 'Pending Confirmation',
+    dash_recent_title: 'Recent Invoices',
+    see_all: 'View All',
+    see_all2: 'View All',
+    dash_logout: 'Logout',
+    // New Invoice
+    inv_info_title: 'Invoice Info',
+    inv_to_store: 'To Store',
+    inv_to_store_ph: '-- Select Destination --',
+    inv_type_label: 'Type',
+    inv_type_normal: 'Normal (5%)',
+    inv_type_urgent: 'Urgent/Shelve (10%)',
+    inv_add_products: 'Add Products',
+    inv_scan_btn: '\ud83d\udcf7 Scan Barcode',
+    inv_manual_btn: '\u270e Manual Entry',
+    inv_scan_stop: 'Stop Scan',
+    inv_product_list_title: 'Product List',
+    // New Product
+    np_title: 'Register New Product',
+    np_barcode_ph: 'Barcode',
+    np_name_ph: 'Product Name (Korean)',
+    np_name_en_ph: 'Product Name (English)',
+    np_cost_ph: 'Cost Price $',
+    np_register_btn: 'Register & Add',
+    cancel_btn: 'Cancel',
+    // Manual Add
+    manual_name_ph: 'Product Name',
+    manual_qty_ph: 'Qty (boxes)',
+    manual_cost_ph: 'Cost $',
+    add_btn: 'Add',
+    cancel_btn2: 'Cancel',
+    // Table Headers
+    th_product: 'Product', th_qty: 'Qty', th_cost: 'Cost', th_sale: 'Sale',
+    th_product2: 'Product', th_qty2: 'Qty', th_cost2: 'Cost', th_sale2: 'Sale',
+    total_label: 'Total',
+    issue_invoice_btn: '\u2714 Issue Invoice',
+    // Detail
+    detail_items_title: 'Items',
+    handover_title: '\u2460 Handover Person',
+    handover_title2: '\u2460 Handover Person',
+    handover_desc: 'Name of person who prepared items',
+    pickup_title: '\u2461 Pickup Person',
+    pickup_desc: 'Name and signature of person picking up',
+    pickup_done_title: '\u2461 Picked Up By',
+    name_ph: 'Name',
+    name_ph2: 'Name',
+    sign_here: 'Sign here',
+    sign_here2: 'Sign here',
+    clear_sig: 'Clear',
+    clear_sig2: 'Clear',
+    confirm_btn: '\u2714 Confirm',
+    confirm_btn2: '\u2714 Confirm',
+    // GPS
+    gps_depart_title: '\ud83d\udccd Departure Record',
+    gps_depart_btn: '\ud83d\ude9b Depart (GPS Record)',
+    gps_travel_title: '\ud83d\udccd Travel Record',
+    // Countdown
+    countdown_warn: '\u26a0 You must leave within 10 minutes!',
+    countdown_sub: 'Time limit after pickup',
+    expired_title: '\u26a0 Time Expired!',
+    expired_desc: '10 minutes have passed. Depart immediately.',
+    // Messages
+    msg_title: '\ud83d\udcac Messages',
+    msg_input_ph: 'Type a message...',
+    msg_send_btn: 'Send',
+    // Print/Email
+    print_btn: '\ud83d\udda8 Print',
+    email_btn: '\u2709 Email',
+    // History
+    hist_all: 'All',
+    hist_sent: 'Sent',
+    hist_received: 'Received',
+    monthly_summary_title: 'Monthly Summary',
+    // Stock
+    stock_new_inv: '\u271a New Invoice',
+    stock_dashboard: '\ud83d\udcca Dashboard',
+    stock_work_order: '\ud83d\udccb Create Work Order',
+    my_stock_title: '\ud83d\udce6 My Store Stock',
+    stock_item_ph: 'Enter item name, press Enter',
+    stock_add_btn: 'A D D',
+    all_stores_title: '\ud83c\udfe2 All Stores Stock',
+    // Bottom Nav
+    nav_stock: 'Stock',
+    nav_invoice: 'Invoice',
+    nav_history: 'Monthly',
+    nav_dashboard: 'Dashboard',
+    // Work Order
+    wo_title: '\ud83d\udccb Work Order',
+    wo_subtitle: 'Pickup Work Order',
+    wo_assignee_label: 'Assigned To (Name)',
+    wo_assignee_ph: 'e.g. John',
+    wo_items_title: 'Items to Pick Up',
+    wo_memo_title: 'Memo / Notes',
+    wo_memo_ph: 'e.g. Check expiration dates, refrigerated truck needed',
+    wo_generate_btn: 'Generate Work Order',
+    wo_print_btn: '\ud83d\udda8 Print',
+    wo_share_btn: '\ud83d\udcac Share',
+    // Page titles
+    page_stock: 'Stock Board',
+    page_work_order: 'Work Order',
+    page_work_order_view: 'Work Order',
+    page_dashboard: 'Dashboard',
+    page_new_invoice: 'New Invoice',
+    page_invoice_detail: 'Invoice Detail',
+    page_history: 'History'
+  },
+  es: {
+    // Login
+    login_store_label: 'Seleccionar Tienda',
+    login_store_placeholder: '-- Seleccionar Tienda --',
+    login_name_label: 'Nombre',
+    login_name_ph: 'Ingrese su nombre',
+    login_start_btn: 'Iniciar',
+    login_version: 'v1.0 \u00b7 Kimchi Mart Interno',
+    // Header
+    logout_btn: 'Cerrar sesi\u00f3n',
+    // Dashboard
+    stat_issued: 'Emitidos',
+    stat_pending: 'Pendientes',
+    stat_done: 'Completados',
+    dash_new_invoice: 'Nueva Factura',
+    dash_new_invoice_sub: 'Crear Factura',
+    dash_history: 'Historial',
+    dash_history_sub: 'Liquidaci\u00f3n',
+    dash_pending_title: 'Pendientes de Confirmar',
+    dash_recent_title: 'Facturas Recientes',
+    see_all: 'Ver Todo',
+    see_all2: 'Ver Todo',
+    dash_logout: 'Cerrar sesi\u00f3n',
+    // New Invoice
+    inv_info_title: 'Info de Factura',
+    inv_to_store: 'Tienda Destino',
+    inv_to_store_ph: '-- Seleccionar Destino --',
+    inv_type_label: 'Tipo',
+    inv_type_normal: 'Normal (5%)',
+    inv_type_urgent: 'Urgente (10%)',
+    inv_add_products: 'Agregar Productos',
+    inv_scan_btn: '\ud83d\udcf7 Escanear C\u00f3digo',
+    inv_manual_btn: '\u270e Entrada Manual',
+    inv_scan_stop: 'Detener Escaneo',
+    inv_product_list_title: 'Lista de Productos',
+    // New Product
+    np_title: 'Registrar Producto Nuevo',
+    np_barcode_ph: 'C\u00f3digo de barras',
+    np_name_ph: 'Nombre del Producto (Coreano)',
+    np_name_en_ph: 'Nombre del Producto (Ingl\u00e9s)',
+    np_cost_ph: 'Precio de costo $',
+    np_register_btn: 'Registrar y Agregar',
+    cancel_btn: 'Cancelar',
+    // Manual Add
+    manual_name_ph: 'Nombre del Producto',
+    manual_qty_ph: 'Cant. (cajas)',
+    manual_cost_ph: 'Costo $',
+    add_btn: 'Agregar',
+    cancel_btn2: 'Cancelar',
+    // Table Headers
+    th_product: 'Producto', th_qty: 'Cant.', th_cost: 'Costo', th_sale: 'Venta',
+    th_product2: 'Producto', th_qty2: 'Cant.', th_cost2: 'Costo', th_sale2: 'Venta',
+    total_label: 'Total',
+    issue_invoice_btn: '\u2714 Emitir Factura',
+    // Detail
+    detail_items_title: 'Art\u00edculos',
+    handover_title: '\u2460 Persona de Entrega',
+    handover_title2: '\u2460 Persona de Entrega',
+    handover_desc: 'Nombre de quien prepar\u00f3 los art\u00edculos',
+    pickup_title: '\u2461 Persona de Recogida',
+    pickup_desc: 'Nombre y firma de quien recoge',
+    pickup_done_title: '\u2461 Recogido Por',
+    name_ph: 'Nombre',
+    name_ph2: 'Nombre',
+    sign_here: 'Firme aqu\u00ed',
+    sign_here2: 'Firme aqu\u00ed',
+    clear_sig: 'Borrar',
+    clear_sig2: 'Borrar',
+    confirm_btn: '\u2714 Confirmar',
+    confirm_btn2: '\u2714 Confirmar',
+    // GPS
+    gps_depart_title: '\ud83d\udccd Registro de Salida',
+    gps_depart_btn: '\ud83d\ude9b Salir (Registro GPS)',
+    gps_travel_title: '\ud83d\udccd Registro de Viaje',
+    // Countdown
+    countdown_warn: '\u26a0 \u00a1Debe salir en 10 minutos!',
+    countdown_sub: 'L\u00edmite de tiempo despu\u00e9s de recoger',
+    expired_title: '\u26a0 \u00a1Tiempo Expirado!',
+    expired_desc: 'Han pasado 10 minutos. Salga inmediatamente.',
+    // Messages
+    msg_title: '\ud83d\udcac Mensajes',
+    msg_input_ph: 'Escribir mensaje...',
+    msg_send_btn: 'Enviar',
+    // Print/Email
+    print_btn: '\ud83d\udda8 Imprimir',
+    email_btn: '\u2709 Correo',
+    // History
+    hist_all: 'Todos',
+    hist_sent: 'Enviados',
+    hist_received: 'Recibidos',
+    monthly_summary_title: 'Resumen Mensual',
+    // Stock
+    stock_new_inv: '\u271a Nueva Factura',
+    stock_dashboard: '\ud83d\udcca Panel',
+    stock_work_order: '\ud83d\udccb Crear Orden de Trabajo',
+    my_stock_title: '\ud83d\udce6 Inventario de Mi Tienda',
+    stock_item_ph: 'Nombre del art\u00edculo, presione Enter',
+    stock_add_btn: 'AGREGAR',
+    all_stores_title: '\ud83c\udfe2 Inventario de Todas las Tiendas',
+    // Bottom Nav
+    nav_stock: 'Inventario',
+    nav_invoice: 'Factura',
+    nav_history: 'Mensual',
+    nav_dashboard: 'Panel',
+    // Work Order
+    wo_title: '\ud83d\udccb Orden de Trabajo',
+    wo_subtitle: 'Orden de Recogida',
+    wo_assignee_label: 'Asignado a (Nombre)',
+    wo_assignee_ph: 'Ej: Juan',
+    wo_items_title: 'Art\u00edculos a Recoger',
+    wo_memo_title: 'Memo / Notas',
+    wo_memo_ph: 'Ej: Verificar fechas de vencimiento, cami\u00f3n refrigerado',
+    wo_generate_btn: 'Generar Orden',
+    wo_print_btn: '\ud83d\udda8 Imprimir',
+    wo_share_btn: '\ud83d\udcac Compartir',
+    // Page titles
+    page_stock: 'Inventario',
+    page_work_order: 'Orden de Trabajo',
+    page_work_order_view: 'Orden de Trabajo',
+    page_dashboard: 'Panel',
+    page_new_invoice: 'Nueva Factura',
+    page_invoice_detail: 'Detalle de Factura',
+    page_history: 'Historial'
+  }
+};
+
+let currentLang = localStorage.getItem('kimchi_lang') || 'ko';
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('kimchi_lang', lang);
+  applyTranslations();
+  // Update lang switcher active state
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim().toLowerCase() === lang);
+  });
+  // Update page title if currently displayed
+  if (currentPage) {
+    const titleKey = 'page_' + currentPage.replace(/-/g, '_');
+    const t = TRANSLATIONS[currentLang];
+    if (t && t[titleKey]) {
+      document.getElementById('headerTitle').textContent = t[titleKey];
+    }
+  }
+}
+
+function applyTranslations() {
+  const t = TRANSLATIONS[currentLang];
+  if (!t) return;
+  // Text content
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.getAttribute('data-t');
+    if (t[key] !== undefined) {
+      el.textContent = t[key];
+    }
+  });
+  // Placeholders
+  document.querySelectorAll('[data-t-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-t-placeholder');
+    if (t[key] !== undefined) {
+      el.placeholder = t[key];
+    }
+  });
+}
+
+function T(key) {
+  const t = TRANSLATIONS[currentLang];
+  return (t && t[key]) || key;
+}
+
+// Apply saved language on load
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('kimchi_lang');
+  if (saved && TRANSLATIONS[saved]) {
+    currentLang = saved;
+  }
+  // Set active lang button
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim().toLowerCase() === currentLang);
+  });
+  applyTranslations();
+});
+
+// Patch showPage to update header title in current language
+const _origShowPage = showPage;
+showPage = function(page, data) {
+  _origShowPage(page, data);
+  const titleKey = 'page_' + page.replace(/-/g, '_');
+  const t = TRANSLATIONS[currentLang];
+  if (t && t[titleKey]) {
+    document.getElementById('headerTitle').textContent = t[titleKey];
+  }
+  // Re-apply translations after page switch (dynamic content)
+  setTimeout(applyTranslations, 50);
+};
 
 // ===== PWA REGISTRATION =====
 if ('serviceWorker' in navigator) {
