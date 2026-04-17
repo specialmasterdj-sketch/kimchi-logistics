@@ -30,6 +30,9 @@
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <!-- Signature Pad -->
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<!-- Leaflet Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
 /* ===== RESET & BASE ===== */
@@ -405,6 +408,46 @@ body {
   flex-shrink: 0; text-decoration: none; transition: background 0.2s;
 }
 .home-btn:hover { background: rgba(255,255,255,0.35); }
+
+/* ===== TRACKING MAP ===== */
+#trackingMap {
+  height: 280px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  z-index: 1;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+#trackingMap .store-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #333;
+  text-shadow: 1px 1px 2px white, -1px -1px 2px white;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+#trackingMapToggle {
+  background: white;
+  border: 2px solid #1565C0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1565C0;
+  cursor: pointer;
+  margin-bottom: 10px;
+  width: 100%;
+  transition: transform 0.1s;
+}
+#trackingMapToggle:active { transform: scale(0.97); }
+@keyframes driverPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+@media (min-width: 500px) {
+  #trackingMap { height: 350px; }
+}
 </style>
 </head>
 <body>
@@ -830,8 +873,7 @@ body {
   <div style="text-align:center; padding:40px 20px">
     <div style="width:80px; height:80px; border-radius:50%; background:#E8F5E9; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:2.5rem">&#10004;</div>
     <div style="font-size:1.3rem; font-weight:900; color:#2E7D32; margin-bottom:8px">&#50836;&#52397;&#49436; &#51204;&#49569; &#50756;&#47308;!</div>
-    <div style="font-size:0.85rem; color:#666; margin-bottom:8px">&#45812;&#45817;&#51088;&#50640;&#44172; &#50629;&#47924;&#44032; &#48176;&#51221;&#46104;&#50632;&#49845;&#45768;&#45796;</div>
-    <div style="font-size:0.8rem; color:#4CAF50; font-weight:600; margin-bottom:24px">&#128172; &#47928;&#51088; &#48156;&#49569;&#51060; &#50676;&#47160;&#49845;&#45768;&#45796;</div>
+    <div style="font-size:0.85rem; color:#666; margin-bottom:24px">&#45812;&#45817;&#51088;&#50640;&#44172; &#50629;&#47924;&#44032; &#48176;&#51221;&#46104;&#50632;&#49845;&#45768;&#45796;</div>
   </div>
 
   <div class="card" style="border:2px solid #E8F5E9">
@@ -856,7 +898,12 @@ body {
     </div>
   </div>
 
-  <div class="btn-row" style="margin-top:16px">
+  <div id="woSmsBtn" class="btn-row" style="margin-top:16px; display:none">
+    <button class="btn" onclick="if(lastWoSmsLink) window.open(lastWoSmsLink,'_blank')" style="padding:14px; background:#4CAF50; color:#fff; font-weight:700">
+      &#128172; &#45812;&#45817;&#51088;&#50640;&#44172; &#47928;&#51088; &#48372;&#45236;&#44592;
+    </button>
+  </div>
+  <div class="btn-row" style="margin-top:8px">
     <button class="btn btn-primary" onclick="showPage('tracking')" style="padding:14px">
       &#128205; &#49892;&#49884;&#44036; &#54788;&#54889; &#48372;&#44592;
     </button>
@@ -877,6 +924,8 @@ body {
     <div style="font-size:1.2rem; font-weight:900; color:#1565C0" data-t="js_stock_tracking">&#128205; &#49892;&#49884;&#44036; &#54788;&#54889;</div>
     <div style="font-size:0.7rem; color:#999">Live Tracking</div>
   </div>
+  <button id="trackingMapToggle" onclick="toggleTrackingMap()" data-t="js_tracking_show_map">&#128506; 지도 보기</button>
+  <div id="trackingMap" style="display:none"></div>
   <div id="trackingList"></div>
   <div class="empty-state" id="trackingEmpty" style="display:none">
     <div class="empty-icon">&#128667;</div>
@@ -994,12 +1043,12 @@ body {
 
 // ===== STORE DATA =====
 const STORES = [
-  { id: 'miami',        name: 'Miami',            nameKr: '마이애미 (Palmetto Bay)',  code: 'MIA' },
-  { id: 'pembroke',     name: 'Pembroke Pines',   nameKr: '펨브로크 파인즈',           code: 'PBP' },
-  { id: 'hollywood',    name: 'Hollywood',        nameKr: '할리우드',                  code: 'HLW' },
-  { id: 'coral',        name: 'Coral Springs',    nameKr: '코럴 스프링즈',             code: 'CRS' },
-  { id: 'fortlauder',   name: 'Fort Lauderdale',  nameKr: '포트 로더데일 (Las Olas)',  code: 'FTL' },
-  { id: 'westpalm',     name: 'West Palm Beach',  nameKr: '웨스트 팜비치',             code: 'WPB' }
+  { id: 'miami',        name: 'Miami',            nameKr: '마이애미 (Palmetto Bay)',  code: 'MIA', lat: 25.6310, lng: -80.3339 },
+  { id: 'pembroke',     name: 'Pembroke Pines',   nameKr: '펨브로크 파인즈',           code: 'PBP', lat: 26.0128, lng: -80.3384 },
+  { id: 'hollywood',    name: 'Hollywood',        nameKr: '할리우드',                  code: 'HLW', lat: 26.0112, lng: -80.1495 },
+  { id: 'coral',        name: 'Coral Springs',    nameKr: '코럴 스프링즈',             code: 'CRS', lat: 26.2712, lng: -80.2706 },
+  { id: 'fortlauder',   name: 'Fort Lauderdale',  nameKr: '포트 로더데일 (Las Olas)',  code: 'FTL', lat: 26.1224, lng: -80.1373 },
+  { id: 'westpalm',     name: 'West Palm Beach',  nameKr: '웨스트 팜비치',             code: 'WPB', lat: 26.7153, lng: -80.0534 }
 ];
 
 // ===== APP STATE =====
@@ -1012,6 +1061,11 @@ let currentInvoice = null;
 let scanner = null;
 let signaturePad = null;
 let historyTab = 'all';
+let lastWoSmsLink = null;
+let trackingMap = null;
+let driverMarkers = {};
+let trackingMapVisible = false;
+let trackingListenerAttached = false;
 
 // ===== DB (localStorage + Firebase sync) =====
 function getDB() {
@@ -1168,6 +1222,18 @@ function showPage(page, data) {
   else if (page === 'new-invoice' || page === 'dashboard') document.querySelectorAll('.nav-item')[1].classList.add('active');
   else if (page === 'history') document.querySelectorAll('.nav-item')[2].classList.add('active');
 
+  // Destroy tracking map when leaving tracking page
+  if (page !== 'tracking' && trackingMap) {
+    trackingMap.remove();
+    trackingMap = null;
+    driverMarkers = {};
+    trackingMapVisible = false;
+    const mapDiv = document.getElementById('trackingMap');
+    const mapBtn = document.getElementById('trackingMapToggle');
+    if (mapDiv) mapDiv.style.display = 'none';
+    if (mapBtn) mapBtn.innerHTML = '&#128506; ' + T('js_tracking_show_map');
+  }
+
   // Page-specific actions
   if (page === 'stock') loadStockBoard();
   if (page === 'work-order') initWorkOrder();
@@ -1177,6 +1243,10 @@ function showPage(page, data) {
   if (page === 'new-invoice') resetNewInvoice();
   if (page === 'invoice-detail' && data) loadInvoiceDetail(data);
   if (page === 'history') loadHistory();
+  if (page === 'work-order-success') {
+    const smsBtn = document.getElementById('woSmsBtn');
+    if (smsBtn) smsBtn.style.display = lastWoSmsLink ? 'flex' : 'none';
+  }
 }
 
 function goBack() {
@@ -2027,12 +2097,14 @@ function generateWorkOrder() {
 
   woItems = [];
 
-  // Send SMS notification to assignee
+  // Store SMS data for manual sending (don't auto-open)
   const phone = document.getElementById('woPhone').value.trim();
   if (phone) {
     const itemNames = (woData.items || []).map(i => i.name).join(', ');
     const smsBody = `[Kimchi Mart] ${assignee}${T('js_sms_body_prefix')}\n\n${T('js_sms_items')}: ${itemNames}\n\n${T('js_sms_check_app')}: https://specialmasterdj-sketch.github.io/kimchi-logistics/\n\n${T('js_sms_requester')}: ${currentUser.name} (${myStore.code})`;
-    window.open(`sms:${phone}?body=${encodeURIComponent(smsBody)}`, '_blank');
+    lastWoSmsLink = `sms:${phone}?body=${encodeURIComponent(smsBody)}`;
+  } else {
+    lastWoSmsLink = null;
   }
 
   showPage('work-order-success');
@@ -2606,12 +2678,19 @@ function loadTracking() {
   const list = document.getElementById('trackingList');
   const empty = document.getElementById('trackingEmpty');
 
+  // Detach previous listener to prevent stacking
+  if (trackingListenerAttached) {
+    fbDB.ref('liveTracking').off('value');
+  }
+  trackingListenerAttached = true;
+
   fbDB.ref('liveTracking').on('value', snap => {
     const data = snap.val();
     if (!data || Object.keys(data).length === 0) {
       list.innerHTML = '';
       empty.style.display = 'block';
       renderStoreQuickButtons();
+      updateTrackingMap(null);
       return;
     }
     empty.style.display = 'none';
@@ -2645,9 +2724,10 @@ function loadTracking() {
       </div>`;
     });
     list.innerHTML = html;
+
+    updateTrackingMap(data);
   });
 
-  // Render 6 store quick-access buttons
   renderStoreQuickButtons();
 }
 
@@ -2667,6 +2747,128 @@ function renderStoreQuickButtons() {
       <div style="font-size:0.55rem;color:#666;margin-top:2px">${s.nameKr.split(' (')[0]}${badge}</div>
     </button>`;
   }).join('');
+}
+
+// ===== TRACKING MAP =====
+function toggleTrackingMap() {
+  const mapDiv = document.getElementById('trackingMap');
+  const btn = document.getElementById('trackingMapToggle');
+  trackingMapVisible = !trackingMapVisible;
+
+  if (trackingMapVisible) {
+    mapDiv.style.display = 'block';
+    btn.innerHTML = '&#128506; ' + T('js_tracking_hide_map');
+    initTrackingMap();
+  } else {
+    mapDiv.style.display = 'none';
+    btn.innerHTML = '&#128506; ' + T('js_tracking_show_map');
+    if (trackingMap) {
+      trackingMap.remove();
+      trackingMap = null;
+      driverMarkers = {};
+    }
+  }
+}
+
+function initTrackingMap() {
+  if (trackingMap) return;
+
+  const storeColors = {
+    miami: '#4CAF50', pembroke: '#2196F3', hollywood: '#FF9800',
+    coral: '#9C27B0', fortlauder: '#F44336', westpalm: '#00838F'
+  };
+
+  trackingMap = L.map('trackingMap', {
+    zoomControl: false,
+    attributionControl: false
+  }).setView([26.15, -80.20], 9);
+
+  L.control.zoom({ position: 'topright' }).addTo(trackingMap);
+  L.control.attribution({ position: 'bottomleft', prefix: false })
+    .addAttribution('&copy; <a href="https://openstreetmap.org">OSM</a>')
+    .addTo(trackingMap);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18
+  }).addTo(trackingMap);
+
+  STORES.forEach(store => {
+    if (!store.lat || !store.lng) return;
+    const color = storeColors[store.id] || '#1565C0';
+
+    L.circleMarker([store.lat, store.lng], {
+      radius: 8,
+      fillColor: color,
+      color: '#fff',
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.9
+    }).addTo(trackingMap)
+      .bindTooltip(store.code, {
+        permanent: true,
+        direction: 'top',
+        offset: [0, -10],
+        className: 'store-label'
+      });
+  });
+
+  const bounds = STORES.filter(s => s.lat && s.lng).map(s => [s.lat, s.lng]);
+  if (bounds.length > 0) {
+    trackingMap.fitBounds(bounds, { padding: [30, 30] });
+  }
+
+  setTimeout(() => trackingMap.invalidateSize(), 100);
+}
+
+function updateTrackingMap(data) {
+  if (!trackingMap || !trackingMapVisible) return;
+
+  const activeIds = data ? Object.keys(data) : [];
+
+  Object.keys(driverMarkers).forEach(id => {
+    if (!activeIds.includes(id)) {
+      trackingMap.removeLayer(driverMarkers[id]);
+      delete driverMarkers[id];
+    }
+  });
+
+  if (!data) return;
+
+  Object.keys(data).forEach(key => {
+    const t = data[key];
+    if (!t.lastLocation || !t.lastLocation.lat || !t.lastLocation.lng) return;
+
+    const isArrived = t.status === 'arrived';
+    const color = isArrived ? '#4CAF50' : '#FF9800';
+    const driverName = t.driver || T('js_tracking_unassigned');
+    const fromStore = STORES.find(s => s.id === t.fromStore);
+    const toStore = STORES.find(s => s.id === t.toStore);
+    const routeLabel = (fromStore?.code || '?') + ' → ' + (toStore?.code || '?');
+
+    if (driverMarkers[key]) {
+      driverMarkers[key].setLatLng([t.lastLocation.lat, t.lastLocation.lng]);
+      driverMarkers[key].setPopupContent(
+        '<b>' + driverName + '</b><br>' + routeLabel +
+        '<br><span style="color:' + color + ';font-weight:700">' +
+        (isArrived ? T('js_tracking_arrived') : T('js_tracking_in_transit')) + '</span>'
+      );
+    } else {
+      const icon = L.divIcon({
+        className: '',
+        html: '<div style="font-size:1.4rem;text-shadow:0 1px 3px rgba(0,0,0,0.3);filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3))' +
+              (isArrived ? '' : ';animation:driverPulse 2s infinite') + '">&#128667;</div>',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
+      driverMarkers[key] = L.marker([t.lastLocation.lat, t.lastLocation.lng], { icon: icon })
+        .addTo(trackingMap)
+        .bindPopup(
+          '<b>' + driverName + '</b><br>' + routeLabel +
+          '<br><span style="color:' + color + ';font-weight:700">' +
+          (isArrived ? T('js_tracking_arrived') : T('js_tracking_in_transit')) + '</span>'
+        );
+    }
+  });
 }
 
 // ===== HISTORY =====
@@ -3125,6 +3327,8 @@ const TRANSLATIONS = {
     js_tap_to_check: '여기를 눌러 확인',
     js_store_stock_check: '지점별 재고 확인',
     js_tracking_no_workers: '현재 이동 중인 작업자 없음',
+    js_tracking_show_map: '지도 보기',
+    js_tracking_hide_map: '지도 숨기기',
     login_phone: '전화번호 / Phone',
     js_wo_phone_label: '담당자 전화번호',
     js_wo_phone_ph: '예: 786-555-1234',
@@ -3388,6 +3592,8 @@ const TRANSLATIONS = {
     js_tap_to_check: 'Tap to check',
     js_store_stock_check: 'Store Stock Check',
     js_tracking_no_workers: 'No workers in transit',
+    js_tracking_show_map: 'Show Map',
+    js_tracking_hide_map: 'Hide Map',
     login_phone: 'Phone',
     js_wo_phone_label: 'Assignee Phone',
     js_wo_phone_ph: 'e.g. 786-555-1234',
@@ -3650,6 +3856,8 @@ const TRANSLATIONS = {
     js_new_task_alert: '\u00a1Nueva tarea disponible!',
     js_tap_to_check: 'Toque para verificar',
     js_store_stock_check: 'Inventario por Tienda',
+    js_tracking_show_map: 'Ver Mapa',
+    js_tracking_hide_map: 'Ocultar Mapa',
     js_tracking_no_workers: 'Ning\u00fan trabajador en tr\u00e1nsito',
     login_phone: 'Tel\u00e9fono',
     js_wo_phone_label: 'Tel\u00e9fono del asignado',
@@ -3678,6 +3886,10 @@ function setLang(lang) {
       document.getElementById('headerTitle').textContent = t[titleKey];
     }
   }
+  // Re-render dynamic content for current page
+  if (currentUser) checkPendingTasks();
+  if (currentPage === 'stock') loadStockBoard();
+  if (currentPage === 'dashboard') loadDashboard();
 }
 
 function applyTranslations() {
