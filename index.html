@@ -921,7 +921,7 @@ body {
 <!-- ===== PAGE: LIVE TRACKING (Manager) ===== -->
 <div class="page" id="page-tracking">
   <div style="text-align:center; padding:10px 0">
-    <div style="font-size:1.2rem; font-weight:900; color:#1565C0" data-t="js_stock_tracking">&#128205; &#49892;&#49884;&#44036; &#54788;&#54889;</div>
+    <div style="font-size:1.2rem; font-weight:900; color:#1565C0" data-t="js_stock_tracking">&#128205; 실시간 업무 진행 상황</div>
     <div style="font-size:0.7rem; color:#999">Live Tracking</div>
   </div>
   <button id="trackingMapToggle" onclick="toggleTrackingMap()" data-t="js_tracking_show_map">&#128506; 지도 보기</button>
@@ -964,23 +964,15 @@ body {
 
   <!-- Quick Actions -->
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px">
-    <button class="btn btn-primary" onclick="showPage('new-invoice')" style="font-size:0.8rem; padding:10px" data-t="stock_new_inv">
-      &#10010; &#49352; &#51064;&#48372;&#51060;&#49828;
-    </button>
-    <button class="btn btn-outline" onclick="showPage('dashboard')" style="font-size:0.8rem; padding:10px" data-t="stock_dashboard">
-      &#128202; &#45824;&#49884;&#48372;&#46300;
-    </button>
-  </div>
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px">
     <button class="btn btn-warning" onclick="showPage('work-order')" style="font-size:0.8rem; padding:10px" data-t="stock_work_order">
-      &#128203; &#50836;&#52397;&#49436;
+      &#128203; 작업 요청서
     </button>
     <button class="btn btn-secondary" onclick="showPage('tracking')" style="font-size:0.8rem; padding:10px; background:#E8F5E9; color:#2E7D32; border:1px solid #4CAF50" data-t="stock_tracking">
-      &#128205; &#49892;&#49884;&#44036; &#54788;&#54889;
+      &#128205; 실시간 업무 진행 상황
     </button>
   </div>
   <button class="btn btn-outline" onclick="showPage('worker-task')" style="font-size:0.8rem; padding:10px; margin-bottom:12px; border-color:#FF9800; color:#E65100" data-t="stock_my_tasks">
-    &#128170; &#45236; &#50629;&#47924; &#54869;&#51064;
+    &#128170; 내 업무 확인
   </button>
 
   <!-- My Store Stock -->
@@ -1043,12 +1035,12 @@ body {
 
 // ===== STORE DATA =====
 const STORES = [
-  { id: 'miami',        name: 'Miami',            nameKr: '마이애미 (Palmetto Bay)',  code: 'MIA', lat: 25.6310, lng: -80.3339 },
-  { id: 'pembroke',     name: 'Pembroke Pines',   nameKr: '펨브로크 파인즈',           code: 'PBP', lat: 26.0128, lng: -80.3384 },
-  { id: 'hollywood',    name: 'Hollywood',        nameKr: '할리우드',                  code: 'HLW', lat: 26.0112, lng: -80.1495 },
-  { id: 'coral',        name: 'Coral Springs',    nameKr: '코럴 스프링즈',             code: 'CRS', lat: 26.2712, lng: -80.2706 },
-  { id: 'fortlauder',   name: 'Fort Lauderdale',  nameKr: '포트 로더데일 (Las Olas)',  code: 'FTL', lat: 26.1224, lng: -80.1373 },
-  { id: 'westpalm',     name: 'West Palm Beach',  nameKr: '웨스트 팜비치',             code: 'WPB', lat: 26.7153, lng: -80.0534 }
+  { id: 'miami',        name: 'Miami (Palmetto Bay)',     nameKr: '마이애미 (Palmetto Bay)',  nameEs: 'Miami (Palmetto Bay)',    code: 'MIA', lat: 25.6310, lng: -80.3339 },
+  { id: 'pembroke',     name: 'Pembroke Pines',            nameKr: '펨브로크 파인즈',          nameEs: 'Pembroke Pines',          code: 'PBP', lat: 26.0128, lng: -80.3384 },
+  { id: 'hollywood',    name: 'Hollywood',                 nameKr: '할리우드',                 nameEs: 'Hollywood',               code: 'HLW', lat: 26.0112, lng: -80.1495 },
+  { id: 'coral',        name: 'Coral Springs',             nameKr: '코럴 스프링즈',            nameEs: 'Coral Springs',           code: 'CRS', lat: 26.2712, lng: -80.2706 },
+  { id: 'fortlauder',   name: 'Fort Lauderdale (Las Olas)',nameKr: '포트 로더데일 (Las Olas)', nameEs: 'Fort Lauderdale (Las Olas)',code: 'FTL', lat: 26.1224, lng: -80.1373 },
+  { id: 'westpalm',     name: 'West Palm Beach',           nameKr: '웨스트 팜비치',            nameEs: 'West Palm Beach',         code: 'WPB', lat: 26.7153, lng: -80.0534 }
 ];
 
 // ===== APP STATE =====
@@ -1176,7 +1168,7 @@ function showApp() {
   document.getElementById('mainHeader').style.display = 'flex';
   document.getElementById('bottomNav').style.display = 'flex';
   document.getElementById('headerSub').textContent = `${currentUser.storeNameKr} · ${currentUser.name}`;
-  document.getElementById('dashStoreName').textContent = `${currentUser.storeNameKr} · ${currentUser.name}`;
+  document.getElementById('dashStoreName').textContent = `${getStoreName(currentUser.storeId)} · ${currentUser.name}`;
 
   // Populate "to store" dropdown (exclude current store)
   const toSelect = document.getElementById('invoiceToStore');
@@ -1193,7 +1185,7 @@ function showApp() {
   });
   populateMonthFilter();
 
-  document.getElementById('stockStoreName').textContent = `${currentUser.storeNameKr} · ${currentUser.name}`;
+  document.getElementById('stockStoreName').textContent = `${getStoreName(currentUser.storeId)} · ${currentUser.name}`;
   initFirebaseListeners();
   showPage('stock');
 }
@@ -3191,7 +3183,10 @@ const TRANSLATIONS = {
     page_work_order: '작업 요청서',
     page_work_order_view: '작업 요청서',
     page_work_order_success: '요청 완료',
-    page_tracking: '실시간 현황',
+    page_tracking: '실시간 업무 진행 상황',
+    stock_tracking: '📍 실시간 업무 진행 상황',
+    stock_my_tasks: '💪 내 업무 확인',
+    stock_work_order: '📋 작업 요청서',
     page_worker_task: '업무 현황',
     page_dashboard: '대시보드',
     page_new_invoice: '새 인보이스 / New Invoice',
@@ -3321,7 +3316,7 @@ const TRANSLATIONS = {
     js_email_th_sale: '판매가',
     js_email_total_cost: '합계 (원가:',
     js_email_opened: '인보이스가 새 창에 열렸습니다. 이메일로 보내세요.',
-    js_stock_tracking: '실시간 현황',
+    js_stock_tracking: '실시간 업무 진행 상황',
     js_stock_my_tasks: '내 업무 확인',
     js_new_task_alert: '새 업무가 있습니다!',
     js_tap_to_check: '여기를 눌러 확인',
@@ -3456,7 +3451,10 @@ const TRANSLATIONS = {
     page_work_order: 'Work Order',
     page_work_order_view: 'Work Order',
     page_work_order_success: 'Request Complete',
-    page_tracking: 'Live Tracking',
+    page_tracking: 'Real-time Work Progress',
+    stock_tracking: '📍 Real-time Work Progress',
+    stock_my_tasks: '💪 My Tasks',
+    stock_work_order: '📋 Work Order',
     page_worker_task: 'My Tasks',
     page_dashboard: 'Dashboard',
     page_new_invoice: 'New Invoice',
@@ -3586,7 +3584,7 @@ const TRANSLATIONS = {
     js_email_th_sale: 'Sale',
     js_email_total_cost: 'Total (Cost:',
     js_email_opened: 'Invoice opened in new window. Send via email.',
-    js_stock_tracking: 'Live Tracking',
+    js_stock_tracking: 'Real-time Work Progress',
     js_stock_my_tasks: 'My Tasks',
     js_new_task_alert: 'New task available!',
     js_tap_to_check: 'Tap to check',
@@ -3721,7 +3719,10 @@ const TRANSLATIONS = {
     page_work_order: 'Orden de Trabajo',
     page_work_order_view: 'Orden de Trabajo',
     page_work_order_success: 'Solicitud Completada',
-    page_tracking: 'Seguimiento en Vivo',
+    page_tracking: 'Progreso de Trabajo en Tiempo Real',
+    stock_tracking: '📍 Progreso en Tiempo Real',
+    stock_my_tasks: '💪 Mis Tareas',
+    stock_work_order: '📋 Orden de Trabajo',
     page_worker_task: 'Mis Tareas',
     page_dashboard: 'Panel',
     page_new_invoice: 'Nueva Factura',
@@ -3851,7 +3852,7 @@ const TRANSLATIONS = {
     js_email_th_sale: 'Venta',
     js_email_total_cost: 'Total (Costo:',
     js_email_opened: 'Factura abierta en nueva ventana. Env\u00ede por correo.',
-    js_stock_tracking: 'Seguimiento en Vivo',
+    js_stock_tracking: 'Progreso de Trabajo en Tiempo Real',
     js_stock_my_tasks: 'Mis Tareas',
     js_new_task_alert: '\u00a1Nueva tarea disponible!',
     js_tap_to_check: 'Toque para verificar',
@@ -3887,7 +3888,14 @@ function setLang(lang) {
     }
   }
   // Re-render dynamic content for current page
-  if (currentUser) checkPendingTasks();
+  if (currentUser) {
+    checkPendingTasks();
+    // Update store name displays
+    const dashEl = document.getElementById('dashStoreName');
+    const stockEl = document.getElementById('stockStoreName');
+    if (dashEl) dashEl.textContent = `${getStoreName(currentUser.storeId)} · ${currentUser.name}`;
+    if (stockEl) stockEl.textContent = `${getStoreName(currentUser.storeId)} · ${currentUser.name}`;
+  }
   if (currentPage === 'stock') loadStockBoard();
   if (currentPage === 'dashboard') loadDashboard();
 }
@@ -3914,6 +3922,15 @@ function applyTranslations() {
 function T(key) {
   const t = TRANSLATIONS[currentLang];
   return (t && t[key]) || key;
+}
+
+// Get store name based on current language
+function getStoreName(storeId) {
+  const store = STORES.find(s => s.id === storeId);
+  if (!store) return '';
+  if (currentLang === 'ko') return store.nameKr;
+  if (currentLang === 'es') return store.nameEs || store.name;
+  return store.name;
 }
 
 // Apply saved language on load
