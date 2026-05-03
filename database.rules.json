@@ -17,6 +17,13 @@
       ".write": "auth != null",
       ".indexOn": ["requestId", "fromStore", "toStore", "createdAt"]
     },
+    "overstock": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$storeId": {
+        ".indexOn": ["postedAt"]
+      }
+    },
     "users": {
       ".read": "auth != null",
       ".write": "auth != null"

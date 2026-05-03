@@ -311,13 +311,79 @@ h2.page-h { font-size: 1.05rem; font-weight: 700; color: #0D47A1; margin-bottom:
   padding: 6px 4px 8px; z-index: 50;
 }
 .bottom-nav button {
-  flex: 1; background: transparent; border: none; padding: 6px 4px;
+  flex: 1; background: transparent; border: none; padding: 6px 2px;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
-  font-size: 0.65rem; font-weight: 600; color: #9ca3af;
+  font-size: 0.6rem; font-weight: 600; color: #9ca3af;
 }
-.bottom-nav button .ico { font-size: 1.3rem; }
+.bottom-nav button .ico { font-size: 1.2rem; }
 .bottom-nav button.active { color: #1565C0; }
 .bottom-nav { display: flex; }
+
+/* OVERSTOCK BOARD */
+.overstock-section { margin-bottom: 16px; }
+.overstock-section h3 {
+  font-size: 0.85rem; font-weight: 700; color: #0D47A1; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.overstock-section h3 .pill {
+  background: #FFF3E0; color: #E65100; font-size: 0.65rem; padding: 2px 7px;
+  border-radius: 9px; font-weight: 700;
+}
+.over-card {
+  background: white; border-radius: 10px; padding: 12px 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid #FB8C00;
+  margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+}
+.over-card .left { flex: 1; min-width: 0; }
+.over-card .name { font-weight: 700; font-size: 0.92rem; color: #1f2937; }
+.over-card .meta { font-size: 0.72rem; color: #6b7280; margin-top: 2px; }
+.over-card .qty-block { text-align: right; font-weight: 700; color: #E65100; flex-shrink: 0; }
+.over-card .qty-block .q { font-size: 1.05rem; }
+.over-card .qty-block .u { font-size: 0.7rem; color: #9ca3af; font-weight: 500; }
+.over-card .actions { display: flex; gap: 4px; flex-shrink: 0; }
+.over-card .actions button {
+  background: transparent; border: none; padding: 6px; font-size: 0.95rem;
+  color: #6b7280; border-radius: 6px;
+}
+.over-card .actions button.req { color: #1565C0; font-weight: 700; font-size: 0.78rem; padding: 6px 10px; background: #E3F2FD; }
+.over-card .actions button.del { color: #E53935; }
+.store-group {
+  background: white; border-radius: 12px; padding: 10px 12px;
+  margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.store-group summary {
+  cursor: pointer; padding: 4px 0; font-weight: 700; font-size: 0.9rem;
+  color: #1f2937; list-style: none; display: flex; justify-content: space-between; align-items: center;
+}
+.store-group summary::-webkit-details-marker { display: none; }
+.store-group summary::after { content: '▾'; color: #9ca3af; font-size: 0.85rem; transition: transform .15s; }
+.store-group[open] summary::after { transform: rotate(180deg); }
+.store-group summary .cnt {
+  background: #FFF3E0; color: #E65100; font-size: 0.7rem; padding: 2px 8px; border-radius: 9px;
+  margin-left: 8px;
+}
+.store-group .body { padding-top: 8px; }
+
+/* TRADES PAIR MATRIX */
+.pair-card {
+  background: white; border-radius: 12px; padding: 12px 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 8px;
+  border-left: 4px solid #1565C0; cursor: pointer;
+}
+.pair-card .pair-route { font-weight: 700; font-size: 0.95rem; color: #1f2937; margin-bottom: 4px; }
+.pair-card .pair-stats {
+  display: flex; gap: 14px; font-size: 0.78rem; color: #4b5563;
+}
+.pair-card .pair-stats .num { font-weight: 700; color: #1565C0; }
+.summary-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px;
+}
+.summary-tile {
+  background: white; border-radius: 10px; padding: 10px 8px; text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.summary-tile .v { font-size: 1.2rem; font-weight: 700; color: #1565C0; line-height: 1.1; }
+.summary-tile .l { font-size: 0.65rem; color: #6b7280; margin-top: 3px; font-weight: 600; }
 
 
 /* responsive */
@@ -490,16 +556,40 @@ h2.page-h { font-size: 1.05rem; font-weight: 700; color: #0D47A1; margin-bottom:
   <button class="nav-btn" data-page="new" onclick="showPage('new')">
     <span class="ico">➕</span><span data-i18n="nav_new">새 요청</span>
   </button>
-  <button class="nav-btn" data-page="archive" onclick="showPage('archive')">
-    <span class="ico">📦</span><span data-i18n="nav_archive">전체 기록</span>
+  <button class="nav-btn" data-page="overstock" onclick="showPage('overstock')">
+    <span class="ico">📦</span><span data-i18n="nav_overstock">오버스탁</span>
+  </button>
+  <button class="nav-btn" data-page="trades" onclick="showPage('trades')">
+    <span class="ico">📊</span><span data-i18n="nav_trades">거래내역</span>
   </button>
 </nav>
 
-<!-- ARCHIVE PAGE (separate) -->
-<section id="page-archive" class="page" style="display:none; padding:14px;">
-  <h2 class="page-h" data-i18n="arch_h">전체 기록</h2>
+<!-- OVERSTOCK BOARD PAGE -->
+<section id="page-overstock" class="page" style="display:none; padding:14px;">
+  <h2 class="page-h" data-i18n="over_h">오버스탁 보드</h2>
+  <div class="type-desc" data-i18n="over_desc">우리 지점의 초과 보유 재고를 등록하면 다른 지점에서 보고 가져갈 수 있습니다.</div>
+
+  <div class="overstock-section">
+    <h3><span data-i18n="over_my">우리 지점</span> <span class="pill" id="myStoreLabel"></span></h3>
+    <div id="myOverList"></div>
+    <button class="add-item-btn" type="button" onclick="openOverstockModal()" data-i18n="over_add">＋ 우리 지점 오버스탁 등록</button>
+  </div>
+
+  <div class="overstock-section">
+    <h3 data-i18n="over_others">다른 지점 오버스탁</h3>
+    <div id="otherOverList"></div>
+  </div>
+</section>
+
+<!-- TRADES PAGE (pair matrix + history) -->
+<section id="page-trades" class="page" style="display:none; padding:14px;">
+  <h2 class="page-h" data-i18n="trades_h">거래 내역</h2>
+  <div class="summary-row" id="tradesSummary"></div>
+  <h3 style="font-size:0.85rem;color:#0D47A1;margin:6px 0 8px" data-i18n="trades_pairs">지점 페어별</h3>
+  <div id="pairList"></div>
+  <h3 style="font-size:0.85rem;color:#0D47A1;margin:14px 0 8px" data-i18n="trades_recent">최근 거래</h3>
   <div class="field">
-    <input id="archSearch" type="text" data-i18n-ph="arch_search_ph" placeholder="품목·지점·요청자 검색" oninput="renderArchive()">
+    <input id="archSearch" type="text" data-i18n-ph="arch_search_ph" placeholder="품목·지점·요청자 검색" oninput="renderTrades()">
   </div>
   <div id="archList" class="req-list"></div>
 </section>
@@ -572,7 +662,31 @@ const I18N = {
     btn_cancel: '취소',
     nav_inbox: '인박스',
     nav_new: '새 요청',
-    nav_archive: '전체 기록',
+    nav_overstock: '오버스탁',
+    nav_trades: '거래내역',
+    over_h: '오버스탁 보드',
+    over_desc: '우리 지점의 초과 보유 재고를 등록하면 다른 지점에서 보고 가져갈 수 있습니다.',
+    over_my: '우리 지점',
+    over_others: '다른 지점 오버스탁',
+    over_add: '＋ 우리 지점 오버스탁 등록',
+    over_add_h: '오버스탁 품목 등록',
+    over_save: '등록',
+    over_my_empty: '아직 등록된 오버스탁이 없습니다',
+    over_other_empty: '다른 지점이 등록한 오버스탁이 없습니다',
+    over_req_btn: '🛒 가져갈게요',
+    over_memo_ph: '유통기한, 보관 상태 등',
+    trades_h: '거래 내역',
+    trades_pairs: '지점 페어별',
+    trades_recent: '최근 거래',
+    trades_total_req: '총 요청',
+    trades_completed: '진행/완료',
+    trades_total_amt: '총 금액',
+    trades_no_pairs: '거래 기록이 없습니다',
+    trades_filtered: '필터',
+    toast_overstock_added: '✅ 오버스탁이 등록되었습니다',
+    toast_removed: '삭제되었습니다',
+    toast_prefilled: '📥 새 요청 폼에 자동 입력됨',
+    confirm_remove_overstock: '이 오버스탁 항목을 삭제하시겠습니까?',
     arch_h: '전체 기록',
     arch_search_ph: '품목·지점·요청자 검색',
     item_name_ph: '품목명',
@@ -687,7 +801,31 @@ const I18N = {
     btn_cancel: 'Cancel',
     nav_inbox: 'Inbox',
     nav_new: 'New',
-    nav_archive: 'All Records',
+    nav_overstock: 'Overstock',
+    nav_trades: 'Trades',
+    over_h: 'Overstock Board',
+    over_desc: 'Post your surplus inventory so other stores can see it and request it.',
+    over_my: 'My Store',
+    over_others: 'Other Stores Overstock',
+    over_add: '＋ Post my overstock item',
+    over_add_h: 'Post Overstock Item',
+    over_save: 'Save',
+    over_my_empty: 'No overstock posted yet',
+    over_other_empty: 'No overstock from other stores',
+    over_req_btn: '🛒 I\'ll take it',
+    over_memo_ph: 'Expiration, condition...',
+    trades_h: 'Trade History',
+    trades_pairs: 'By store pair',
+    trades_recent: 'Recent trades',
+    trades_total_req: 'Total reqs',
+    trades_completed: 'Active/Done',
+    trades_total_amt: 'Total amt',
+    trades_no_pairs: 'No trade history yet',
+    trades_filtered: 'Filtered',
+    toast_overstock_added: '✅ Overstock item posted',
+    toast_removed: 'Removed',
+    toast_prefilled: '📥 New request form prefilled',
+    confirm_remove_overstock: 'Remove this overstock item?',
     arch_h: 'All Records',
     arch_search_ph: 'Search items / store / requester',
     item_name_ph: 'Item name',
@@ -802,7 +940,31 @@ const I18N = {
     btn_cancel: 'Cancelar',
     nav_inbox: 'Bandeja',
     nav_new: 'Nueva',
-    nav_archive: 'Registros',
+    nav_overstock: 'Exceso',
+    nav_trades: 'Comercio',
+    over_h: 'Tablero de Exceso',
+    over_desc: 'Publica tu inventario sobrante para que otras tiendas lo vean y lo pidan.',
+    over_my: 'Mi Tienda',
+    over_others: 'Exceso de otras tiendas',
+    over_add: '＋ Publicar artículo en exceso',
+    over_add_h: 'Publicar Artículo Sobrante',
+    over_save: 'Guardar',
+    over_my_empty: 'No hay artículos publicados aún',
+    over_other_empty: 'No hay exceso de otras tiendas',
+    over_req_btn: '🛒 Lo tomo',
+    over_memo_ph: 'Vencimiento, condición...',
+    trades_h: 'Historial de Comercio',
+    trades_pairs: 'Por par de tiendas',
+    trades_recent: 'Comercio reciente',
+    trades_total_req: 'Solicit.',
+    trades_completed: 'Activas/Hechas',
+    trades_total_amt: 'Monto total',
+    trades_no_pairs: 'Sin historial aún',
+    trades_filtered: 'Filtrado',
+    toast_overstock_added: '✅ Artículo publicado',
+    toast_removed: 'Eliminado',
+    toast_prefilled: '📥 Formulario prellenado',
+    confirm_remove_overstock: '¿Eliminar este artículo en exceso?',
     arch_h: 'Todos los Registros',
     arch_search_ph: 'Buscar artículo/tienda/solicitante',
     item_name_ph: 'Artículo',
@@ -887,9 +1049,11 @@ let currentTab = 'received';
 let pageHistory = [];
 let allRequests = [];   // realtime mirror of /requests
 let allInvoices = [];   // realtime mirror of /invoices
+let allOverstock = {};  // realtime mirror of /overstock
 let selectedRequestId = null;
 let newReqType = 'NEED';
 let invoiceDraft = [];
+let pairFilter = null;  // when set, filter trades by store pair
 
 // ===== TRANSLATION =====
 function T(k) { return (I18N[lang] && I18N[lang][k]) || I18N.ko[k] || k; }
@@ -919,7 +1083,8 @@ function applyLang() {
       `${storeName(currentUser.storeId)} · ${currentUser.name}`;
     populateStoreDropdowns();
     if (currentPage === 'inbox') renderInbox();
-    if (currentPage === 'archive') renderArchive();
+    if (currentPage === 'overstock') renderOverstockBoard();
+    if (currentPage === 'trades') renderTrades();
     if (currentPage === 'detail') renderDetail();
     if (currentPage === 'invoice') renderInvoiceBuilder();
     if (currentPage === 'invview') renderInvoiceView();
@@ -1017,6 +1182,11 @@ function attachFirebaseListeners() {
     allInvoices = Object.values(v);
     if (currentPage === 'detail' && selectedRequestId) renderDetail();
     if (currentPage === 'invview') renderInvoiceView();
+    if (currentPage === 'trades') renderTrades();
+  });
+  fbDB.ref('overstock').on('value', snap => {
+    allOverstock = snap.val() || {};
+    if (currentPage === 'overstock') renderOverstockBoard();
   });
 }
 
@@ -1029,7 +1199,7 @@ function showPage(name, opts={}) {
   if (target) target.style.display = 'block';
   // Header back button
   const backBtn = document.getElementById('backBtn');
-  backBtn.classList.toggle('show', !['inbox','new','archive'].includes(name));
+  backBtn.classList.toggle('show', !['inbox','new','overstock','trades'].includes(name));
   // Bottom nav active
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.page === name);
@@ -1037,7 +1207,8 @@ function showPage(name, opts={}) {
   // Page-specific init
   if (name === 'inbox') renderInbox();
   if (name === 'new') initNewForm();
-  if (name === 'archive') renderArchive();
+  if (name === 'overstock') renderOverstockBoard();
+  if (name === 'trades') renderTrades();
   if (name === 'detail') renderDetail();
   if (name === 'invoice') renderInvoiceBuilder();
   if (name === 'invview') renderInvoiceView();
@@ -1502,13 +1673,212 @@ function renderInvoiceView() {
     </div>`;
 }
 
-// ===== ARCHIVE =====
-function renderArchive() {
+// ===== OVERSTOCK BOARD =====
+function renderOverstockBoard() {
+  if (!currentUser) return;
+  const me = currentUser.storeId;
+  document.getElementById('myStoreLabel').textContent = storeName(me);
+  // My store
+  const myList = document.getElementById('myOverList');
+  myList.innerHTML = '';
+  const mine = allOverstock[me] || {};
+  const myItems = Object.values(mine);
+  if (myItems.length === 0) {
+    myList.innerHTML = `<div style="font-size:0.78rem;color:#9ca3af;padding:6px 0">${T('over_my_empty')}</div>`;
+  } else {
+    myItems.forEach(it => myList.appendChild(overCardEl(it, true)));
+  }
+  // Other stores
+  const others = document.getElementById('otherOverList');
+  others.innerHTML = '';
+  const otherStores = STORES.filter(s => s.id !== me);
+  let anyOther = false;
+  otherStores.forEach(s => {
+    const items = Object.values(allOverstock[s.id] || {});
+    if (items.length === 0) return;
+    anyOther = true;
+    const det = document.createElement('details');
+    det.className = 'store-group';
+    det.open = true;
+    det.innerHTML = `
+      <summary>
+        <span>${escapeHtml(storeName(s.id))} <span style="color:#9ca3af;font-weight:500">(${s.code})</span></span>
+        <span class="cnt">${items.length}</span>
+      </summary>
+      <div class="body"></div>`;
+    const body = det.querySelector('.body');
+    items.forEach(it => body.appendChild(overCardEl(it, false)));
+    others.appendChild(det);
+  });
+  if (!anyOther) {
+    others.innerHTML = `<div style="font-size:0.78rem;color:#9ca3af;padding:6px 0">${T('over_other_empty')}</div>`;
+  }
+}
+
+function overCardEl(it, isMine) {
+  const el = document.createElement('div');
+  el.className = 'over-card';
+  const noteHtml = it.memo ? `<div class="meta">${escapeHtml(it.memo)}</div>` : '';
+  const postedHtml = `<div class="meta">${escapeHtml(it.postedBy || '')} · ${formatDateShort(it.postedAt)}</div>`;
+  let actionsHtml;
+  if (isMine) {
+    actionsHtml = `<div class="actions">
+      <button class="del" title="삭제" onclick="event.stopPropagation();removeOverstockItem('${it.storeId}','${it.id}')">🗑</button>
+    </div>`;
+  } else {
+    actionsHtml = `<div class="actions">
+      <button class="req" onclick="event.stopPropagation();requestFromOverstock('${it.storeId}','${escapeAttr(it.name)}','${it.qty}','${escapeAttr(it.unit||'')}')">${T('over_req_btn')}</button>
+    </div>`;
+  }
+  el.innerHTML = `
+    <div class="left">
+      <div class="name">${escapeHtml(it.name)}</div>
+      ${noteHtml}
+      ${postedHtml}
+    </div>
+    <div class="qty-block">
+      <div class="q">${it.qty}</div>
+      <div class="u">${escapeHtml(it.unit||'')}</div>
+    </div>
+    ${actionsHtml}`;
+  return el;
+}
+
+function openOverstockModal(existing) {
+  const ph_name = T('item_name_ph');
+  const ph_qty = T('item_qty');
+  const ph_memo = T('over_memo_ph');
+  openModal(`
+    <h3>${T('over_add_h')}</h3>
+    <div class="field">
+      <label>${T('item_name_ph')} <span class="req">*</span></label>
+      <input id="oName" type="text" placeholder="${ph_name}">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 100px;gap:8px">
+      <div class="field" style="margin-bottom:0">
+        <label>${ph_qty} <span class="req">*</span></label>
+        <input id="oQty" type="number" min="1" value="1">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>${T('item_unit')}</label>
+        <select id="oUnit">${UNITS.map(u=>`<option>${u}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px">
+      <label>${T('f_memo')}</label>
+      <textarea id="oMemo" rows="2" placeholder="${ph_memo}"></textarea>
+    </div>
+    <div class="row">
+      <button class="btn muted" onclick="closeModal()">${T('btn_cancel')}</button>
+      <button class="btn primary" onclick="addOverstockItem()">${T('over_save')}</button>
+    </div>`);
+}
+
+function addOverstockItem() {
+  const name = document.getElementById('oName').value.trim();
+  const qty = parseFloat(document.getElementById('oQty').value);
+  const unit = document.getElementById('oUnit').value;
+  const memo = document.getElementById('oMemo').value.trim();
+  if (!name || !qty) return toast(T('toast_validation'));
+  const id = 'o_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  const item = {
+    id, storeId: currentUser.storeId, name, qty, unit, memo,
+    postedBy: currentUser.name, postedAt: new Date().toISOString()
+  };
+  fbDB.ref(`overstock/${currentUser.storeId}/${id}`).set(item).then(() => {
+    closeModal();
+    toast(T('toast_overstock_added'));
+  });
+}
+
+function removeOverstockItem(storeId, itemId) {
+  if (!confirm(T('confirm_remove_overstock'))) return;
+  fbDB.ref(`overstock/${storeId}/${itemId}`).remove().then(() => {
+    toast(T('toast_removed'));
+  });
+}
+
+function requestFromOverstock(storeId, name, qty, unit) {
+  // Pre-fill new request form (NEED) and route to /new
+  newReqType = 'NEED';
+  showPage('new');
+  setTimeout(() => {
+    document.getElementById('reqToStore').value = storeId;
+    const r = document.querySelector('#itemRows .item-row');
+    if (r) {
+      r.querySelector('.i-name').value = name;
+      r.querySelector('.i-qty').value = qty;
+      const us = r.querySelector('.i-unit');
+      if (unit && Array.from(us.options).some(o=>o.value===unit)) us.value = unit;
+    }
+    toast(T('toast_prefilled'));
+  }, 50);
+}
+
+// ===== TRADES (history + pair matrix) =====
+function renderTrades() {
+  if (!currentUser) return;
+  const me = currentUser.storeId;
+  const myReqs = allRequests.filter(r => r.fromStore === me || r.toStore === me);
+  const myInvs = allInvoices.filter(i => i.fromStore === me || i.toStore === me);
+  // Summary tiles
+  const totalReq = myReqs.length;
+  const completed = myReqs.filter(r => r.status === 'completed' || r.status === 'accepted').length;
+  const totalAmt = myInvs.reduce((s,i) => s + (i.total||0), 0);
+  document.getElementById('tradesSummary').innerHTML = `
+    <div class="summary-tile"><div class="v">${totalReq}</div><div class="l">${T('trades_total_req')}</div></div>
+    <div class="summary-tile"><div class="v">${completed}</div><div class="l">${T('trades_completed')}</div></div>
+    <div class="summary-tile"><div class="v">$${totalAmt.toFixed(0)}</div><div class="l">${T('trades_total_amt')}</div></div>`;
+
+  // Pair matrix: aggregate by other-store
+  const pairs = {};
+  myReqs.forEach(r => {
+    const other = r.fromStore === me ? r.toStore : r.fromStore;
+    if (!pairs[other]) pairs[other] = { count: 0, amount: 0 };
+    pairs[other].count++;
+  });
+  myInvs.forEach(i => {
+    const other = i.fromStore === me ? i.toStore : i.fromStore;
+    if (!pairs[other]) pairs[other] = { count: 0, amount: 0 };
+    pairs[other].amount += i.total || 0;
+  });
+  const pairHost = document.getElementById('pairList');
+  pairHost.innerHTML = '';
+  const pairEntries = Object.entries(pairs)
+    .filter(([_, stat]) => stat.count > 0 || stat.amount > 0)
+    .sort((a,b) => b[1].count - a[1].count);
+  if (pairEntries.length === 0) {
+    pairHost.innerHTML = `<div style="font-size:0.78rem;color:#9ca3af;padding:6px 0">${T('trades_no_pairs')}</div>`;
+  } else {
+    pairEntries.forEach(([sid, stat]) => {
+      const card = document.createElement('div');
+      card.className = 'pair-card';
+      card.onclick = () => { pairFilter = sid; renderTrades(); };
+      card.innerHTML = `
+        <div class="pair-route">${escapeHtml(storeName(me))} ↔ ${escapeHtml(storeName(sid))}</div>
+        <div class="pair-stats">
+          <span><span class="num">${stat.count}</span> ${T('item_count')}</span>
+          <span><span class="num">$${stat.amount.toFixed(2)}</span></span>
+        </div>`;
+      pairHost.appendChild(card);
+    });
+    if (pairFilter) {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'margin-top:8px;padding:8px 12px;background:#E3F2FD;border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;color:#0D47A1;font-weight:600';
+      banner.innerHTML = `<span>${T('trades_filtered')}: ${escapeHtml(storeName(pairFilter))}</span>
+        <button onclick="pairFilter=null;renderTrades()" style="background:transparent;border:none;color:#1565C0;font-weight:700;cursor:pointer">✕</button>`;
+      pairHost.appendChild(banner);
+    }
+  }
+
+  // Recent list
   const host = document.getElementById('archList');
   if (!host) return;
-  const me = currentUser.storeId;
   const q = (document.getElementById('archSearch')?.value || '').trim().toLowerCase();
-  let list = allRequests.filter(r => r.fromStore === me || r.toStore === me);
+  let list = myReqs.slice();
+  if (pairFilter) {
+    list = list.filter(r => (r.fromStore === pairFilter || r.toStore === pairFilter));
+  }
   if (q) {
     list = list.filter(r => {
       const txt = [
