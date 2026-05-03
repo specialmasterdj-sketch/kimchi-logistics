@@ -277,10 +277,15 @@ h2.page-h { font-size: 1.05rem; font-weight: 700; color: #0D47A1; margin-bottom:
 }
 .btn-contact.sms  { color: #2E7D32; border-color: #C8E6C9; }
 .btn-contact.sms small  { color: #66BB6A; }
+.btn-contact.wa   { color: #128C7E; border-color: #A7E9DC; }
+.btn-contact.wa small   { color: #25D366; }
 .btn-contact.mail { color: #6A1B9A; border-color: #E1BEE7; }
 .btn-contact.mail small { color: #AB47BC; }
 .btn-contact.chat { color: #1565C0; border-color: #BBDEFB; }
 .btn-contact.chat small { color: #42A5F5; }
+.btn-contact.copy { color: #4b5563; border-color: #d1d5db; }
+.btn-contact.copy small { color: #9ca3af; }
+.btn-contact { cursor: pointer; text-align: left; }
 
 /* INVOICE BUILDER */
 .inv-line {
@@ -691,12 +696,18 @@ const I18N = {
     f_to_user_email: '받는 사람 이메일 (옵션)',
     f_to_user_email_ph: '예: manager@miamikimchi.com',
     contact_h: '직접 연락하기',
-    btn_sms: '문자 보내기',
-    btn_email: '이메일 보내기',
+    btn_sms: '문자 (SMS)',
+    btn_whatsapp: 'WhatsApp',
+    btn_email: 'Gmail로 보내기',
     btn_chat: '채팅방으로',
     btn_chat_room: '재고 부족·과다 룸 (모든 지점 공통)',
+    btn_copy: '본문 복사',
+    btn_copy_sub: '카톡·텔레그램·기타 앱에 붙여넣기',
     sms_from: '요청',
     sms_check: '앱에서 확인',
+    toast_sms_open: '📱 SMS 앱 열기 시도 + 본문 복사 완료',
+    toast_email_open: '📧 Gmail 새 탭 열림 + 본문 복사 완료',
+    toast_copied: '📋 본문이 클립보드에 복사되었습니다',
     f_items: '품목',
     f_add_item: '＋ 품목 추가',
     f_pickup: '픽업 일시',
@@ -841,12 +852,18 @@ const I18N = {
     f_to_user_email: 'Recipient email (optional)',
     f_to_user_email_ph: 'e.g. manager@miamikimchi.com',
     contact_h: 'Contact directly',
-    btn_sms: 'Send SMS',
-    btn_email: 'Send Email',
+    btn_sms: 'SMS',
+    btn_whatsapp: 'WhatsApp',
+    btn_email: 'Send via Gmail',
     btn_chat: 'Open Chat Room',
     btn_chat_room: 'Need / Overstock room (all stores)',
+    btn_copy: 'Copy message',
+    btn_copy_sub: 'Paste into KakaoTalk · Telegram · any app',
     sms_from: 'request from',
     sms_check: 'Check in app',
+    toast_sms_open: '📱 Opened SMS app + copied to clipboard',
+    toast_email_open: '📧 Gmail compose opened + copied to clipboard',
+    toast_copied: '📋 Message copied to clipboard',
     f_items: 'Items',
     f_add_item: '＋ Add item',
     f_pickup: 'Pickup date/time',
@@ -991,12 +1008,18 @@ const I18N = {
     f_to_user_email: 'Email destinatario (opc.)',
     f_to_user_email_ph: 'Ej: manager@miamikimchi.com',
     contact_h: 'Contacto directo',
-    btn_sms: 'Enviar SMS',
-    btn_email: 'Enviar Email',
+    btn_sms: 'SMS',
+    btn_whatsapp: 'WhatsApp',
+    btn_email: 'Enviar por Gmail',
     btn_chat: 'Abrir chat',
     btn_chat_room: 'Sala falta/exceso (todas las tiendas)',
+    btn_copy: 'Copiar mensaje',
+    btn_copy_sub: 'Pegar en cualquier app de mensajes',
     sms_from: 'solicitud de',
     sms_check: 'Ver en la app',
+    toast_sms_open: '📱 SMS abierto + copiado al portapapeles',
+    toast_email_open: '📧 Gmail abierto + copiado al portapapeles',
+    toast_copied: '📋 Mensaje copiado al portapapeles',
     f_items: 'Artículos',
     f_add_item: '＋ Agregar',
     f_pickup: 'Fecha/hora recogida',
@@ -1592,7 +1615,7 @@ function detailActionsHtml(r, isReceiver, isSender, inv) {
 }
 
 function directContactButtons(r, isSender, isReceiver) {
-  // Build sms/mailto/chat links for the *other* party
+  // Build messaging links for the *other* party
   if (r.status === 'cancelled') return '';
   const otherName = isSender ? (r.toUser || '') : (r.fromUserName || '');
   const otherPhone = isSender ? (r.toUserPhone || '') : (r.fromUserPhone || '');
@@ -1600,31 +1623,86 @@ function directContactButtons(r, isSender, isReceiver) {
   const otherStore = isSender ? r.toStore : r.fromStore;
   if (!otherStore) return '';
 
-  const itemSummary = (r.items || []).slice(0,3).map(i => `${i.name} ×${i.qty}${i.unit?' '+i.unit:''}`).join(', ');
-  const pickupTxt = formatDateLong(r.pickupAt);
-  const typeTxt = r.type === 'OVERSTOCK' ? 'OVERSTOCK' : 'NEED';
-  const myStoreTxt = storeName(currentUser.storeId);
-  const subject = `[Kimchi Mart] ${typeTxt} ${T('sms_from')} ${myStoreTxt}`;
-  const body = `${typeTxt} · ${myStoreTxt} → ${storeName(otherStore)}
-${T('detail_items')}: ${itemSummary}
-${T('detail_pickup')}: ${pickupTxt}
-${r.memo?T('detail_memo')+': '+r.memo+'\n':''}${T('sms_check')}: https://specialmasterdj-sketch.github.io/kimchi-logistics/`;
-
+  // Stash the request id so action functions can rebuild the body fresh (handles lang changes)
   const out = [];
   if (otherPhone) {
-    const sms = `sms:${otherPhone.replace(/[^0-9+]/g,'')}?body=${encodeURIComponent(body)}`;
-    out.push(`<a class="btn-contact sms" href="${sms}">📱 ${T('btn_sms')}<small>${escapeHtml(otherName||otherPhone)}</small></a>`);
+    const phoneClean = otherPhone.replace(/[^0-9+]/g,'');
+    out.push(`<button type="button" class="btn-contact sms" onclick="contactAction('sms','${r.id}','${phoneClean}')">📱 ${T('btn_sms')}<small>${escapeHtml(otherName||otherPhone)}</small></button>`);
+    // WhatsApp works on desktop too — phone digits only, no +
+    const waPhone = phoneClean.replace(/^\+?1?/,'1').replace(/[^0-9]/g,'');
+    out.push(`<button type="button" class="btn-contact wa" onclick="contactAction('wa','${r.id}','${waPhone}')">💬 ${T('btn_whatsapp')}<small>${escapeHtml(otherName||otherPhone)}</small></button>`);
   }
   if (otherEmail) {
-    const mail = `mailto:${otherEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    out.push(`<a class="btn-contact mail" href="${mail}">📧 ${T('btn_email')}<small>${escapeHtml(otherEmail)}</small></a>`);
+    out.push(`<button type="button" class="btn-contact mail" onclick="contactAction('email','${r.id}','${escapeAttr(otherEmail)}')">📧 ${T('btn_email')}<small>${escapeHtml(otherEmail)}</small></button>`);
   }
   // Chat room link → "need_overstock" room (universal across stores)
-  const chatUrl = `https://specialmasterdj-sketch.github.io/kfood-guide/chat.html?room=need_overstock`;
-  out.push(`<a class="btn-contact chat" href="${chatUrl}" target="_blank">💬 ${T('btn_chat')}<small>${T('btn_chat_room')}</small></a>`);
+  out.push(`<button type="button" class="btn-contact chat" onclick="contactAction('chat','${r.id}','')">🗨 ${T('btn_chat')}<small>${T('btn_chat_room')}</small></button>`);
+  // Always offer copy as a safety net
+  out.push(`<button type="button" class="btn-contact copy" onclick="contactAction('copy','${r.id}','')">📋 ${T('btn_copy')}<small>${T('btn_copy_sub')}</small></button>`);
 
-  if (out.length === 0) return '';
   return `<div class="contact-h">${T('contact_h')}</div>${out.join('')}`;
+}
+
+function buildMessageBody(r) {
+  const me = currentUser.storeId;
+  const myStoreTxt = storeName(me);
+  const otherStore = r.fromStore === me ? r.toStore : r.fromStore;
+  const itemSummary = (r.items || []).map(i => `• ${i.name} ×${i.qty}${i.unit?' '+i.unit:''}`).join('\n');
+  const pickupTxt = formatDateLong(r.pickupAt);
+  const typeTxt = r.type === 'OVERSTOCK' ? 'OVERSTOCK' : 'NEED';
+  return `[Kimchi Mart] ${typeTxt} · ${myStoreTxt} → ${storeName(otherStore)}
+
+${T('detail_items')}:
+${itemSummary}
+
+${T('detail_pickup')}: ${pickupTxt}
+${r.memo?T('detail_memo')+': '+r.memo+'\n':''}${T('sms_check')}: https://specialmasterdj-sketch.github.io/kimchi-logistics/`;
+}
+
+async function copyToClipboard(text) {
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (e) {}
+  // Fallback
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.left='-9999px';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch (e) { return false; }
+}
+
+async function contactAction(kind, reqId, target) {
+  const r = allRequests.find(x => x.id === reqId);
+  if (!r) return;
+  const body = buildMessageBody(r);
+  const subject = body.split('\n')[0]; // first line as subject
+  if (kind === 'sms') {
+    await copyToClipboard(body);
+    const url = `sms:${target}?body=${encodeURIComponent(body)}`;
+    // mobile: opens SMS app; desktop: usually no-op, but we already copied
+    window.location.href = url;
+    setTimeout(() => toast(T('toast_sms_open')), 100);
+  } else if (kind === 'wa') {
+    const url = `https://wa.me/${target}?text=${encodeURIComponent(body)}`;
+    window.open(url, '_blank');
+  } else if (kind === 'email') {
+    await copyToClipboard(body);
+    // Gmail web compose works on desktop without a default mail client
+    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(target)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(url, '_blank');
+    setTimeout(() => toast(T('toast_email_open')), 100);
+  } else if (kind === 'chat') {
+    window.open('https://specialmasterdj-sketch.github.io/kfood-guide/chat.html?room=need_overstock', '_blank');
+  } else if (kind === 'copy') {
+    const ok = await copyToClipboard(body);
+    toast(ok ? T('toast_copied') : '복사 실패');
+  }
 }
 
 function acceptRequest(id) {
