@@ -257,6 +257,31 @@ h2.page-h { font-size: 1.05rem; font-weight: 700; color: #0D47A1; margin-bottom:
 .action-bar .row { display: flex; gap: 8px; }
 .action-bar .row .btn { flex: 1; }
 
+.contact-bar {
+  background: white; border-radius: 12px; padding: 12px; margin-top: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.contact-bar .contact-h {
+  font-size: 0.78rem; font-weight: 700; color: #6b7280; padding-bottom: 4px;
+}
+.btn-contact {
+  display: flex; flex-direction: column; padding: 11px 14px; border-radius: 10px;
+  text-decoration: none; font-weight: 700; font-size: 0.92rem;
+  border: 1.5px solid #e5e7eb; background: white;
+  transition: transform .05s;
+}
+.btn-contact:active { transform: scale(0.98); }
+.btn-contact small {
+  display: block; font-weight: 500; font-size: 0.7rem; color: #9ca3af; margin-top: 2px;
+}
+.btn-contact.sms  { color: #2E7D32; border-color: #C8E6C9; }
+.btn-contact.sms small  { color: #66BB6A; }
+.btn-contact.mail { color: #6A1B9A; border-color: #E1BEE7; }
+.btn-contact.mail small { color: #AB47BC; }
+.btn-contact.chat { color: #1565C0; border-color: #BBDEFB; }
+.btn-contact.chat small { color: #42A5F5; }
+
 /* INVOICE BUILDER */
 .inv-line {
   display: grid; grid-template-columns: 1fr 56px 70px 80px 32px; gap: 6px;
@@ -493,12 +518,23 @@ h2.page-h { font-size: 1.05rem; font-weight: 700; color: #0D47A1; margin-bottom:
 
     <div class="field">
       <label><span data-i18n="f_to_store">받을 지점 (보내줄 지점)</span> <span class="req">*</span></label>
-      <select id="reqToStore"><option value="" data-i18n="f_to_store_ph">지점 선택</option></select>
+      <select id="reqToStore" onchange="onReqToStoreChange()"><option value="" data-i18n="f_to_store_ph">지점 선택</option></select>
     </div>
 
     <div class="field">
-      <label data-i18n="f_to_user">담당자 (옵션)</label>
-      <input id="reqToUser" type="text" data-i18n-ph="f_to_user_ph" placeholder="이 지점의 누구에게 전달할지">
+      <label><span data-i18n="f_to_user">받는 사람</span> <span class="req">*</span></label>
+      <input id="reqToUser" type="text" list="storeUsersList" oninput="onReqToUserInput()" data-i18n-ph="f_to_user_ph" placeholder="이름 (등록된 직원은 자동 추천)">
+      <datalist id="storeUsersList"></datalist>
+    </div>
+
+    <div class="field">
+      <label><span data-i18n="f_to_user_phone">받는 사람 전화번호</span> <span class="req">*</span></label>
+      <input id="reqToUserPhone" type="tel" data-i18n-ph="f_to_user_phone_ph" placeholder="예: 305-555-1234">
+    </div>
+
+    <div class="field">
+      <label data-i18n="f_to_user_email">받는 사람 이메일 (옵션)</label>
+      <input id="reqToUserEmail" type="email" data-i18n-ph="f_to_user_email_ph" placeholder="예: manager@miamikimchi.com">
     </div>
 
     <div class="field">
@@ -648,8 +684,19 @@ const I18N = {
     type_desc_over: '재고가 너무 많아 다른 지점에 처분을 부탁합니다. 받은 지점이 가져갈 의향을 답합니다.',
     f_to_store: '받을 지점',
     f_to_store_ph: '지점 선택',
-    f_to_user: '담당자 (옵션)',
-    f_to_user_ph: '이 지점의 누구에게 전달할지',
+    f_to_user: '받는 사람',
+    f_to_user_ph: '이름 (등록된 직원은 자동 추천)',
+    f_to_user_phone: '받는 사람 전화번호',
+    f_to_user_phone_ph: '예: 305-555-1234',
+    f_to_user_email: '받는 사람 이메일 (옵션)',
+    f_to_user_email_ph: '예: manager@miamikimchi.com',
+    contact_h: '직접 연락하기',
+    btn_sms: '문자 보내기',
+    btn_email: '이메일 보내기',
+    btn_chat: '채팅방으로',
+    btn_chat_room: '재고 부족·과다 룸 (모든 지점 공통)',
+    sms_from: '요청',
+    sms_check: '앱에서 확인',
     f_items: '품목',
     f_add_item: '＋ 품목 추가',
     f_pickup: '픽업 일시',
@@ -787,8 +834,19 @@ const I18N = {
     type_desc_over: 'Ask another store to take excess stock off your hands. They confirm or decline.',
     f_to_store: 'Target store',
     f_to_store_ph: 'Select store',
-    f_to_user: 'Recipient (optional)',
-    f_to_user_ph: 'Who at that store',
+    f_to_user: 'Recipient',
+    f_to_user_ph: 'Name (registered staff auto-suggest)',
+    f_to_user_phone: 'Recipient phone',
+    f_to_user_phone_ph: 'e.g. 305-555-1234',
+    f_to_user_email: 'Recipient email (optional)',
+    f_to_user_email_ph: 'e.g. manager@miamikimchi.com',
+    contact_h: 'Contact directly',
+    btn_sms: 'Send SMS',
+    btn_email: 'Send Email',
+    btn_chat: 'Open Chat Room',
+    btn_chat_room: 'Need / Overstock room (all stores)',
+    sms_from: 'request from',
+    sms_check: 'Check in app',
     f_items: 'Items',
     f_add_item: '＋ Add item',
     f_pickup: 'Pickup date/time',
@@ -926,8 +984,19 @@ const I18N = {
     type_desc_over: 'Pide a otra tienda que se quede con exceso de inventario. Ellos confirman o rechazan.',
     f_to_store: 'Tienda destino',
     f_to_store_ph: 'Seleccionar tienda',
-    f_to_user: 'Destinatario (opc.)',
-    f_to_user_ph: 'Quién en esa tienda',
+    f_to_user: 'Destinatario',
+    f_to_user_ph: 'Nombre (autocompletar)',
+    f_to_user_phone: 'Teléfono destinatario',
+    f_to_user_phone_ph: 'Ej: 305-555-1234',
+    f_to_user_email: 'Email destinatario (opc.)',
+    f_to_user_email_ph: 'Ej: manager@miamikimchi.com',
+    contact_h: 'Contacto directo',
+    btn_sms: 'Enviar SMS',
+    btn_email: 'Enviar Email',
+    btn_chat: 'Abrir chat',
+    btn_chat_room: 'Sala falta/exceso (todas las tiendas)',
+    sms_from: 'solicitud de',
+    sms_check: 'Ver en la app',
     f_items: 'Artículos',
     f_add_item: '＋ Agregar',
     f_pickup: 'Fecha/hora recogida',
@@ -1050,6 +1119,7 @@ let pageHistory = [];
 let allRequests = [];   // realtime mirror of /requests
 let allInvoices = [];   // realtime mirror of /invoices
 let allOverstock = {};  // realtime mirror of /overstock
+let allUsers = {};      // realtime mirror of /users (for autocomplete)
 let selectedRequestId = null;
 let newReqType = 'NEED';
 let invoiceDraft = [];
@@ -1188,6 +1258,10 @@ function attachFirebaseListeners() {
     allOverstock = snap.val() || {};
     if (currentPage === 'overstock') renderOverstockBoard();
   });
+  fbDB.ref('users').on('value', snap => {
+    allUsers = snap.val() || {};
+    if (currentPage === 'new') populateUserDatalist();
+  });
 }
 
 // ===== ROUTING =====
@@ -1309,6 +1383,8 @@ function initNewForm() {
   setReqType(newReqType || 'NEED');
   document.getElementById('reqToStore').value = '';
   document.getElementById('reqToUser').value = '';
+  document.getElementById('reqToUserPhone').value = '';
+  document.getElementById('reqToUserEmail').value = '';
   document.getElementById('reqMemo').value = '';
   // default pickup = tomorrow 10am
   const t = new Date(); t.setDate(t.getDate()+1); t.setHours(10,0,0,0);
@@ -1319,6 +1395,45 @@ function initNewForm() {
   // reset radio
   const r0 = document.querySelector('input[name="pickupBy"][value="requester"]');
   if (r0) { r0.checked = true; syncRadio('pickupBy'); }
+  populateUserDatalist();
+}
+
+function populateUserDatalist() {
+  const dl = document.getElementById('storeUsersList');
+  if (!dl) return;
+  const toStore = document.getElementById('reqToStore').value;
+  dl.innerHTML = '';
+  if (!toStore) return;
+  const users = allUsers[toStore] || {};
+  Object.values(users).forEach(u => {
+    if (!u || !u.name) return;
+    const opt = document.createElement('option');
+    opt.value = u.name;
+    opt.label = u.phone ? `${u.name} · ${u.phone}` : u.name;
+    opt.dataset.phone = u.phone || '';
+    dl.appendChild(opt);
+  });
+}
+
+function onReqToStoreChange() {
+  populateUserDatalist();
+  document.getElementById('reqToUser').value = '';
+  document.getElementById('reqToUserPhone').value = '';
+  document.getElementById('reqToUserEmail').value = '';
+}
+
+function onReqToUserInput() {
+  const name = document.getElementById('reqToUser').value.trim();
+  const toStore = document.getElementById('reqToStore').value;
+  if (!name || !toStore) return;
+  const users = allUsers[toStore] || {};
+  const match = Object.values(users).find(u => u && u.name === name);
+  if (match) {
+    const phoneEl = document.getElementById('reqToUserPhone');
+    if (match.phone && !phoneEl.value) phoneEl.value = match.phone;
+    const emailEl = document.getElementById('reqToUserEmail');
+    if (match.email && !emailEl.value) emailEl.value = match.email;
+  }
 }
 function setReqType(type) {
   newReqType = type;
@@ -1350,6 +1465,8 @@ function addItemRow(item) {
 function submitRequest() {
   const toStore = document.getElementById('reqToStore').value;
   const toUser = document.getElementById('reqToUser').value.trim();
+  const toUserPhone = document.getElementById('reqToUserPhone').value.trim();
+  const toUserEmail = document.getElementById('reqToUserEmail').value.trim();
   const pickupAt = document.getElementById('reqPickup').value;
   const pickupBy = document.querySelector('input[name="pickupBy"]:checked').value;
   const memo = document.getElementById('reqMemo').value.trim();
@@ -1361,7 +1478,7 @@ function submitRequest() {
     const unit = r.querySelector('.i-unit').value;
     if (name && qty > 0) items.push({ name, qty, unit });
   });
-  if (!toStore || !pickupAt || items.length === 0) {
+  if (!toStore || !toUser || !toUserPhone || !pickupAt || items.length === 0) {
     return toast(T('toast_validation'));
   }
   const id = 'r_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
@@ -1370,15 +1487,28 @@ function submitRequest() {
     fromStore: currentUser.storeId,
     fromUserName: currentUser.name,
     fromUserPhone: currentUser.phone || '',
-    toStore, toUser,
+    toStore, toUser, toUserPhone, toUserEmail,
     items, pickupAt, pickupBy, memo,
     status: 'pending',
     createdAt: new Date().toISOString()
   };
   fbDB.ref('requests/' + id).set(req).then(() => {
+    // Save sender's email/phone update to /users for future autocomplete
+    try {
+      const safeName = (currentUser.name || '').replace(/[.#$/\[\]]/g, '_');
+      fbDB.ref(`users/${currentUser.storeId}/${safeName}`).update({
+        name: currentUser.name, phone: currentUser.phone || '',
+        storeId: currentUser.storeId, storeCode: currentUser.storeCode
+      });
+    } catch(e) {}
     toast(T('toast_sent'));
     setTab('sent');
     showPage('inbox', { replace: true });
+    // After 600ms, open the recipient store's chat room (need_overstock) with prefilled link
+    setTimeout(() => {
+      selectedRequestId = id;
+      showPage('detail');
+    }, 700);
   }).catch(e => alert('Error: ' + e.message));
 }
 
@@ -1418,7 +1548,7 @@ function renderDetail() {
       <h3>${escapeHtml(storeName(r.fromStore))} → ${escapeHtml(storeName(r.toStore))}</h3>
       <div class="kv-list">
         <div class="row"><span class="k">${T('detail_requester')}</span><span class="v">${escapeHtml(r.fromUserName||'')} ${r.fromUserPhone?'· '+escapeHtml(r.fromUserPhone):''}</span></div>
-        ${r.toUser?`<div class="row"><span class="k">${T('detail_to_user')}</span><span class="v">${escapeHtml(r.toUser)}</span></div>`:''}
+        ${r.toUser?`<div class="row"><span class="k">${T('detail_to_user')}</span><span class="v">${escapeHtml(r.toUser)} ${r.toUserPhone?'· '+escapeHtml(r.toUserPhone):''}</span></div>`:''}
         <div class="row"><span class="k">${T('detail_pickup')}</span><span class="v">${formatDateLong(r.pickupAt)}</span></div>
         <div class="row"><span class="k">${T('detail_pickup_by')}</span><span class="v">${r.pickupBy==='supplier'?T('pickup_send_short'):T('pickup_self_short')}</span></div>
         ${r.memo?`<div class="row"><span class="k">${T('detail_memo')}</span><span class="v">${escapeHtml(r.memo)}</span></div>`:''}
@@ -1454,8 +1584,47 @@ function detailActionsHtml(r, isReceiver, isSender, inv) {
   if (r.status === 'completed' || r.status === 'declined') {
     if (inv) buttons.push(`<button class="btn ghost" onclick="openInvoiceView('${inv.id}')">${T('btn_view_invoice')}</button>`);
   }
-  if (buttons.length === 0) return '';
-  return `<div class="action-bar">${buttons.map(b=>`<div class="row">${b}</div>`).join('')}</div>`;
+  // Direct contact buttons (SMS / Email / Chat) — for sender to nudge recipient
+  const contactButtons = directContactButtons(r, isSender, isReceiver);
+  const main = buttons.length ? `<div class="action-bar">${buttons.map(b=>`<div class="row">${b}</div>`).join('')}</div>` : '';
+  const contact = contactButtons ? `<div class="contact-bar">${contactButtons}</div>` : '';
+  return main + contact;
+}
+
+function directContactButtons(r, isSender, isReceiver) {
+  // Build sms/mailto/chat links for the *other* party
+  if (r.status === 'cancelled') return '';
+  const otherName = isSender ? (r.toUser || '') : (r.fromUserName || '');
+  const otherPhone = isSender ? (r.toUserPhone || '') : (r.fromUserPhone || '');
+  const otherEmail = isSender ? (r.toUserEmail || '') : '';
+  const otherStore = isSender ? r.toStore : r.fromStore;
+  if (!otherStore) return '';
+
+  const itemSummary = (r.items || []).slice(0,3).map(i => `${i.name} ×${i.qty}${i.unit?' '+i.unit:''}`).join(', ');
+  const pickupTxt = formatDateLong(r.pickupAt);
+  const typeTxt = r.type === 'OVERSTOCK' ? 'OVERSTOCK' : 'NEED';
+  const myStoreTxt = storeName(currentUser.storeId);
+  const subject = `[Kimchi Mart] ${typeTxt} ${T('sms_from')} ${myStoreTxt}`;
+  const body = `${typeTxt} · ${myStoreTxt} → ${storeName(otherStore)}
+${T('detail_items')}: ${itemSummary}
+${T('detail_pickup')}: ${pickupTxt}
+${r.memo?T('detail_memo')+': '+r.memo+'\n':''}${T('sms_check')}: https://specialmasterdj-sketch.github.io/kimchi-logistics/`;
+
+  const out = [];
+  if (otherPhone) {
+    const sms = `sms:${otherPhone.replace(/[^0-9+]/g,'')}?body=${encodeURIComponent(body)}`;
+    out.push(`<a class="btn-contact sms" href="${sms}">📱 ${T('btn_sms')}<small>${escapeHtml(otherName||otherPhone)}</small></a>`);
+  }
+  if (otherEmail) {
+    const mail = `mailto:${otherEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    out.push(`<a class="btn-contact mail" href="${mail}">📧 ${T('btn_email')}<small>${escapeHtml(otherEmail)}</small></a>`);
+  }
+  // Chat room link → "need_overstock" room (universal across stores)
+  const chatUrl = `https://specialmasterdj-sketch.github.io/kfood-guide/chat.html?room=need_overstock`;
+  out.push(`<a class="btn-contact chat" href="${chatUrl}" target="_blank">💬 ${T('btn_chat')}<small>${T('btn_chat_room')}</small></a>`);
+
+  if (out.length === 0) return '';
+  return `<div class="contact-h">${T('contact_h')}</div>${out.join('')}`;
 }
 
 function acceptRequest(id) {
@@ -1804,6 +1973,14 @@ function requestFromOverstock(storeId, name, qty, unit) {
   showPage('new');
   setTimeout(() => {
     document.getElementById('reqToStore').value = storeId;
+    populateUserDatalist();
+    // Pre-fill the poster as the recipient (they posted the overstock item)
+    const items = Object.values(allOverstock[storeId] || {});
+    const item = items.find(it => it && it.name === name);
+    if (item && item.postedBy) {
+      document.getElementById('reqToUser').value = item.postedBy;
+      onReqToUserInput();
+    }
     const r = document.querySelector('#itemRows .item-row');
     if (r) {
       r.querySelector('.i-name').value = name;
