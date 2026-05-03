@@ -1,0 +1,25 @@
+{
+  "_comment": "Kimchi Logistics — Inter-Store Supply Request System (Realtime DB Rules)",
+  "_apply": "Firebase 콘솔 → Realtime Database → Rules 탭에 붙여넣기. 또는 firebase deploy --only database",
+  "_policy": "지점 직원만 (auth != null) read/write. 새 핵심 노드: /requests, /invoices",
+
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+
+    "requests": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["fromStore", "toStore", "status", "createdAt"]
+    },
+    "invoices": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["requestId", "fromStore", "toStore", "createdAt"]
+    },
+    "users": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}
