@@ -71,6 +71,30 @@ input, select, textarea { font-family: inherit; }
   display: flex; align-items: center; justify-content: center;
 }
 
+/* ===== STAFF PICKER ===== */
+.staff-pick-wrap { position: relative; }
+.staff-pick-wrap input { padding-right: 32px; }
+.staff-pick-arrow {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  color: #9ca3af; font-size: 0.7rem; cursor: pointer; pointer-events: auto;
+}
+.staff-dropdown {
+  display: none; position: absolute; left: 0; right: 0; top: 100%;
+  background: white; border: 1.5px solid #1565C0; border-radius: 10px;
+  max-height: 220px; overflow-y: auto; z-index: 200;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+.staff-dropdown.open { display: block; }
+.staff-dd-item {
+  padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f3f4f6;
+}
+.staff-dd-item:last-child { border-bottom: none; }
+.staff-dd-item:hover, .staff-dd-item:active { background: #e3f2fd; }
+.staff-dd-name { font-weight: 600; font-size: 0.92rem; color: #1f2937; }
+.staff-dd-sub { font-size: 0.75rem; color: #6b7280; margin-top: 2px; }
+.staff-dd-empty { padding: 14px; text-align: center; color: #9ca3af; font-size: 0.85rem; }
+.staff-dd-hd { padding: 6px 14px; font-size: 0.7rem; font-weight: 700; color: #1565C0; background: #f0f7ff; position: sticky; top: 0; }
+
 /* ===== LOGIN ===== */
 .login-page {
   min-height: 100vh; display: flex; flex-direction: column;
@@ -526,10 +550,13 @@ h2.page-h { font-size: 1.05rem; font-weight: 700; color: #0D47A1; margin-bottom:
       <select id="reqToStore" onchange="onReqToStoreChange()"><option value="" data-i18n="f_to_store_ph">지점 선택</option></select>
     </div>
 
-    <div class="field">
+    <div class="field" style="position:relative">
       <label><span data-i18n="f_to_user">받는 사람</span> <span class="req">*</span></label>
-      <input id="reqToUser" type="text" list="storeUsersList" oninput="onReqToUserInput()" data-i18n-ph="f_to_user_ph" placeholder="이름 (등록된 직원은 자동 추천)">
-      <datalist id="storeUsersList"></datalist>
+      <div class="staff-pick-wrap">
+        <input id="reqToUser" type="text" autocomplete="off" oninput="onStaffSearch()" onfocus="onStaffSearch()" data-i18n-ph="f_to_user_ph" placeholder="이름 (등록된 직원은 자동 추천)">
+        <span class="staff-pick-arrow" onclick="document.getElementById('reqToUser').focus()">&#9660;</span>
+        <div id="staffDropdown" class="staff-dropdown"></div>
+      </div>
     </div>
 
     <div class="field">
@@ -1143,6 +1170,7 @@ let allRequests = [];   // realtime mirror of /requests
 let allInvoices = [];   // realtime mirror of /invoices
 let allOverstock = {};  // realtime mirror of /overstock
 let allUsers = {};      // realtime mirror of /users (for autocomplete)
+let allDirectory = [];  // all employees from kimchi-mart-order schedules
 let selectedRequestId = null;
 let newReqType = 'NEED';
 let invoiceDraft = [];
@@ -1283,8 +1311,40 @@ function attachFirebaseListeners() {
   });
   fbDB.ref('users').on('value', snap => {
     allUsers = snap.val() || {};
-    if (currentPage === 'new') populateUserDatalist();
   });
+  loadAllDirectory();
+}
+
+// ===== ALL-EMPLOYEE DIRECTORY (from kimchi-mart-order schedules) =====
+const KMO_FB = 'https://kimchi-mart-order-default-rtdb.firebaseio.com';
+const SCHED_BRANCHES = ['LASOLAS','MIAMI','HOLLYWOOD','PEMBROKE_PINES','CORAL_SPRINGS'];
+const SCHED_TO_STORE = {LASOLAS:'fortlauder',MIAMI:'miami',HOLLYWOOD:'hollywood',PEMBROKE_PINES:'pembroke',CORAL_SPRINGS:'coral'};
+
+async function loadAllDirectory() {
+  allDirectory = [];
+  for (const br of SCHED_BRANCHES) {
+    try {
+      const res = await fetch(KMO_FB+'/schedules/'+br+'/employees.json');
+      const d = await res.json();
+      if (!d) continue;
+      const arr = Array.isArray(d) ? d : Object.values(d);
+      const storeId = SCHED_TO_STORE[br] || br.toLowerCase();
+      arr.forEach(e => {
+        if (!e || !e.name || !e.name.trim()) return;
+        allDirectory.push({name:e.name.trim(), role:e.role||'', phone:e.phone||'', storeId});
+      });
+    } catch(_){}
+  }
+  const logUsers = allUsers || {};
+  Object.entries(logUsers).forEach(([sid, users]) => {
+    if (!users) return;
+    Object.values(users).forEach(u => {
+      if (!u || !u.name) return;
+      const exists = allDirectory.some(d => d.name.toUpperCase().replace(/\s/g,'') === u.name.toUpperCase().replace(/\s/g,'') && d.storeId === sid);
+      if (!exists) allDirectory.push({name:u.name.trim(), role:'', phone:u.phone||'', storeId:sid});
+    });
+  });
+  allDirectory.sort((a,b) => a.name.localeCompare(b.name,'ko'));
 }
 
 // ===== ROUTING =====
@@ -1418,46 +1478,76 @@ function initNewForm() {
   // reset radio
   const r0 = document.querySelector('input[name="pickupBy"][value="requester"]');
   if (r0) { r0.checked = true; syncRadio('pickupBy'); }
-  populateUserDatalist();
-}
-
-function populateUserDatalist() {
-  const dl = document.getElementById('storeUsersList');
-  if (!dl) return;
-  const toStore = document.getElementById('reqToStore').value;
-  dl.innerHTML = '';
-  if (!toStore) return;
-  const users = allUsers[toStore] || {};
-  Object.values(users).forEach(u => {
-    if (!u || !u.name) return;
-    const opt = document.createElement('option');
-    opt.value = u.name;
-    opt.label = u.phone ? `${u.name} · ${u.phone}` : u.name;
-    opt.dataset.phone = u.phone || '';
-    dl.appendChild(opt);
-  });
 }
 
 function onReqToStoreChange() {
-  populateUserDatalist();
   document.getElementById('reqToUser').value = '';
   document.getElementById('reqToUserPhone').value = '';
   document.getElementById('reqToUserEmail').value = '';
+  closeStaffDropdown();
 }
 
-function onReqToUserInput() {
-  const name = document.getElementById('reqToUser').value.trim();
+let _staffPool = [];
+function onStaffSearch() {
+  const q = document.getElementById('reqToUser').value.trim().toLowerCase();
   const toStore = document.getElementById('reqToStore').value;
-  if (!name || !toStore) return;
-  const users = allUsers[toStore] || {};
-  const match = Object.values(users).find(u => u && u.name === name);
-  if (match) {
-    const phoneEl = document.getElementById('reqToUserPhone');
-    if (match.phone && !phoneEl.value) phoneEl.value = match.phone;
-    const emailEl = document.getElementById('reqToUserEmail');
-    if (match.email && !emailEl.value) emailEl.value = match.email;
+  const dd = document.getElementById('staffDropdown');
+  let pool = allDirectory.slice();
+  if (toStore) {
+    const targetFirst = pool.filter(d => d.storeId === toStore);
+    const others = pool.filter(d => d.storeId !== toStore);
+    pool = [...targetFirst, ...others];
   }
+  if (q) {
+    pool = pool.filter(d => d.name.toLowerCase().includes(q) || (d.role||'').toLowerCase().includes(q));
+  } else {
+    const byStore = {};
+    pool.forEach(d => { (byStore[d.storeId] = byStore[d.storeId] || []).push(d); });
+    const order = toStore ? [toStore, ...STORES.map(s=>s.id).filter(s=>s!==toStore)] : STORES.map(s=>s.id);
+    pool = [];
+    order.forEach(sid => { if (byStore[sid]) pool.push(...byStore[sid].sort((a,b)=>a.name.localeCompare(b.name,'ko'))); });
+  }
+  if (pool.length === 0) {
+    dd.innerHTML = `<div class="staff-dd-empty">${lang==='ko'?'검색 결과 없음':lang==='es'?'Sin resultados':'No results'}</div>`;
+    dd.classList.add('open');
+    return;
+  }
+  let html = '';
+  let lastStore = null;
+  pool.slice(0, 50).forEach(d => {
+    if (d.storeId !== lastStore) {
+      lastStore = d.storeId;
+      const s = STORES.find(x => x.id === d.storeId);
+      const label = s ? storeName(s.id) : d.storeId;
+      html += `<div class="staff-dd-hd">${escapeHtml(label)}</div>`;
+    }
+    const sub = [d.role, d.phone].filter(Boolean).join(' · ');
+    const idx = pool.indexOf(d);
+    html += `<div class="staff-dd-item" data-idx="${idx}" onclick="pickStaffIdx(this.dataset.idx)">
+      <div class="staff-dd-name">${escapeHtml(d.name)}</div>
+      ${sub ? `<div class="staff-dd-sub">${escapeHtml(sub)}</div>` : ''}
+    </div>`;
+  });
+  _staffPool = pool.slice(0, 50);
+  dd.innerHTML = html;
+  dd.classList.add('open');
 }
+
+function pickStaffIdx(idx) {
+  const d = _staffPool[idx];
+  if (!d) return;
+  document.getElementById('reqToUser').value = d.name;
+  if (d.phone) document.getElementById('reqToUserPhone').value = d.phone;
+  closeStaffDropdown();
+}
+
+function closeStaffDropdown() {
+  const dd = document.getElementById('staffDropdown');
+  if (dd) dd.classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.staff-pick-wrap')) closeStaffDropdown();
+});
 function setReqType(type) {
   newReqType = type;
   document.getElementById('btnTypeNeed').classList.toggle('active', type === 'NEED');
@@ -2051,13 +2141,12 @@ function requestFromOverstock(storeId, name, qty, unit) {
   showPage('new');
   setTimeout(() => {
     document.getElementById('reqToStore').value = storeId;
-    populateUserDatalist();
-    // Pre-fill the poster as the recipient (they posted the overstock item)
     const items = Object.values(allOverstock[storeId] || {});
     const item = items.find(it => it && it.name === name);
     if (item && item.postedBy) {
       document.getElementById('reqToUser').value = item.postedBy;
-      onReqToUserInput();
+      const match = allDirectory.find(d => d.name === item.postedBy);
+      if (match && match.phone) document.getElementById('reqToUserPhone').value = match.phone;
     }
     const r = document.querySelector('#itemRows .item-row');
     if (r) {
